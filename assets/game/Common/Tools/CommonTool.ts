@@ -96,4 +96,27 @@ export class CommonTool {
     public static async sleep(delayTime: number): Promise<void> {
         return new Promise<void>(resolve => cc.director.getScene().getChildByName("Canvas").getComponent(cc.Canvas).scheduleOnce(resolve, delayTime / 1000));
     }
+
+    /** 設定圖片 */
+    public static setSprite(obj, sp : cc.SpriteFrame) {
+        if(obj == null){
+            console.error("無法找到對應的Obj 物件");
+            return;
+        }
+        let sprite = obj.getComponent(cc.Sprite);
+        if(sprite){
+            sprite.spriteFrame = sp;
+        }else {
+            console.error("目標沒有Sprite元件 對象 => ", obj);
+        }
+    }
+
+    /** 設定文字 */
+    public static setLabel(obj : cc.Label, text) {
+        if(obj == null){
+            console.error("無法找到對應的Obj Label物件");
+            return;
+        }
+        obj.string = (text) ? text.toString() : "";
+    }
 }

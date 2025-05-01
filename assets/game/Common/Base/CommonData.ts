@@ -1,13 +1,12 @@
-// 基礎公用數據
-const { ccclass } = cc._decorator;
+const { ccclass, property } = cc._decorator;
+// ********  基礎公用數據 *************
 
 // 遊戲狀態
 export enum GAME_STATUS {
-    IDLE,   //閒置
-    BUY,    //購卡
-    DRAWTHENUMBERS,   //開球 Draw the Numbers
-    EXTRABALL, //額外球
-    REWARD, //中獎
+    LOADING,            //加載
+    BUY,                //下注時間
+    DRAWTHENUMBERS,     //開球時間
+    REWARD,             //中獎表演
 }
 
 // 卡片類型
@@ -50,3 +49,14 @@ export const ERROR_CODE = cc.Enum({
     NOT_ENOUGH_BALANCE: "3202",
     UNKNOWN_ERROR: "20000",
 })
+
+/** 中獎圖片的數據資料 */
+@ccclass('prizeData')
+export default class prizeData {
+    @property({ type: cc.Float })
+    public coin: number = 0;
+    @property(cc.SpriteFrame)
+    public default : cc.SpriteFrame;
+    @property(cc.SpriteFrame)
+    public winning : cc.SpriteFrame;
+}

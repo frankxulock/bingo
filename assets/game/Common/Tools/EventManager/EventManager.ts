@@ -36,11 +36,17 @@ export default class EventMag extends Singleton  {
 /** 遊戲狀態事件通知 */
 export class GameStateEvent {
     /** 遊戲狀態通知 */
-    public static GAME_IDLE = "GAME_IDLE";
+    public static GAME_LOADING = "GAME_LOADING";
     public static GAME_BUY = "GAME_BUY";
     public static GAME_DRAWTHENUMBERS = "GAME_DRAWTHENUMBERS";
-    public static GAME_EXTRABALL = "GAME_EXTRABALL";
     public static GAME_REWARD = "GAME_REWARD";
+    public static GAME_SNAPSHOT = "GAME_SNAPSHOT";
+}
+
+/** 遊戲內部狀態更新 */
+export class GameStateUpdate {
+    public static StateUpdate_SendBall = "StateUpdate_SendBall";
+    public static StateUpdate_BingoJackpot = "StateUpdate_BingoJackpot";
 }
 
 /** 遊戲彈跳視窗通知 */
