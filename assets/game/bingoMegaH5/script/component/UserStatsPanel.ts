@@ -31,6 +31,6 @@ export default class UserStatsPanel extends MegaComponent {
 
     /** 快照事件狀態還原 */
     protected onSnapshot(): void {
-        CommonTool.setLabel(this.Label_Online, this.data.getOnline);
+        CommonTool.setLabel(this.Label_Online, this.data.getOnline());
     }
 }

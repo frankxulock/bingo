@@ -1,14 +1,16 @@
+import { CARD_GAMEPLAY, CARD_STATUS } from "../CommonData";
 import BaseCardData from "./BaseCardData";
 
 /** 基礎遊戲卡片資料 */
 export class CardMega extends BaseCardData {
 
     protected bingoSpot: number = 0b0000000000001000000000000;  // 默認中獎卡片位置 由上至下左至右排序
-    private type : cardType;                    // 卡片類型
-    private mode : cardMode;                    // 玩法類型
-    private validityRange = {                   // 檢查範圍
-        [cardMode.BingoAndJackpot] : 24,
-        [cardMode.ExtraPatterns] : 4,
+    private cardState : CARD_STATUS;                    // 卡片類型
+    private playState : CARD_GAMEPLAY;                  // 玩法類型
+    private validityRange = {                      // 檢查範圍
+        [CARD_GAMEPLAY.COMDO] : 4,
+        [CARD_GAMEPLAY.EXTRA] : 4,
+        [CARD_GAMEPLAY.JACKPOT] : 24,
     }
 
     /** Bingo＆Jackpot玩法特定參數 */
@@ -66,16 +68,22 @@ export class CardMega extends BaseCardData {
         0b1111111011101011101111111,
     ]
     private extralPrice = [20,40,108,228,600,3000,6000,78000];  // 獎金金額
+    public uncheckedBG: cc.SpriteFrame;
+    public checkedBG: cc.SpriteFrame;
 
     // 卡片初始化
     constructor (data) {
         super();
+        this.id = data.cardId;
+        this.cardState = data.cardState;
+        this.playState = data.playState;
+        this.cardInfo = data.numbers;
     }
 
     // 更新卡片數據
     protected updateCard(ball: number): void {
         // 預購卡不做更新
-        if(this.type == cardType.preOrder)
+        if(this.cardState == CARD_STATUS.PREORDER)
             return;
         super.updateCard(ball);
     }
@@ -83,13 +91,17 @@ export class CardMega extends BaseCardData {
     /** 根據遊戲類型檢查中獎圖型 */
     protected bingoPatternCheck(){
         // 有中獎圖型可能才開始檢查
-        if(this.sendBall >= this.validityRange[this.type]) {
+        if(this.sendBall >= this.validityRange[this.cardState]) {
             // 根據玩法類型進行對應檢查
-            switch(this.mode){
-                case cardMode.BingoAndJackpot:
+            switch(this.playState){
+                case CARD_GAMEPLAY.COMDO:
+                    this.checkBingoAndJackpot();
+                    this.checkExtraPatterns();
+                    break;
+                case CARD_GAMEPLAY.JACKPOT:
                     this.checkBingoAndJackpot();
                     break;
-                case cardMode.ExtraPatterns:
+                case CARD_GAMEPLAY.EXTRA:
                     this.checkExtraPatterns();
                     break;
             }
@@ -248,17 +260,35 @@ export class CardMega extends BaseCardData {
     }
 
     //#endregion
-}
 
-/** 卡片類型 */
-enum cardType {
-    Normal,         // 正常購卡
-    preOrder,       // 預購卡
-    DIY,            // DIY卡
-}
+    getCardViewData() {
+        let title;
+        if(this.cardState == CARD_STATUS.NORMAL)
+            title = "BUY";
+        else if(this.cardState == CARD_STATUS.PREORDER)
+            title = "PRE-BUY";
+        else if(this.cardState == CARD_STATUS.DIY)
+            title = "DIY";
+        let haveBingoJackpo = (this.playState == CARD_GAMEPLAY.EXTRA) ? false : true;
+        let haveExtra = (this.playState == CARD_GAMEPLAY.JACKPOT) ? false : true;
 
-/** 玩法類型 */
-enum cardMode {
-    BingoAndJackpot,// Bingo模式
-    ExtraPatterns,  // 額外模式
+        let data = {
+            title: title,
+            DIYCard: (this.cardState === CARD_STATUS.DIY),
+            haveBingoJackpo: haveBingoJackpo,
+            haveExtra: haveExtra,
+            numbers: this.cardInfo,
+            checkedBG: this.checkedBG,
+        }
+        return data;
+    }
+
+    getChageCardData() {
+        return {
+            id: this.id,
+            numbers: this.cardInfo,
+            cardState: this.cardState,
+            playState: this.playState,
+        }
+    }
 }

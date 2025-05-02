@@ -24,4 +24,6 @@ export default abstract class BaseCardData {
     }
 
     protected bingoPatternCheck(){};
+    public getCardViewData(){ return null };
+    public getChageCardData() { return null};
 }

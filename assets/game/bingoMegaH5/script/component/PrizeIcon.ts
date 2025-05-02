@@ -14,6 +14,6 @@ export default class PrizeIcon extends MegaComponent {
     }
 
     setCoin(coin : number) {
-        CommonTool.setLabel(this.Label_coin, coin);
+        CommonTool.setLabel(this.Label_coin, CommonTool.formatMoney(coin));
     }
 }

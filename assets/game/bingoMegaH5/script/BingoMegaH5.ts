@@ -34,6 +34,7 @@ export default class BingoMegaH5 extends MegaComponent {
     /** 初始化各種註冊流程（後期根據不同遊戲複寫） */
     protected init(): void {
         super.init();
+        this.data.DefaultData();
         this.data.gameID = Number(UrlManager.getGameID());
         audioManager.init({bgmVolume : 1, soundVolume : 1});
         audioManager.setNode();

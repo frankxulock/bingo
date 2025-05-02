@@ -1,10 +1,4 @@
-import SocketManager from "./BingoSocketManager";
-
 import MegaDataManager from "./gameMega/MegaDataManager";
-import { UrlManager } from "../Tools/UrlManager";
-import { audioManager } from "../Tools/AudioMgr";
-import { GAME_STATUS, WEB_EVENT } from "./CommonData";
-import EventManager, { GameStateEvent } from "../Tools/EventManager/EventManager";
 
 // 賓果遊戲的Controller
 const { ccclass, property } = cc._decorator;
@@ -19,7 +13,7 @@ export default class BaseUIComponent extends cc.Component {
         this.init();
     }
 
-    protected onDisable(): void {
+    protected onDestroy(): void {
         // 遊戲結束
         this.removeEventListener();
     }

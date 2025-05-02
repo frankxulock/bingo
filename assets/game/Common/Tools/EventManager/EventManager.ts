@@ -45,8 +45,18 @@ export class GameStateEvent {
 
 /** 遊戲內部狀態更新 */
 export class GameStateUpdate {
-    public static StateUpdate_SendBall = "StateUpdate_SendBall";
+    // 講池更新事件
     public static StateUpdate_BingoJackpot = "StateUpdate_BingoJackpot";
+    // 開啟確認購卡頁面
+    public static StateUpdate_OpenConfirmPage = "StateUpdate_OpenConfirmPage";
+    // 重置卡片內容回包
+    public static StateUpdate_CardResetResponse = "StateUpdate_CardResetResponse";
+    // 下注回包事件
+    public static StateUpdate_BetResponseEvent = "StateUpdate_BetResponseEvent";
+    // 開啟已購卡頁面
+    public static StateUpdate_OpenPurchasedTicketPage = "StateUpdate_OpenPurchasedTicketPage";
+    // 發球事件
+    public static StateUpdate_SendBall = "StateUpdate_SendBall";
 }
 
 /** 遊戲彈跳視窗通知 */

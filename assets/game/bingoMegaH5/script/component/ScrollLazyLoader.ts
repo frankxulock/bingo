@@ -1,0 +1,77 @@
+const { ccclass, property } = cc._decorator;
+
+@ccclass
+export default class ScrollLazyLoader extends cc.Component {
+    @property(cc.ScrollView)
+    private scrollView: cc.ScrollView = null;
+    @property(cc.Node)
+    private content: cc.Node = null;
+
+    @property(cc.Prefab)
+    private itemPrefab: cc.Prefab = null;
+
+    @property({ tooltip: "一次載入的項目數量" })
+    private loadCount: number = 4;
+
+    @property({ tooltip: "項目上掛載的 Component 名稱，例如 'ItemScript'" })
+    private itemScriptName: string = "ItemScript";
+
+    private itemPool: cc.NodePool = new cc.NodePool();
+    private allData: any[] = [];
+    private loadedCount: number = 0;
+
+    protected onLoad() {
+        this.scrollView.node.on('scroll-to-bottom', this.onScrollToBottom, this);
+    }
+
+    public scrollToTop() {
+        this.scrollView.scrollToTop(0);
+    }
+
+    /** 更新資料並刷新顯示 */
+    public refreshData(newData: any[]) {
+        const content = this.content;
+    
+        // 安全地清除所有子節點
+        const oldItems = [...content.children]; // 拷貝一份
+        for (const child of oldItems) {
+            content.removeChild(child);
+            this.itemPool.put(child);
+        }
+    
+        // 重設資料
+        this.allData = newData;
+        this.loadedCount = 0;
+    
+        // 載入首批資料
+        this.loadNextBatch();
+    }
+
+    private loadNextBatch() {
+        const content = this.content;
+
+        for (let i = 0; i < this.loadCount; i++) {
+            if (this.loadedCount >= this.allData.length) return;
+
+            const data = this.allData[this.loadedCount++];
+            let item: cc.Node = this.itemPool.size() > 0
+                ? this.itemPool.get()
+                : cc.instantiate(this.itemPrefab);
+
+            const comp = item.getComponent(this.itemScriptName);
+            if (comp && typeof comp.setData === "function") {
+                comp.setData(data);
+            }
+
+            content.addChild(item);
+        }
+    }
+
+    private onScrollToBottom() {
+        this.loadNextBatch();
+    }
+
+    protected onDestroy() {
+        this.scrollView.node.off('scroll-to-bottom', this.onScrollToBottom, this);
+    }
+}

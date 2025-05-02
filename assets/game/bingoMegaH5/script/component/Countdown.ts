@@ -25,9 +25,9 @@ export default class Countdown extends MegaComponent {
     /** 快照事件 */
     protected onSnapshot(): void {
         let gameState = this.data.getGameState();
-        let buyTime = (gameState == GAME_STATUS.BUY);
-        this.node.active = buyTime;
-        if(buyTime) {
+        let isBuyTime = (gameState == GAME_STATUS.BUY);
+        this.node.active = isBuyTime;
+        if(isBuyTime) {
             this.StartTiming();
         }
     }

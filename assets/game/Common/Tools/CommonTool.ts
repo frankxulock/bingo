@@ -117,6 +117,19 @@ export class CommonTool {
             console.error("無法找到對應的Obj Label物件");
             return;
         }
-        obj.string = (text) ? text.toString() : "";
+        obj.string = (text != null) ? text.toString() : "";
+    }
+
+    /** 金額轉換函式 超過1000顯示k ... */
+    public static formatMoney(value: number): string {
+        if (value >= 1_000_000_000) {
+            return (value / 1_000_000_000).toFixed(1).replace(/\.0$/, '') + 'B';
+        } else if (value >= 1_000_000) {
+            return (value / 1_000_000).toFixed(1).replace(/\.0$/, '') + 'M';
+        } else if (value >= 1_000) {
+            return (value / 1_000).toFixed(1).replace(/\.0$/, '') + 'K';
+        } else {
+            return value.toString();
+        }
     }
 }

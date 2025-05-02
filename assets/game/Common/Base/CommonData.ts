@@ -11,7 +11,6 @@ export enum GAME_STATUS {
 
 // 卡片類型
 export enum CARD_STATUS {
-    NONE,   // 無
     NORMAL, // 正常卡片
     DIY,    // DIY卡片
     PREORDER,// 預購卡
@@ -19,10 +18,9 @@ export enum CARD_STATUS {
 
 // 卡片玩法
 export enum CARD_GAMEPLAY {
-    NONE,   // 無
-    JACKPOT, // Jackpot玩法卡片
-    EXTRA,  // 額外球玩法
-    COMDO,  //
+    COMDO,      // Comdo玩法
+    EXTRA,      // 額外球玩法
+    JACKPOT,    // Jackpot玩法卡片
 }
 
 export const WEB_EVENT = cc.Enum({

@@ -4,7 +4,6 @@ const {ccclass, property} = cc._decorator;
 
 @ccclass
 export default class AvatarComponent extends cc.Component {
-
     private mask : cc.Node = null;
     private avatar : cc.Node = null;
 
@@ -15,8 +14,12 @@ export default class AvatarComponent extends cc.Component {
 
     /** 設定總大小 size : 尺寸   offer 偏移量*/
     setSize(size : number, offer : number = 2) {
-        this.node.setContentSize(size);
-        this.mask.setContentSize((size - offer))
+        let nodeSize = new cc.Size(size, size);
+        let maskSize = new cc.Size(size - offer, size - offer);
+        this.node.setContentSize(nodeSize);
+        this.mask.setContentSize(maskSize);
+        console.warn("node => " + this.node.getContentSize());
+        console.warn("mask => " + this.mask.getContentSize());
     }
 
     /** 設定頭像大小 */
