@@ -16,6 +16,12 @@ export default class Card extends cc.Component {
     private Node_NumberGroup: cc.Node = null;
     private IconSp : cc.Sprite[] = null;
     private Label_nums : cc.Label[] = [];
+    @property({ type: cc.Node, visible: true })
+    private Node_WinLineGroup: cc.Node = null;
+    @property({ type: cc.Node, visible: true })
+    private Node_WinGroup: cc.Node = null;
+    @property({ type: cc.Label, visible: true })
+    private Label_WinAmount: cc.Label = null;
 
     setData(cardData : BaseCardData) 
     {
@@ -31,6 +37,11 @@ export default class Card extends cc.Component {
             })
         }
 
+        this.IconSp.forEach((i, index)=> {
+            let numberItemBG = data.numberItemBGs[index];
+            CommonTool.setSprite(i, numberItemBG);
+        })
+
         this.Label_nums.forEach((i, index)=>{
             let numbers = data.numbers[index];
             CommonTool.setLabel(i, numbers);
@@ -40,5 +51,21 @@ export default class Card extends cc.Component {
                 CommonTool.setLabel(i, txt);
             }
         })
+
+        /** 檢查是否顯示中獎線 */
+        if (this.Node_WinLineGroup && data.rewardLine) {
+            this.Node_WinLineGroup.children.forEach((item, index) => {
+                item.active = data.rewardLine.includes(index);
+            });
+        }
+
+        /** 顯示此卡的總贏分 */
+        if (this.Node_WinGroup) {
+            const hasWin = data.totalWin && data.totalWin > 0;
+            this.Node_WinGroup.active = hasWin;
+            if (hasWin) {
+                CommonTool.setLabel(this.Label_WinAmount, CommonTool.formatMoney2(data.totalWin));
+            }
+        }
     }
 }

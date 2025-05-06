@@ -32,12 +32,11 @@ export default class MegaDataManager extends BaseDataManager {
     protected maxCard : number = 500;       // 最大卡片數量
     protected ConfirmedCardPurchaseList : BaseCardData[] = [];  // 確認購卡的卡片資訊內容
     protected PurchasedCardList : BaseCardData[] = [];          // 目前擁有的卡片數據資料
-    protected uncheckedBG : cc.SpriteFrame = null;              // 卡片號碼未中獎背景
-    protected checkedBG : cc.SpriteFrame = null;                // 卡片號碼中獎背景
+    protected cardIconBGs : cc.SpriteFrame = null;              // 卡片號碼(中獎/未中獎/預中獎)背景
     /** 發球資訊 */
     protected currentBallNumber : number;               // 當前球號
     protected currentBallNumberList : number[] = [];    // 當前球號列表
-    protected totalBallCount : number = 48;             // 總共發球球數
+    protected totalBallCount : number = 49;             // 總共發球球數
     protected ballBG : cc.SpriteFrame[] = [];           // 球號的背景顏色
     protected winnerItem : any[] = [];                  // 已經中獎項目
     protected pendingWinnerItem : any[] = [];           // 即將中獎項目
@@ -114,6 +113,11 @@ export default class MegaDataManager extends BaseDataManager {
         return this.currentBallNumberList.length;
     }
 
+    /** 取得開出球號列表 */
+    public getBallList(){
+        return this.currentBallNumberList;
+    }
+
     /** 取得總球數 */
     public getTotalBallCount(){
         return this.totalBallCount;
@@ -155,9 +159,26 @@ export default class MegaDataManager extends BaseDataManager {
         return this.ConfirmedCardPurchaseList;
     }
 
-    /** 取得已購卡頁面的卡片資訊 */
+    /** 取得已購卡頁面的卡片資訊 (根據中獎金額>預中獎金額排序>原生排序) */
     public getPurchasedCardList() {
-        return this.PurchasedCardList;
+        const withIndex = this.PurchasedCardList.map((card, index) => ({
+            card,
+            index,
+            totalWin: card.getTotalWin(),
+            preWin: card.getPreTotalWin(),
+        }));
+    
+        withIndex.sort((a, b) => {
+            if (b.totalWin !== a.totalWin) {
+                return b.totalWin - a.totalWin; // 中獎金額高的排前面
+            }
+            if (b.preWin !== a.preWin) {
+                return b.preWin - a.preWin;     // 預中獎金額高的排前面
+            }
+            return a.index - b.index;           // 保留原本順序
+        });
+    
+        return withIndex.map(entry => entry.card);
     }
 
     //#endregion
@@ -188,19 +209,8 @@ export default class MegaDataManager extends BaseDataManager {
     /** 變更購卡數量 */
     public ChangeReadyBuyValue(value : number) {
         this.readyBuy += value;
-        this.readyBuy = Math.max(0, Math.min(this.maxCard, this.readyBuy));
-    }
-
-    /** 發球事件 */
-    public ServerToBallEvent(data) {
-        let num = data.num;
-        if (this.currentBallNumberList.includes(num)) {
-            console.error("球號重複 Server資訊 Data => ", data);
-            return;
-        }
-
-        this.currentBallNumber = num;
-        this.currentBallNumberList.push(num);
+        let maxCard = (this.maxCard - this.PurchasedCardList.length);
+        this.readyBuy = Math.max(0, Math.min(maxCard, this.readyBuy));
     }
 
     //#endregion
@@ -211,8 +221,7 @@ export default class MegaDataManager extends BaseDataManager {
     public setInitData(data){
         this.ballBG = data.ballBG;
         this.prizeDataList = data.prizeDataList;
-        this.uncheckedBG = data.cardUncheckedBG;
-        this.checkedBG = data.cardCheckedBG;
+        this.cardIconBGs = data.cardIconBGs;
     }
     
     // 避免某些資料沒有 Client自行設定
@@ -295,27 +304,54 @@ export default class MegaDataManager extends BaseDataManager {
 
     /** 取得已購卡頁面相關資訊 */
     public getPurchasedTicketPageData() {
-         // 底部欄位展示內容( 0:可以購買當局卡,1:可以購買預購卡,2顯示已經中獎金額,3:不展示 )
+        /** 計算總贏分與預中獎列表 */
+        let totalWin = 0;
+        let rewardMap: { [reward: number]: number[] } = {};  // 用金額分類球號
+        let PreItems: { reward: number, numbers: number[] }[] = [];
+        
+        this.PurchasedCardList.forEach((card) => {
+            totalWin += card.getTotalWin();
+            const preData = card.getPreData();
+        
+            preData.forEach((preCardData) => {
+                if (!rewardMap[preCardData.reward]) {
+                    rewardMap[preCardData.reward] = [];
+                }
+                if (!rewardMap[preCardData.reward].includes(preCardData.number)) {
+                    rewardMap[preCardData.reward].push(preCardData.number);
+                }
+            });
+        });
+        
+        // 將 map 整理成陣列並排序
+        for (const rewardStr in rewardMap) {
+            const reward = Number(rewardStr);
+            const numbers = rewardMap[reward].filter(n => typeof n === 'number'); // 確保是有效數字
+            if (numbers.length > 0) {
+                PreItems.push({ reward, numbers });
+            }
+        }
+        // 金額由高至低排序
+        PreItems.sort((a, b) => b.reward - a.reward);
+ 
+        // 底部欄位展示內容( 0:可以購買當局卡,1:可以購買預購卡,2顯示已經中獎金額,3:不展示 )
         let BottomBtnState = 3;
-        if(this.gameState == GAME_STATUS.BUY) {
+        if(this.gameState == GAME_STATUS.BUY || this.gameState == GAME_STATUS.GAMEOVER) {
             BottomBtnState = (this.PurchasedCardList.length < 500) ? 0 : 3;
         }else {
             if(this.cardState == CARD_STATUS.PREORDER) {
                 if(this.PurchasedCardList.length < 500)
                     BottomBtnState = 1;
             }else {
-                if(this.winnerItem.length > 0)
+                if(totalWin > 0)
                     BottomBtnState = 2;
             }
         }
 
         let d = {
-            // 已經中獎內容
-            winnerItem : [],
-            // 即將中獎內容
-            pendingWinnerItem: [],
-            BottomBtnState: BottomBtnState,
-            totalWin : '',
+            pendingWinnerItem: PreItems,                    // 即將中獎內容列表
+            BottomBtnState: BottomBtnState,                 // 下方顯示列表
+            totalWin : totalWin,                            // 總贏分
         }
 
         return d;
@@ -358,9 +394,7 @@ export default class MegaDataManager extends BaseDataManager {
         // 獲取確認購卡頁面的卡片資訊
         for(let i = 0; i < data.length; i++){
             let cardInfo = data[i];
-            let card = new CardMega(cardInfo);
-            card.uncheckedBG = this.uncheckedBG;
-            card.checkedBG = this.checkedBG;
+            let card = new CardMega(cardInfo, this.cardIconBGs);
             this.ConfirmedCardPurchaseList.push(card);
         }
         // 購卡頁面按鈕恢復成可使用狀態
@@ -402,6 +436,63 @@ export default class MegaDataManager extends BaseDataManager {
         this.PurchasedCardList = data;
         // 開啟確認夠卡介面
         EventManager.getInstance().emit(GameStateUpdate.StateUpdate_OpenPurchasedTicketPage);
+    }
+
+    /** 發球事件 */
+    public ServerToBallEvent(num) {
+        if (this.currentBallNumberList.includes(num)) {
+            console.error("球號重複 Server資訊 Data => ", num);
+            return;
+        }
+
+        this.PurchasedCardList.forEach((cardItem, index)=>{
+            cardItem.updateCard(num);
+        })
+
+        this.currentBallNumber = num;
+        this.currentBallNumberList.push(num);
+        EventManager.getInstance().emit(GameStateUpdate.StateUpdate_SendBall);
+    }
+
+    /** Jackpot&Bingo中獎事件 */
+    public ServerToWinJackpotOrBingo() {
+
+    }
+
+    /** 發球完畢 結算事件 */
+    public ServerToReward(){
+
+    }
+
+    /** 遊戲結束重置所有參數 */
+    public GameOver(buyTime? : number) {
+        this.buyTime = (buyTime) ? buyTime : 60;
+        this.currentBallNumber = null;
+        this.currentBallNumberList = [];
+        // 檢查玩家當局是否買卡
+        let HasTheCurrentPlayerPurchasedCard = (this.PurchasedCardList.length > 0);
+
+        // 將預購卡轉為本局卡，其他全部清除
+        const nextRoundCards = this.PurchasedCardList.filter(card => {
+            if (card.getCardState() === CARD_STATUS.PREORDER) {
+                card.setCardState(CARD_STATUS.NORMAL);
+                return true;
+            }
+            return false;
+        });
+        cc.log("遊戲結束重置遊戲內容");
+        this.PurchasedCardList = nextRoundCards;
+        if(this.PurchasedCardList.length > 0){
+            this.cardState = CARD_STATUS.NORMAL;
+        }
+        else{
+            // 玩家當局有買卡才做購卡頁面數據重置行為
+            if(HasTheCurrentPlayerPurchasedCard){
+                this.readyBuy = 0;
+                this.playState = 0;
+            }
+        }
+        EventManager.getInstance().emit(GameStateEvent.GAME_OVER);
     }
 
     //#endregion

@@ -1,5 +1,7 @@
+import { CARD_STATUS } from "../../../Common/Base/CommonData";
 import MegaComponent from "../../../Common/Base/gameMega/MegaComponent";
 import { CommonTool } from "../../../Common/Tools/CommonTool";
+import EventManager, { GameStateEvent } from "../../../Common/Tools/EventManager/EventManager";
 import ToastManager from "../../../Common/Tools/Toast/ToastManager";
 import ChipItem from "../component/ChipItem";
 
@@ -34,6 +36,18 @@ export default class CardPurchasePage extends MegaComponent {
     private Btn_BuyCard : cc.Node = null;
     @property({ type: cc.Node, visible: true })
     private Btn_PreBuyCard : cc.Node = null;
+
+    protected addEventListener(): void {
+        super.addEventListener();
+        EventManager.getInstance().on(GameStateEvent.GAME_BUY, this.onSnapshot, this);
+        EventManager.getInstance().on(GameStateEvent.GAME_DRAWTHENUMBERS, this.onSnapshot, this);
+    }
+
+    protected removeEventListener(): void {
+        super.removeEventListener();
+        EventManager.getInstance().on(GameStateEvent.GAME_BUY, this.onSnapshot, this);
+        EventManager.getInstance().on(GameStateEvent.GAME_DRAWTHENUMBERS, this.onSnapshot, this);
+    }
     
     protected init(): void {
         super.init();
@@ -52,13 +66,14 @@ export default class CardPurchasePage extends MegaComponent {
         });
         this.Btn_Increase.on('click', this.OnIncrease, this);
         this.Btn_Decrease.on('click', this.OnDecrease, this);
-        this.Btn_BuyCard.on('click', this.OpenConfirmPurchasePage, this);
-        this.Btn_PreBuyCard.on('click', this.OpenConfirmPurchasePage, this);
+        this.Btn_BuyCard.on('click', this.OnBuyCard, this);
+        this.Btn_PreBuyCard.on('click', this.OnBtnPreBuyCard, this);
         this.node.active = false;
     }
 
     /** 開啟DIY購卡頁面 */
     private OpenDIYWindow() {
+        this.data.setCardState(CARD_STATUS.DIY);
         this.data.OpenDIYEvent();
     }
 
@@ -74,6 +89,18 @@ export default class CardPurchasePage extends MegaComponent {
         this.changeCardInfo();
     }
 
+    /** 購買正常卡 */
+    private OnBuyCard() {
+        this.data.setCardState(CARD_STATUS.NORMAL);
+        this.OpenConfirmPurchasePage();
+    }
+
+    /** 購買預購卡 */
+    private OnBtnPreBuyCard() {
+        this.data.setCardState(CARD_STATUS.PREORDER);
+        this.OpenConfirmPurchasePage();
+    }
+
     /** 開啟確認買卡片頁面 */
     private OpenConfirmPurchasePage() {    
         if(this.data.getReadyBuy() == 0) {
@@ -87,6 +114,17 @@ export default class CardPurchasePage extends MegaComponent {
 
         // 先發給數據層之後再將數據與通知層拆分
         this.data.SendConfirmPurchase();
+    }
+
+    /** 快照恢復 */
+    protected onSnapshot(): void {
+        this.node.active = this.data.showCardPurchasePage();
+        this.setPageState();
+    }
+
+    /** 遊戲結束事件 重置目前內容 */
+    protected onGameOver(): void {
+        this.onSnapshot();
     }
 
     /** 更新下注頁面的狀態內容 */

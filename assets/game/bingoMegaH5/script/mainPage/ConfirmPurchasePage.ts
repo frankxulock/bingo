@@ -31,11 +31,13 @@ export default class ConfirmPurchasePage extends MegaComponent {
     private Btn_confirm: cc.Node = null;
 
     protected addEventListener(): void {
+        super.addEventListener();
         EventManager.getInstance().on(GameStateUpdate.StateUpdate_OpenConfirmPage, this.showAction, this);
         EventManager.getInstance().on(GameStateUpdate.StateUpdate_CardResetResponse, this.OnCardResetResponse, this);
     }
 
     protected removeEventListener(): void {
+        super.removeEventListener();
         EventManager.getInstance().off(GameStateUpdate.StateUpdate_OpenConfirmPage, this.showAction, this);    
         EventManager.getInstance().off(GameStateUpdate.StateUpdate_CardResetResponse, this.OnCardResetResponse, this);    
     }

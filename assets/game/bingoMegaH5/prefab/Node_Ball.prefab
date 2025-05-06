@@ -228,8 +228,12 @@
       "__id__": 1
     },
     "_enabled": true,
-    "label": null,
-    "text": "hello",
+    "spriteBG": {
+      "__id__": 5
+    },
+    "ballNum": {
+      "__id__": 3
+    },
     "_id": ""
   },
   {

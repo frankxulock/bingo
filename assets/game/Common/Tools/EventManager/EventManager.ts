@@ -41,6 +41,7 @@ export class GameStateEvent {
     public static GAME_DRAWTHENUMBERS = "GAME_DRAWTHENUMBERS";
     public static GAME_REWARD = "GAME_REWARD";
     public static GAME_SNAPSHOT = "GAME_SNAPSHOT";
+    public static GAME_OVER = "GAME_OVER";
 }
 
 /** 遊戲內部狀態更新 */

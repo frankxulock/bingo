@@ -7,6 +7,7 @@ export enum GAME_STATUS {
     BUY,                //下注時間
     DRAWTHENUMBERS,     //開球時間
     REWARD,             //中獎表演
+    GAMEOVER,           //遊戲結束
 }
 
 // 卡片類型

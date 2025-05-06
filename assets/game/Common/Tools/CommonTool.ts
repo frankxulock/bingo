@@ -1,3 +1,5 @@
+import MegaDataManager from "../Base/gameMega/MegaDataManager";
+
 /** 通用工具 */
 export class CommonTool {
     /** 取得金額數字字串(根據幣值換算顯示) 
@@ -131,5 +133,11 @@ export class CommonTool {
         } else {
             return value.toString();
         }
+    }
+
+    /** 金額轉換函式 顯示貨幣 */
+    public static formatMoney2(value: number, specialSymbols? : string): string {
+        let data = MegaDataManager.getInstance();
+        return specialSymbols + data.currency + (value).toString();
     }
 }

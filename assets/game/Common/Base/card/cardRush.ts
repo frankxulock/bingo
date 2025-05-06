@@ -79,7 +79,7 @@ export class CardMega extends BaseCardData {
             if (totalReward > 0) {
                 const data = { id: i, reward: totalReward };
                 this.preData.push(data);
-                console.log(`未中位置 [${data.id}] 補中後有效預中獎金額：${data.reward}`);
+                // console.log(`未中位置 [${data.id}] 補中後有效預中獎金額：${data.reward}`);
             }
         }
     }

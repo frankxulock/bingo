@@ -5,7 +5,7 @@ export default class ScrollLazyLoader extends cc.Component {
     @property(cc.ScrollView)
     private scrollView: cc.ScrollView = null;
     @property(cc.Node)
-    private content: cc.Node = null;
+    public content: cc.Node = null;
 
     @property(cc.Prefab)
     private itemPrefab: cc.Prefab = null;
@@ -42,7 +42,7 @@ export default class ScrollLazyLoader extends cc.Component {
         // 重設資料
         this.allData = newData;
         this.loadedCount = 0;
-    
+
         // 載入首批資料
         this.loadNextBatch();
     }

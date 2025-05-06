@@ -18,8 +18,6 @@ export default class AvatarComponent extends cc.Component {
         let maskSize = new cc.Size(size - offer, size - offer);
         this.node.setContentSize(nodeSize);
         this.mask.setContentSize(maskSize);
-        console.warn("node => " + this.node.getContentSize());
-        console.warn("mask => " + this.mask.getContentSize());
     }
 
     /** 設定頭像大小 */

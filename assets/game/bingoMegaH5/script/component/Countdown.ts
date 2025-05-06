@@ -26,7 +26,6 @@ export default class Countdown extends MegaComponent {
     protected onSnapshot(): void {
         let gameState = this.data.getGameState();
         let isBuyTime = (gameState == GAME_STATUS.BUY);
-        this.node.active = isBuyTime;
         if(isBuyTime) {
             this.StartTiming();
         }
@@ -34,6 +33,7 @@ export default class Countdown extends MegaComponent {
 
     /** 開始倒計時 */
     private StartTiming() {
+        this.node.active = true;
         this.timer = this.data.getBuyTime();
         // 立即顯示一次初始時間
         this.updateTimerDisplay();
