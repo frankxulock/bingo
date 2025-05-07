@@ -4,7 +4,7 @@ import BallCompoent from "./BallCompoent";
 
 const { ccclass, property } = cc._decorator;
 
-@ccclass("BallPrize")
+@ccclass
 export default class BallPrize extends MegaComponent {
 
     @property({ type: [BallCompoent], visible: true })

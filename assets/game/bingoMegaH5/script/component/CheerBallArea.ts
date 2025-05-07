@@ -33,7 +33,7 @@ export default class CheerBallArea extends MegaComponent {
     protected init(): void {
         super.init();
         this.Balls = this.Node_BallAnimArea.getComponentsInChildren(BallCompoent);
-        this.Balls.forEach((obj, index)=>{ obj.init(); });
+        // this.Balls.forEach((obj, index)=>{ obj.init(); });
         this.node.on('click', this.OpenBallDetailsWindow, this);
     }
 

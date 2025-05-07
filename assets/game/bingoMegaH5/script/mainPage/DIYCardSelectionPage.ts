@@ -55,6 +55,6 @@ export default class DIYCardSelectionPage extends cc.Component implements IWindo
 
     /** 勾選全部的DIY卡片 */
     public OnSelectAll() {
-        this.i
+        // this.i
     }
 }

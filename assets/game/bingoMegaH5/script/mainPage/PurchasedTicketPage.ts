@@ -13,7 +13,7 @@ export default class PurchasedTicketPage extends MegaComponent {
     private ScrollView_CardGroup: ScrollLazyLoader = null;
     @property({ type: cc.Node, visible: true })
     private Btn_AddCard: cc.Node = null;
-    @property({ type: [cc.Node], visible: true })
+    @property({ type: cc.Node, visible: true })
     private Btn_PreBuyCard: cc.Node = null;
     @property({ type: cc.Node, visible: true })
     private Node_TotaiWin: cc.Node = null;

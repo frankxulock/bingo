@@ -57,5 +57,5 @@ export default class prizeData {
     @property(cc.SpriteFrame)
     public default : cc.SpriteFrame = null;
     @property(cc.SpriteFrame)
-    public winning : cc.SpriteFrame;
+    public winning : cc.SpriteFrame = null;
 }

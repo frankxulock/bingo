@@ -24748,52 +24748,62 @@
   {
     "__type__": "prizeData",
     "coin": 5.5,
-    "default": null
+    "default": null,
+    "winning": null
   },
   {
     "__type__": "prizeData",
     "coin": 5.5,
-    "default": null
+    "default": null,
+    "winning": null
   },
   {
     "__type__": "prizeData",
     "coin": 10,
-    "default": null
+    "default": null,
+    "winning": null
   },
   {
     "__type__": "prizeData",
     "coin": 27.5,
-    "default": null
+    "default": null,
+    "winning": null
   },
   {
     "__type__": "prizeData",
     "coin": 57.5,
-    "default": null
+    "default": null,
+    "winning": null
   },
   {
     "__type__": "prizeData",
     "coin": 57.5,
-    "default": null
+    "default": null,
+    "winning": null
   },
   {
     "__type__": "prizeData",
     "coin": 150,
-    "default": null
+    "default": null,
+    "winning": null
   },
   {
     "__type__": "prizeData",
     "coin": 1000,
-    "default": null
+    "default": null,
+    "winning": null
   },
   {
     "__type__": "prizeData",
     "coin": 1800,
-    "default": null
+    "default": null,
+    "winning": null
   },
   {
     "__type__": "prizeData",
     "coin": 20000,
-    "default": null
+    "default": null,
+    "winning": null
   },
   {
     "__type__": "cc.Sprite",
