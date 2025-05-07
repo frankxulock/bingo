@@ -5,8 +5,8 @@ import BaseCardData from "./BaseCardData";
 export class CardMega extends BaseCardData {
 
     protected bingoSpot: number = 0b0000000000001000000000000;  // 默認中獎卡片位置 由上至下左至右排序
-    private cardState : CARD_STATUS;                    // 卡片類型
-    private playState : CARD_GAMEPLAY;                  // 玩法類型
+    private cardState : CARD_STATUS = null;                     // 卡片類型
+    private playState : CARD_GAMEPLAY = null;                   // 玩法類型
     private validityRange = {                      // 檢查範圍
         [CARD_GAMEPLAY.COMDO] : 3,
         [CARD_GAMEPLAY.EXTRA] : 3,

@@ -6,8 +6,8 @@ const {ccclass, property} = cc._decorator;
 @ccclass
 export default class ChipItem extends MegaComponent {
 
-    private unselected_Label : cc.Label;
-    private selected_Label : cc.Label;
+    private unselected_Label : cc.Label = null;
+    private selected_Label : cc.Label = null;
 
     protected init(): void {
         super.init();

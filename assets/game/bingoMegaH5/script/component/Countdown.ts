@@ -1,7 +1,7 @@
 import { GAME_STATUS } from "../../../Common/Base/CommonData";
 import MegaComponent from "../../../Common/Base/gameMega/MegaComponent";
 import { CommonTool } from "../../../Common/Tools/CommonTool";
-import EventManager, { GameStateEvent } from "../../../Common/Tools/EventManager/EventManager";
+import EventManager, { GameStateEvent } from "../../../Common/Tools/Base/EventManager";
 
 const {ccclass, property} = cc._decorator;
 
@@ -9,7 +9,7 @@ const {ccclass, property} = cc._decorator;
 export default class Countdown extends MegaComponent {
 
     @property({ type: cc.Label, visible: true })
-    private Label_RemainingTime : cc.Label;
+    private Label_RemainingTime : cc.Label = null;
     private timer : number = 0;
 
     protected addEventListener(): void {

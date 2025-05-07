@@ -97,15 +97,15 @@
     "_opacity": 255,
     "_color": {
       "__type__": "cc.Color",
-      "r": 29,
-      "g": 29,
-      "b": 29,
+      "r": 255,
+      "g": 255,
+      "b": 255,
       "a": 255
     },
     "_contentSize": {
       "__type__": "cc.Size",
-      "width": 224,
-      "height": 20.16
+      "width": 0,
+      "height": 17.64
     },
     "_anchorPoint": {
       "__type__": "cc.Vec2",
@@ -156,9 +156,9 @@
     ],
     "_srcBlendFactor": 770,
     "_dstBlendFactor": 771,
-    "_string": "投注结束，请等待下局进行投注",
-    "_N$string": "投注结束，请等待下局进行投注",
-    "_fontSize": 16,
+    "_string": "",
+    "_N$string": "",
+    "_fontSize": 14,
     "_lineHeight": 0,
     "_enableWrapText": true,
     "_N$file": null,
@@ -201,7 +201,7 @@
     "_srcBlendFactor": 770,
     "_dstBlendFactor": 771,
     "_spriteFrame": {
-      "__uuid__": "a23235d1-15db-4b95-8439-a2e005bfff91"
+      "__uuid__": "1c11d1a4-29a7-45fd-8cbe-49f755e26e0a"
     },
     "_type": 0,
     "_sizeMode": 0,

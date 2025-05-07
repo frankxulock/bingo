@@ -6,7 +6,7 @@
 //  - https://docs.cocos.com/creator/2.4/manual/en/scripting/life-cycle-callbacks.html
 
 import MegaComponent from "../../../Common/Base/gameMega/MegaComponent";
-import EventManager, { GameStateUpdate } from "../../../Common/Tools/EventManager/EventManager";
+import EventManager, { GameStateUpdate } from "../../../Common/Tools/Base/EventManager";
 import ReelScroller from "./ReelScroller";
 
 const {ccclass, property} = cc._decorator;
@@ -14,7 +14,7 @@ const {ccclass, property} = cc._decorator;
 @ccclass
 export default class BingoJackpotCounter extends MegaComponent {
     @property({ type: cc.Node, visible: true })
-    private Group_JackpotAmount : cc.Node;
+    private Group_JackpotAmount : cc.Node = null;
     private Reels : ReelScroller[] = [];
 
     protected addEventListener(): void {

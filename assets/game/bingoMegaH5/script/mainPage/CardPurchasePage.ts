@@ -1,9 +1,10 @@
 import { CARD_STATUS } from "../../../Common/Base/CommonData";
 import MegaComponent from "../../../Common/Base/gameMega/MegaComponent";
 import { CommonTool } from "../../../Common/Tools/CommonTool";
-import EventManager, { GameStateEvent } from "../../../Common/Tools/EventManager/EventManager";
+import EventManager, { GameStateEvent } from "../../../Common/Tools/Base/EventManager";
 import ToastManager from "../../../Common/Tools/Toast/ToastManager";
 import ChipItem from "../component/ChipItem";
+import PopupManager, { PopupName } from "../../../Common/Tools/PopupManager/PopupManager";
 
 const {ccclass, property} = cc._decorator;
 
@@ -51,7 +52,7 @@ export default class CardPurchasePage extends MegaComponent {
     
     protected init(): void {
         super.init();
-        this.Btn_MyFavCards.on('click', this.OpenDIYWindow, this);
+        this.Btn_MyFavCards.on('click', this.OpenDIYCardSelectionPage, this);
         this.Toggle_PlayState.toggleItems.forEach((toggle, index) => {
             toggle.node.on('toggle', () => {
                 this.data.setPlayState(index);
@@ -71,10 +72,10 @@ export default class CardPurchasePage extends MegaComponent {
         this.node.active = false;
     }
 
-    /** 開啟DIY購卡頁面 */
-    private OpenDIYWindow() {
+    /** 開啟DIY選購頁面 */
+    private OpenDIYCardSelectionPage() {
         this.data.setCardState(CARD_STATUS.DIY);
-        this.data.OpenDIYEvent();
+        PopupManager.instance.showPopup(PopupName.DIYCardSelectionPage, this.data.getDIYCardSelectionData());
     }
 
     /** 增加購卡數量 */

@@ -1,13 +1,13 @@
 /** 基礎遊戲卡片資料 */
 export default abstract class BaseCardData {
-    protected id : number;                        // 卡片ID
-    protected price : number;                     // 默認金額
-    protected cardInfo : number[] = [];           // 卡片數據
-    protected bingoSpot : number;                 // 中獎位置（使用二進制）
-    protected totalWin : number;                  // 中獎金額
-    protected preTotalWin : number;               // 預中獎金額
-    protected sendBall : number = 0;              // 已經發送球數
-    protected extraline = []                      // 中獎線類型
+    protected id : number = null;                        // 卡片ID
+    protected price : number = null;                     // 默認金額
+    protected cardInfo : number[] = [];                  // 卡片數據
+    protected bingoSpot : number = null;                 // 中獎位置（使用二進制）
+    protected totalWin : number = 0;                     // 中獎金額
+    protected preTotalWin : number;                      // 預中獎金額
+    protected sendBall : number = 0;                     // 已經發送球數
+    protected extraline = [];                            // 中獎線類型
 
     /** 更新卡片數據 */
     public updateCard(ball : number){
@@ -34,4 +34,8 @@ export default abstract class BaseCardData {
     public getCardState() {return null; }
 
     public getPreData() {return null;}
+
+    public getID() {
+        return this.id;
+    }
 }

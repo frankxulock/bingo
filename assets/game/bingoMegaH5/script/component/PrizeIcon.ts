@@ -6,7 +6,7 @@ const {ccclass, property} = cc._decorator;
 @ccclass
 export default class PrizeIcon extends MegaComponent {
 
-    private Label_coin : cc.Label;
+    private Label_coin : cc.Label = null;
     
     protected init(): void {
         super.init();

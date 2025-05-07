@@ -13,7 +13,7 @@
   },
   {
     "__type__": "cc.Node",
-    "_name": "Sprite_CardIcon",
+    "_name": "CardIcon",
     "_objFlags": 0,
     "_parent": null,
     "_children": [

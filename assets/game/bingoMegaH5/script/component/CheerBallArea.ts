@@ -1,6 +1,6 @@
 import MegaComponent from "../../../Common/Base/gameMega/MegaComponent";
 import { CommonTool } from "../../../Common/Tools/CommonTool";
-import EventManager, { GameStateUpdate } from "../../../Common/Tools/EventManager/EventManager";
+import EventManager, { GameStateUpdate } from "../../../Common/Tools/Base/EventManager";
 import BallCompoent from "./BallCompoent";
 
 const {ccclass, property} = cc._decorator;

@@ -1,13 +1,15 @@
-import { CARD_GAMEPLAY } from "../../../Common/Base/CommonData";
 import MegaComponent from "../../../Common/Base/gameMega/MegaComponent";
 import { CommonTool } from "../../../Common/Tools/CommonTool";
-import EventManager, { GameStateUpdate } from "../../../Common/Tools/EventManager/EventManager";
+import EventManager, { GameStateUpdate } from "../../../Common/Tools/Base/EventManager";
 import ScrollLazyLoader from "../component/ScrollLazyLoader";
+import { IWindow } from "../../../Common/Tools/PopupManager/IWindow";
+import PopupManager, { PopupName } from "../../../Common/Tools/PopupManager/PopupManager";
 
 const {ccclass, property} = cc._decorator;
 
 @ccclass
-export default class ConfirmPurchasePage extends MegaComponent {
+export default class ConfirmPurchasePage extends MegaComponent implements IWindow {
+
     @property({ type: cc.Node, visible: true })
     private Node_Modal: cc.Node = null;
     @property({ type: ScrollLazyLoader, visible: true })
@@ -32,13 +34,11 @@ export default class ConfirmPurchasePage extends MegaComponent {
 
     protected addEventListener(): void {
         super.addEventListener();
-        EventManager.getInstance().on(GameStateUpdate.StateUpdate_OpenConfirmPage, this.showAction, this);
         EventManager.getInstance().on(GameStateUpdate.StateUpdate_CardResetResponse, this.OnCardResetResponse, this);
     }
 
     protected removeEventListener(): void {
-        super.removeEventListener();
-        EventManager.getInstance().off(GameStateUpdate.StateUpdate_OpenConfirmPage, this.showAction, this);    
+        super.removeEventListener(); 
         EventManager.getInstance().off(GameStateUpdate.StateUpdate_CardResetResponse, this.OnCardResetResponse, this);    
     }
 
@@ -48,6 +48,18 @@ export default class ConfirmPurchasePage extends MegaComponent {
         this.Btn_cancel.on('click', this.OnCancel, this);
         this.Btn_confirm.on('click', this.OnConfirm, this);
         this.node.active = false;
+    }
+
+    open(data : any): void {
+        if(this.data == null)
+            this.init();
+        this.node.active = true;
+        this.ScrollView_ConfirmedCardList.scrollToTop();
+        this.setPageState();
+    }
+    close(): void {
+        this.node.active = false;
+        PopupManager.instance.closePopup(PopupName.ConfirmPurchasePage);
     }
 
     /** 發送重置目前卡片內容 */
@@ -63,20 +75,13 @@ export default class ConfirmPurchasePage extends MegaComponent {
 
     /** 關閉確認卡片頁面 */
     private OnCancel() {
-        this.node.active = false;
+        this.close();
     }
 
     /** 確定購買卡片 */
     private OnConfirm() {
-        this.node.active = false;
+        this.close();
         this.data.SendPurchasedCardList();
-    }
-
-    /** 展示頁面 */
-    private showAction() {
-        this.node.active = true;
-        this.ScrollView_ConfirmedCardList.scrollToTop();
-        this.setPageState();
     }
 
     /** 變更確認頁面的內容 */

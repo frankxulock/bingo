@@ -1,7 +1,8 @@
 import { CardMega } from "./Common/Base/card/cardMega";
 import { GAME_STATUS } from "./Common/Base/CommonData";
 import MegaDataManager from "./Common/Base/gameMega/MegaDataManager";
-import EventManager, { GameStateEvent, GameStateUpdate } from "./Common/Tools/EventManager/EventManager";
+import EventManager, { GameStateEvent, GameStateUpdate } from "./Common/Tools/Base/EventManager";
+import PopupManager, { PopupName } from "./Common/Tools/PopupManager/PopupManager";
 
 const {ccclass, property} = cc._decorator;
 
@@ -36,6 +37,10 @@ export default class UnitTest extends cc.Component {
         this.btns[4].node.on('click', this.startSimulation, this);
         this.btns[5].node.on('click', this.TestMegaCard, this);
         this.btns[6].node.on('click', this.TestMegaCardView, this);
+        this.btns[7].node.on('click', this.OpenResultPage, this);
+        this.btns[8].node.on('click', this.OpneRewardPopupPage, this);
+        this.btns[9].node.on('click', this.OpneDIYCardSelectionPage, this);
+        this.btns[10].node.on('click', this.OpneDIYEditPage, this);
     }
 
     // 模擬快照封包進入
@@ -231,12 +236,19 @@ export default class UnitTest extends cc.Component {
         let sentBalls = 0;
     
         this.ballInterval = this.schedule(() => {
+
+            // extra patterns獎勵事件
+            if(sentBalls === 44) {
+                this.OpneDIYCardSelectionPage();
+            }
+
+            // 49球結算事件
             if (sentBalls === drawNumbers.length) {
                 this.unschedule(this.ballInterval);
                 cc.log("發球完畢 結算表演，等待 5 秒重新下注");
                 this.TestState = GAME_STATUS.REWARD;
                 this.data.setGameState(GAME_STATUS.REWARD);
-                this.data.ServerToReward();
+                this.OpenResultPage();
                 this.scheduleOnce(() => {
                     this.data.GameOver(this.betTimer);
                     this.startBettingPhase();
@@ -248,7 +260,7 @@ export default class UnitTest extends cc.Component {
             cc.log(`發送球號：${number}`);
             this.data.ServerToBallEvent(number);
             sentBalls++;
-        }, this.snedBallTime);
+        }, this.snedBallTime, this.totalBalls);
     }
     
     /** 單卡獎金測試 */
@@ -351,4 +363,46 @@ export default class UnitTest extends cc.Component {
         // this.data.ServerToBallEvent(24);
         // this.data.ServerToBallEvent(25);
     }
+
+    private OpenResultPage() {
+        PopupManager.instance.showPopup(PopupName.ResultPage, this.data.getResultPageData());
+    }
+
+    private OpneRewardPopupPage() {
+        PopupManager.instance.showPopup(PopupName.RewardPopupPage, this.data.getRewardPopupData());
+    }
+
+    /** DIY購卡頁面 */
+    private OpneDIYCardSelectionPage() {
+        this.RandomlyGeneratedCard();
+        PopupManager.instance.showPopup(PopupName.DIYCardSelectionPage, this.data.getDIYCardSelectionData());
+    }
+
+    /** DIY編輯頁面 */
+    private OpneDIYEditPage() {
+        PopupManager.instance.showPopup(PopupName.DIYEditPage, this.data.getDIYEditData());
+    }
+
+    /** 隨機生成卡片測試功能 */
+    public RandomlyGeneratedCard() {
+        const cards = [];
+        const count = Math.floor(Math.random() * 60) + 1; // 隨機 1~60
+    
+        for (let i = 0; i < count; i++) {
+            const cardId = this.generateCardID(i);
+            const numbers = this.generateCardNumbersFlat(); // 陣列
+    
+            const cardData = {
+                cardId: cardId,
+                numbers: numbers,
+                cardState: 1,
+                playState: 0,
+            };
+    
+            cards.push(cardData);
+        }
+    
+        const allCardTest = cards.map(cardData => new CardMega(cardData, this.data.cardIconBGs));
+        this.data.SendPurchasedCardListResponse(allCardTest);
+    }    
 }

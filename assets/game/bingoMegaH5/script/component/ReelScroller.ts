@@ -5,7 +5,7 @@ const {ccclass, property} = cc._decorator;
 
 @ccclass
 export default class ReelScroller extends MegaComponent {
-    private curLabel : cc.Label;
+    private curLabel : cc.Label = null;
 
     protected init(): void {
         super.init();

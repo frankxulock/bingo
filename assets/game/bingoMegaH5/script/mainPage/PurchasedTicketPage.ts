@@ -1,6 +1,6 @@
 import MegaComponent from "../../../Common/Base/gameMega/MegaComponent";
 import { CommonTool } from "../../../Common/Tools/CommonTool";
-import EventManager, { GameStateEvent, GameStateUpdate } from "../../../Common/Tools/EventManager/EventManager";
+import EventManager, { GameStateEvent, GameStateUpdate } from "../../../Common/Tools/Base/EventManager";
 import ScrollLazyLoader from "../component/ScrollLazyLoader";
 
 const {ccclass, property} = cc._decorator;

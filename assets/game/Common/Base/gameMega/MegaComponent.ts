@@ -1,4 +1,4 @@
-import EventManager, { GameStateEvent } from "../../Tools/EventManager/EventManager";
+import EventManager, { GameStateEvent } from "../../Tools/Base/EventManager";
 import BaseComponent from "../BaseComponent";
 import MegaDataManager from "./MegaDataManager";
 

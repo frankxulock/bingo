@@ -5,9 +5,9 @@ const {ccclass, property} = cc._decorator;
 @ccclass
 export default class VideoViewport extends MegaComponent {
     @property({ type: cc.Toggle, visible: true })
-    private toggle_Audio : cc.Toggle;
+    private toggle_Audio : cc.Toggle = null;
     @property({ type: cc.Toggle, visible: true })
-    private toggle_Video : cc.Toggle;
+    private toggle_Video : cc.Toggle = null;
 
     protected init(): void {
         super.init();

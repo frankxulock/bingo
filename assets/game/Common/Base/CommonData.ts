@@ -55,7 +55,7 @@ export default class prizeData {
     @property({ type: cc.Float })
     public coin: number = 0;
     @property(cc.SpriteFrame)
-    public default : cc.SpriteFrame;
+    public default : cc.SpriteFrame = null;
     @property(cc.SpriteFrame)
     public winning : cc.SpriteFrame;
 }

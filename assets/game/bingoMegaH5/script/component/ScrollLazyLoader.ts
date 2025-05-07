@@ -70,8 +70,4 @@ export default class ScrollLazyLoader extends cc.Component {
     private onScrollToBottom() {
         this.loadNextBatch();
     }
-
-    protected onDestroy() {
-        this.scrollView.node.off('scroll-to-bottom', this.onScrollToBottom, this);
-    }
 }

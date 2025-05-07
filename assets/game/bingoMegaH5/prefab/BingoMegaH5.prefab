@@ -24747,43 +24747,53 @@
   },
   {
     "__type__": "prizeData",
-    "coin": 5.5
+    "coin": 5.5,
+    "default": null
   },
   {
     "__type__": "prizeData",
-    "coin": 5.5
+    "coin": 5.5,
+    "default": null
   },
   {
     "__type__": "prizeData",
-    "coin": 10
+    "coin": 10,
+    "default": null
   },
   {
     "__type__": "prizeData",
-    "coin": 27.5
+    "coin": 27.5,
+    "default": null
   },
   {
     "__type__": "prizeData",
-    "coin": 57.5
+    "coin": 57.5,
+    "default": null
   },
   {
     "__type__": "prizeData",
-    "coin": 57.5
+    "coin": 57.5,
+    "default": null
   },
   {
     "__type__": "prizeData",
-    "coin": 150
+    "coin": 150,
+    "default": null
   },
   {
     "__type__": "prizeData",
-    "coin": 1000
+    "coin": 1000,
+    "default": null
   },
   {
     "__type__": "prizeData",
-    "coin": 1800
+    "coin": 1800,
+    "default": null
   },
   {
     "__type__": "prizeData",
-    "coin": 20000
+    "coin": 20000,
+    "default": null
   },
   {
     "__type__": "cc.Sprite",

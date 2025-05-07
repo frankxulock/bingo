@@ -1,6 +1,5 @@
-import BaseCardData from "../../../Common/Base/card/BaseCardData";
-import MegaComponent from "../../../Common/Base/gameMega/MegaComponent";
-import { CommonTool } from "../../../Common/Tools/CommonTool";
+import BaseCardData from "../../../../Common/Base/card/BaseCardData";
+import { CommonTool } from "../../../../Common/Tools/CommonTool";
 
 const { ccclass, property } = cc._decorator;
 
