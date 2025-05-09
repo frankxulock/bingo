@@ -5,12 +5,11 @@ const {ccclass, property} = cc._decorator;
 
 @ccclass
 export default class PrizeIcon extends MegaComponent {
-
+    @property({ type: cc.Label, visible: true })
     private Label_coin : cc.Label = null;
     
     protected init(): void {
         super.init();
-        this.Label_coin = this.node.children[0].getComponent(cc.Label);
     }
 
     setCoin(coin : number) {

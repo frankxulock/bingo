@@ -1,4 +1,5 @@
 import MegaComponent from "../../../Common/Base/gameMega/MegaComponent";
+import FlvPlayer from "./FlvPlayer";
 
 const {ccclass, property} = cc._decorator;
 
@@ -8,6 +9,8 @@ export default class VideoViewport extends MegaComponent {
     private toggle_Audio : cc.Toggle = null;
     @property({ type: cc.Toggle, visible: true })
     private toggle_Video : cc.Toggle = null;
+    @property({ type: FlvPlayer, visible: true })
+    private flvPlayer :FlvPlayer = null;
 
     protected init(): void {
         super.init();
@@ -29,5 +32,10 @@ export default class VideoViewport extends MegaComponent {
         const bgNode = toggle.node.children[0];
         if(bgNode) bgNode.active = !isChecked;
         console.log("設定視頻事件  狀態 ", isChecked);
+        if(isChecked){
+            this.flvPlayer.startPlay();
+        }else {
+            this.flvPlayer.cancelPlay();
+        }
     }
 }

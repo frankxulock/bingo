@@ -1,8 +1,9 @@
 import { CardMega } from "./Common/Base/card/cardMega";
-import { GAME_STATUS } from "./Common/Base/CommonData";
+import { CARD_CONTENT, CARD_STATUS, GAME_STATUS } from "./Common/Base/CommonData";
 import MegaDataManager from "./Common/Base/gameMega/MegaDataManager";
 import EventManager, { GameStateEvent, GameStateUpdate } from "./Common/Tools/Base/EventManager";
-import PopupManager, { PopupName } from "./Common/Tools/PopupManager/PopupManager";
+import PopupManager from "./Common/Tools/PopupSystem/PopupManager";
+import { PopupName } from "./Common/Tools/PopupSystem/PopupConfig";
 
 const {ccclass, property} = cc._decorator;
 
@@ -15,7 +16,7 @@ export default class UnitTest extends cc.Component {
     private static _instance: UnitTest = null;
     public static get instance(): UnitTest {
         if (!this._instance) {
-            cc.warn("ToastManager 尚未初始化！");
+            cc.warn("尚未初始化！");
         }
         return this._instance;
     }
@@ -41,23 +42,13 @@ export default class UnitTest extends cc.Component {
         this.btns[8].node.on('click', this.OpneRewardPopupPage, this);
         this.btns[9].node.on('click', this.OpneDIYCardSelectionPage, this);
         this.btns[10].node.on('click', this.OpneDIYEditPage, this);
+        this.btns[11].node.on('click', this.setAvatarData, this);
+        this.btns[12].node.on('click', this.setLeaderboardData, this);
     }
 
     // 模擬快照封包進入
     onSnapshot() {
-        let data = {
-            nickName : "caler",                     // 玩家名稱
-            coin : 99999,                           // 金額
-            currency : "₱",                         // 貨幣單位
-            gameState : 1,                          // 1 : 下注時間 2 : 開獎時間 ...
-            buyTime : 60,                           // 下注時間
-            ballList : [3.51, 25, 98, 12],          // 目前已開球號
-            cardInfo : [],                          // 玩家已經購買的卡片
-            BingoJackpotAmount : "15263311",   // Ｊackpot金額
-            online : 30,                            // 當前在線人數
-        }
-        this.data.setSnapshot(data);
-        EventManager.getInstance().emit(GameStateEvent.GAME_SNAPSHOT);
+
     }
 
     onSendBall() {
@@ -73,6 +64,7 @@ export default class UnitTest extends cc.Component {
     public testCardSimulationGeneration() {
         let data = {
             cardState: 1,
+            cardContent: 0,
             playState: 2,
             // 1-500 隨機
             readyBuy: Math.floor(Math.random() * 500) + 1, // 1~500
@@ -81,7 +73,7 @@ export default class UnitTest extends cc.Component {
         this.SimulationData_OpenConfirm(data);
     }
 
-    /** 模擬Server卡片法送給Client */
+    /** 模擬Server卡片法送給Client 亂數卡片 */
     public SimulationData_OpenConfirm(data) {
         const cards = [];
         for (let i = 0; i < data.readyBuy; i++) {
@@ -92,11 +84,34 @@ export default class UnitTest extends cc.Component {
                 cardId: cardId,
                 numbers: numbers,
                 cardState: data.cardState,
+                cardContent: data.cardContent,
                 playState: data.playState,
             };
 
             cards.push(cardData);
         }
+        this.data.ConfirmPurchaseResponse(cards);
+        this.setAvatarData();
+    }
+
+    /** 模擬Server卡片法送給Client 亂數卡片 */
+    public DIYData_OpenConfirm(data) {
+        const cards = [];
+        for (let i = 0; i < data.cardInfo.length; i++) {
+            const cardId = data.cardInfo[i];
+            const numbers = data.cardInfo[i].cardInfo; // 陣列
+
+            const cardData = {
+                cardId: cardId,
+                numbers: numbers,
+                cardState: data.cardState,
+                cardContent: data.cardContent,
+                playState: data.playState,
+            };
+
+            cards.push(cardData);
+        }
+        console.log("DIY Card => ", cards);
         this.data.ConfirmPurchaseResponse(cards);
     }
 
@@ -116,12 +131,16 @@ export default class UnitTest extends cc.Component {
     }
 
     /** 生成唯一卡片ID（可用時間戳＋索引） */
-    private generateCardID(index: number): string {
+    public static generateCardID(): string {
+        return `card_${Date.now()}_0`;
+    }
+    public generateCardID(index: number): string {
         return `card_${Date.now()}_${index}`;
     }
 
+
     /** 生成賓果卡數據：一維陣列，25 格，中間為 null */
-    private generateCardNumbersFlat(): (number | null)[] {
+    public generateCardNumbersFlat(): (number | null)[] {
         const getRandom = (range: number[], count: number): number[] =>
             this.shuffle(range).slice(0, count).sort((a, b) => a - b);
     
@@ -150,12 +169,12 @@ export default class UnitTest extends cc.Component {
 
 
     /** 工具：範圍陣列 */
-    private range(start: number, end: number): number[] {
+    public range(start: number, end: number): number[] {
         return Array.from({ length: end - start + 1 }, (_, i) => i + start);
     }
 
     /** 工具：洗牌 */
-    private shuffle(array: number[]): number[] {
+    public shuffle(array: number[]): number[] {
         const result = array.slice();
         for (let i = result.length - 1; i > 0; i--) {
             const j = Math.floor(Math.random() * (i + 1));
@@ -164,24 +183,35 @@ export default class UnitTest extends cc.Component {
         return result;
     }
 
+    /** 工具：隨機中獎球號 */
+    public generateRandomWinData(): Map<number, number> {
+        let numberMap : Map<number, number> = new Map();
+        for (let ballNumber = 1; ballNumber <= 75; ballNumber++) {
+            const winCount = Math.floor(Math.random() * 51); // 0 to 50
+            numberMap.set(ballNumber, winCount);
+        }
+        return numberMap;
+    }
+
 
 
     /** 遊戲流程模擬 */
     private isRunning = false;
     private ballInterval = null;
-    private betTimer = 5;
+    private betTimer = 2;
     private totalBalls = 49;
     private TestState = GAME_STATUS.LOADING;
-    private snedBallTime = 0.5;
+    private snedBallTime = 1;
 
     public startSimulation() {
+        this.btns[4].active = false;
         if (this.isRunning) return;
         this.unscheduleAllCallbacks(); // <-- 保險起見全部清掉
         this.isRunning = true;
         /** // 模擬快照封包 */
         let data = {
             nickName : "caler",                     // 玩家名稱
-            coin : 99999,                           // 金額
+            coin : 9999999,                           // 金額
             currency : "₱",                         // 貨幣單位
             gameState : 1,                          // 1 : 下注時間 2 : 開獎時間 ...
             buyTime : this.betTimer,                           // 下注時間
@@ -189,6 +219,7 @@ export default class UnitTest extends cc.Component {
             cardInfo : [],                          // 玩家已經購買的卡片
             BingoJackpotAmount : "15263311",   // Ｊackpot金額
             online : 30,                            // 當前在線人數
+            ballNumberWinMap: this.generateRandomWinData(),                   // 每個球的中獎次數
         }
         this.data.setSnapshot(data);
         EventManager.getInstance().emit(GameStateEvent.GAME_SNAPSHOT);
@@ -239,7 +270,7 @@ export default class UnitTest extends cc.Component {
 
             // extra patterns獎勵事件
             if(sentBalls === 44) {
-                this.OpneDIYCardSelectionPage();
+                this.OpneRewardPopupPage();
             }
 
             // 49球結算事件
@@ -269,6 +300,7 @@ export default class UnitTest extends cc.Component {
         let data = {
             cardId : "12",
             cardState : 0,
+            cardContent: 0,
             playState : 0,
             numbers : [
                 1,       2,     3,      4,      5,
@@ -279,7 +311,7 @@ export default class UnitTest extends cc.Component {
             ]
         }
 
-        let card = new CardMega(data, null);
+        let card = new CardMega(data);
         console.warn(this.generateCardNumbersFlat());
         // 用這樣的方式檢查每個中獎圖形
         for(let i = 0; i < 5; i++){
@@ -311,6 +343,7 @@ export default class UnitTest extends cc.Component {
         let cardInfo = {
             cardId : 0,
             cardState : 0,
+            cardContent: 0,
             playState : 0,
             numbers : [
                 1,       2,     3,      4,      5,
@@ -323,13 +356,13 @@ export default class UnitTest extends cc.Component {
         let cardInfo2 = {
             cardId : 1,
             cardState : 0,
+            cardContent: 0,
             playState : 0,
             numbers : this.generateCardNumbersFlat(), 
         }
-        let card = new CardMega(cardInfo, this.data.cardIconBGs);
-        // let card2 = new CardMega(cardInfo2, this.data.cardIconBGs);
+        let card = new CardMega(cardInfo);
+        // let card2 = new CardMega(cardInfo2);
         
-
         let allCardTest = [];
         allCardTest.push(card);
         // allCardTest.push(card2); 
@@ -365,22 +398,25 @@ export default class UnitTest extends cc.Component {
     }
 
     private OpenResultPage() {
-        PopupManager.instance.showPopup(PopupName.ResultPage, this.data.getResultPageData());
+        PopupManager.showPopup(PopupName.ResultPage, this.data.getResultPageData());
     }
 
     private OpneRewardPopupPage() {
-        PopupManager.instance.showPopup(PopupName.RewardPopupPage, this.data.getRewardPopupData());
+        PopupManager.showPopup(PopupName.RewardPopupPage, this.data.getRewardPopupData());
     }
 
     /** DIY購卡頁面 */
     private OpneDIYCardSelectionPage() {
-        this.RandomlyGeneratedCard();
-        PopupManager.instance.showPopup(PopupName.DIYCardSelectionPage, this.data.getDIYCardSelectionData());
+        this.data.setCardContent(CARD_CONTENT.DIY);
+        this.DIYRandomlyGeneratedCard();
+        PopupManager.showPopup(PopupName.DIYCardSelectionPage, this.data.getDIYCardSelectionData());
     }
 
     /** DIY編輯頁面 */
     private OpneDIYEditPage() {
-        PopupManager.instance.showPopup(PopupName.DIYEditPage, this.data.getDIYEditData());
+        this.data.setballNumberWinMap(this.generateRandomWinData());
+
+        PopupManager.showPopup(PopupName.DIYEditPage, this.data.getDIYEditData());
     }
 
     /** 隨機生成卡片測試功能 */
@@ -396,13 +432,165 @@ export default class UnitTest extends cc.Component {
                 cardId: cardId,
                 numbers: numbers,
                 cardState: 1,
+                cardContent: 0,
                 playState: 0,
             };
     
             cards.push(cardData);
         }
     
-        const allCardTest = cards.map(cardData => new CardMega(cardData, this.data.cardIconBGs));
+        const allCardTest = cards.map(cardData => new CardMega(cardData));
         this.data.SendPurchasedCardListResponse(allCardTest);
     }    
+
+    /** 隨機收藏DIY卡片測試功能 */
+    public DIYRandomlyGeneratedCard() {
+        const cards = [];
+        const count = Math.floor(Math.random() * 60) + 1; // 隨機 1~60
+    
+        for (let i = 0; i < count; i++) {
+            const cardId = this.generateCardID(i);
+            const numbers = this.generateCardNumbersFlat(); // 陣列
+    
+            const cardData = {
+                cardId: cardId,
+                numbers: numbers,
+                cardState: 1,
+                cardContent: 1,
+                playState: 0,
+            };
+    
+            cards.push(cardData);
+        }
+    
+        const allCardTest = cards.map(cardData => new CardMega(cardData));
+
+        const sampleCount = 10;
+        // 打亂陣列
+        const shuffled = allCardTest.sort(() => 0.5 - Math.random()); 
+        // 取前 N 筆（如果總數少於 N，就取全部）
+        const selectedCards = shuffled.slice(0, Math.min(sampleCount, shuffled.length));
+        
+        this.data.SendPurchasedCardListResponse(selectedCards);
+        this.data.setDIYCardList(allCardTest);
+    } 
+
+    private setAvatarData() {
+        const data: any[] = [];
+        const count = Math.floor(Math.random() * 14) + 2; // 2~15 筆
+    
+        for (let i = 0; i < count; i++) {
+            const fbID = (100000 + Math.floor(Math.random() * 900000)).toString();
+            const hostName = `Host_${i + 1}`;
+            const hostImage = `https://picsum.photos/150/150?random=${Math.floor(Math.random() * 9) + 1}`; // 隨機大頭貼
+            const host = {
+                hostIcon: hostImage,
+                hostImage: hostImage,
+                hostName: hostName,
+                from: "Form: Earth",
+                birthday: "Dec " + (Math.floor(Math.random() * 28) + 1),
+                favorote: "Music",
+                fbName: hostName,
+                fbID: fbID,
+            };
+            data.push(host);
+        }
+
+        this.data.setAvatarData(data);
+    }
+
+    private setLeaderboardData() {
+
+        let JPRanking = [
+            {
+                name : "Deplk001",
+                ball : [2, 5, 15],  //最多三顆 1-75
+                num : 21,           // 0-25
+                BuyCard: 2,         // 1-500
+            }
+        ]
+
+        let data = {
+            JPRanking: this.getRanking(),
+            JPHistory: this.getHistory(true),
+            EPRanking: this.getRanking(),
+            EPHistory: this.getHistory(false),
+        }
+        this.data.setLeaderboardData(data);
+    }
+
+    getRanking(): any[] {
+        const Ranking = [];
+    
+        const total = Math.floor(Math.random() * 200) + 1; // 1~200 筆
+    
+        for (let i = 0; i < total; i++) {
+            const name = `User${String(i + 1).padStart(3, '0')}`;
+    
+            const ballCount = Math.floor(Math.random() * 3) + 1; // 1~3 顆球
+            const ball = Array.from({ length: ballCount }, () =>
+                Math.floor(Math.random() * 75) + 1
+            );
+            const imgae = "";
+    
+            const entry = {
+                imgae,
+                name,
+                ball,
+                num: Math.floor(Math.random() * 26),       // 0~25
+                BuyCard: Math.floor(Math.random() * 500) + 1 // 1~500
+            };
+    
+            Ranking.push(entry);
+        }
+    
+        return Ranking;
+    }
+
+    getHistory(IsJP: boolean): any[] {
+        // 隨機名稱生成器
+        const randomName = () => {
+            const names = ["Deplk001", "KuroTan", "User123", "Gamer456", "Player789"];
+            return names[Math.floor(Math.random() * names.length)];
+        };
+    
+        // 隨機金額生成器 (500 - 9999999)
+        const randomAmount = () => {
+            return Math.floor(Math.random() * (9999999 - 500 + 1)) + 500;
+        };
+    
+        // 隨機日期生成器 (格式：MM/DD/YYYY)
+        const randomDate = () => {
+            const start = new Date(2020, 0, 1); // 開始日期 2020-01-01
+            const end = new Date(); // 今天
+            const randomTime = start.getTime() + Math.random() * (end.getTime() - start.getTime());
+            const date = new Date(randomTime);
+            return `${date.getMonth() + 1}/${date.getDate()}/${date.getFullYear()}`;
+        };
+    
+        let JPHistory = [];
+        let EPHistory = [];
+        
+        // 隨機產生 JPHistory 或 EPHistory
+        for (let i = 0; i < 30; i++) {
+            // 如果是 JP，則加入 date
+            if (IsJP) {
+                let data = {
+                    name : randomName(),
+                    amount : randomAmount(),
+                    date : randomDate()
+                };
+                JPHistory.push(data);
+            } else {
+                let data = {
+                    name : randomName(),
+                    amount : randomAmount(),
+                };
+                EPHistory.push(data);
+            }
+        }
+    
+        // 根據 IsJP 返回不同的歷史紀錄
+        return IsJP ? JPHistory : EPHistory;
+    }
 }

@@ -140,4 +140,16 @@ export class CommonTool {
         let data = MegaDataManager.getInstance();
         return specialSymbols + data.currency + (value).toString();
     }
+
+    /** 圖片轉換 */
+    public static loadRemoteImageToSprite(sprite: cc.Sprite, url: string) {
+        cc.loader.load({ url: url, type: 'png' }, (err, texture: cc.Texture2D) => {
+            if (err) {
+                cc.error('載入圖片失敗:', err);
+                return;
+            }
+            const spriteFrame = new cc.SpriteFrame(texture);
+            sprite.spriteFrame = spriteFrame;
+        });
+    }
 }

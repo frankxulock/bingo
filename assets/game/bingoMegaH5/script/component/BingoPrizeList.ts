@@ -10,6 +10,7 @@ export default class BingoPrizeList extends MegaComponent {
     protected init(): void {
         super.init();
         this.PrizelList = this.node.getComponentsInChildren(PrizeIcon);
+        this.setPrizeAmount();
     }
 
     protected onSnapshot(): void {
@@ -20,7 +21,7 @@ export default class BingoPrizeList extends MegaComponent {
     setPrizeAmount() {
         let prizeData = this.data.getPrizeDataList();
         for(let i = 0; i < this.PrizelList.length; i++){
-            this.PrizelList[i].setCoin(prizeData[i].coin);
+            this.PrizelList[i].setCoin(prizeData[i]);
         }
     }
 }

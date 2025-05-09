@@ -1,28 +1,22 @@
+import BaseSingletonComponent from "../Base/BaseSingletonComponent";
+
 const { ccclass, property } = cc._decorator;
 
 @ccclass
-export default class ToastManager extends cc.Component {
+export default class ToastManager extends BaseSingletonComponent {
+
     @property(cc.Prefab)
     toastPrefab: cc.Prefab = null;
 
     @property(cc.Node)
     toastParent: cc.Node = null;
 
-    private static _instance: ToastManager = null;
-
-    public static get instance(): ToastManager {
-        if (!this._instance) {
-            cc.warn("ToastManager 尚未初始化！");
-        }
-        return this._instance;
+    public static getInstance(): ToastManager {
+        return this._getInstance(ToastManager);
     }
 
-    onLoad() {
-        if (ToastManager._instance && ToastManager._instance !== this) {
-            this.destroy(); // 保證單例唯一
-            return;
-        }
-        ToastManager._instance = this;
+    public static showToast(msg: string): void {
+        this.getInstance()?.show(msg);
     }
 
     /** 顯示 Toast 訊息 */
@@ -47,5 +41,9 @@ export default class ToastManager extends cc.Component {
             .to(0.3, { opacity: 0, y: 60 })
             .call(() => toastNode.destroy())
             .start();
+    }
+
+    protected init(): void {
+        // cc.log("ToastManager 初始化完成");
     }
 }

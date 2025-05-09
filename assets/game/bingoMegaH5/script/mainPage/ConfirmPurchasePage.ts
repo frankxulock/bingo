@@ -2,8 +2,9 @@ import MegaComponent from "../../../Common/Base/gameMega/MegaComponent";
 import { CommonTool } from "../../../Common/Tools/CommonTool";
 import EventManager, { GameStateUpdate } from "../../../Common/Tools/Base/EventManager";
 import ScrollLazyLoader from "../component/ScrollLazyLoader";
-import { IWindow } from "../../../Common/Tools/PopupManager/IWindow";
-import PopupManager, { PopupName } from "../../../Common/Tools/PopupManager/PopupManager";
+import { IWindow } from "../../../Common/Tools/PopupSystem/IWindow";
+import PopupManager from "../../../Common/Tools/PopupSystem/PopupManager";
+import { PopupName } from "../../../Common/Tools/PopupSystem/PopupConfig";
 
 const {ccclass, property} = cc._decorator;
 
@@ -59,7 +60,7 @@ export default class ConfirmPurchasePage extends MegaComponent implements IWindo
     }
     close(): void {
         this.node.active = false;
-        PopupManager.instance.closePopup(PopupName.ConfirmPurchasePage);
+        PopupManager.closePopup(PopupName.ConfirmPurchasePage);
     }
 
     /** 發送重置目前卡片內容 */

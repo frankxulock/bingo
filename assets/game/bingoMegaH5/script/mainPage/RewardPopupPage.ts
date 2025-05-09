@@ -1,6 +1,7 @@
 import { CommonTool } from "../../../Common/Tools/CommonTool";
-import { IWindow } from "../../../Common/Tools/PopupManager/IWindow";
-import PopupManager, { PopupName } from "../../../Common/Tools/PopupManager/PopupManager";
+import { IWindow } from "../../../Common/Tools/PopupSystem/IWindow";
+import PopupManager from "../../../Common/Tools/PopupSystem/PopupManager";
+import { PopupName } from "../../../Common/Tools/PopupSystem/PopupConfig";
 
 const { ccclass, property } = cc._decorator;
 
@@ -27,13 +28,13 @@ export default class RewardPopupPage extends cc.Component implements IWindow {
         }, 3000);
     }
 
-    close(...args: any[]): void {
+    close(): void {
         // 清除尚未執行的定時器（若從外部提早關閉）
         if (this.autoCloseTimer !== null) {
             clearTimeout(this.autoCloseTimer);
             this.autoCloseTimer = null;
         }
 
-        PopupManager.instance.closePopup(PopupName.RewardPopupPage);
+        PopupManager.closePopup(PopupName.RewardPopupPage);
     }
 }

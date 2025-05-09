@@ -58,9 +58,14 @@ export class GameStateUpdate {
     public static StateUpdate_SendBall = "StateUpdate_SendBall";
     // 開啟DIY卡片編輯頁面
     public static StateUpdate_OpenDIYEditPage = "StateUpdate_OpenDIYEditPage";
-}
-
-/** 遊戲彈跳視窗通知 */
-export class GameWindowEvent {
-
+    // 更新DIY卡片選購頁面
+    public static StateUpdate_DIYCardSelectionPage = "StateUpdate_DIYCardSelectionPage";
+    // 刪除DIY卡片
+    public static StateUpdate_DeleteDIYCard = "StateUpdate_DeleteDIYCard";
+    // 儲存DIY卡片
+    public static StateUpdate_SaveDIYCards = "StateUpdate_SaveDIYCards";
+    // 開啟DIY通知確認購買事件
+    public static StateUpdate_DIYConfirmPurchase = "StateUpdate_DIYConfirmPurchase";
+    // 重置購卡頁面資訊
+    public static StateUpdate_CardPurchasePage = "StateUpdate_CardPurchasePage";
 }

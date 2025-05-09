@@ -2,6 +2,8 @@ import MegaComponent from "../../../Common/Base/gameMega/MegaComponent";
 import { CommonTool } from "../../../Common/Tools/CommonTool";
 import EventManager, { GameStateUpdate } from "../../../Common/Tools/Base/EventManager";
 import BallCompoent from "./BallCompoent";
+import PopupManager from "../../../Common/Tools/PopupSystem/PopupManager";
+import { PopupName } from "../../../Common/Tools/PopupSystem/PopupConfig";
 
 const {ccclass, property} = cc._decorator;
 
@@ -16,7 +18,6 @@ export default class CheerBallArea extends MegaComponent {
     private Balls : BallCompoent[] = [];
     private userIndex : number = 0;
     private StartPos : cc.Vec2 = new cc.Vec2(-14, 0);
-    private isAnim : boolean = false;   // 是否正在播放動畫
     private animationQueue: number[] = [];
     private isAnimating: boolean = false;
 
@@ -33,13 +34,12 @@ export default class CheerBallArea extends MegaComponent {
     protected init(): void {
         super.init();
         this.Balls = this.Node_BallAnimArea.getComponentsInChildren(BallCompoent);
-        // this.Balls.forEach((obj, index)=>{ obj.init(); });
         this.node.on('click', this.OpenBallDetailsWindow, this);
     }
 
     /** 開啟球號資訊詳情頁面 */
     public OpenBallDetailsWindow(){
-        console.log("開啟球號資訊詳情頁面");
+        PopupManager.showPopup(PopupName.AllBallNumbersPage, this.data.getAllBallNumbersData());
     }
 
     /** 快照事件狀態還原 */
@@ -111,29 +111,25 @@ export default class CheerBallArea extends MegaComponent {
         newBall.setPosition(this.StartPos);
     
         // 所有球一起往右平移一格
-        const movePromises: Promise<void>[] = [];
         for (let i = 0; i < maxBalls; i++) {
             const ball = this.Balls[i];
             const node = ball.node;
             const curPos = ball.getPosition();
             const newX = curPos.x + offset;
 
-            cc.Tween.stopAllByTarget(node);
-            movePromises.push(
-                new Promise<void>((resolve) => {
-                    cc.tween(node)
-                        .to(0.4, { position: new cc.Vec3(newX, curPos.y, 0) }, { easing: 'sineOut' })
-                        .call(resolve)
-                        .start();
-                })
-            );
+            cc.tween(node)
+            .to(0.4, { position: new cc.Vec3(newX, curPos.y, 0) })
+            .call(()=>{
+                if(i == maxBalls - 1) {
+                    console.log("下一組動畫播放");
+
+                    this.userIndex = (this.userIndex + 1) % maxBalls;  // ✅ 循環更新
+                    this.isAnimating = false;
+                    this.tryRunAnimation(); // 繼續播放下一球
+                }
+            })
+            .start();
         }
-    
-        Promise.all(movePromises).then(() => {
-            this.userIndex = (this.userIndex + 1) % maxBalls;  // ✅ 循環更新
-            this.isAnimating = false;
-            this.tryRunAnimation(); // 繼續播放下一球
-        });
     }
 
     /** 重置時取消動畫 */

@@ -12,9 +12,14 @@ export enum GAME_STATUS {
 
 // 卡片類型
 export enum CARD_STATUS {
+    NORMAL,     // 當局
+    PREORDER,   // 預購卡
+}
+
+/** 卡片內容 */
+export enum CARD_CONTENT {
     NORMAL, // 正常卡片
     DIY,    // DIY卡片
-    PREORDER,// 預購卡
 }
 
 // 卡片玩法

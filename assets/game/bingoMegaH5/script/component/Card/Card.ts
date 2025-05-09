@@ -22,7 +22,7 @@ export default class Card extends cc.Component {
     @property({ type: cc.Label, visible: true })
     private Label_WinAmount: cc.Label = null;
 
-    setData(cardData : BaseCardData) 
+    setData(cardData : BaseCardData, index?: number) 
     {
         // 設定卡片顯示內容
         let data = cardData.getCardViewData();

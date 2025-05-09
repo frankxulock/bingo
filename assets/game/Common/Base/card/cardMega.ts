@@ -1,4 +1,5 @@
-import { CARD_GAMEPLAY, CARD_STATUS } from "../CommonData";
+import BingoMegaUI from "../../../bingoMegaH5/script/BingoMegaUI";
+import { CARD_CONTENT, CARD_GAMEPLAY, CARD_STATUS } from "../CommonData";
 import BaseCardData from "./BaseCardData";
 
 /** 基礎遊戲卡片資料 */
@@ -6,6 +7,7 @@ export class CardMega extends BaseCardData {
 
     protected bingoSpot: number = 0b0000000000001000000000000;  // 默認中獎卡片位置 由上至下左至右排序
     private cardState : CARD_STATUS = null;                     // 卡片類型
+    private cardContent : CARD_CONTENT = null;                  // 卡片內容
     private playState : CARD_GAMEPLAY = null;                   // 玩法類型
     private validityRange = {                      // 檢查範圍
         [CARD_GAMEPLAY.COMDO] : 3,
@@ -71,13 +73,14 @@ export class CardMega extends BaseCardData {
     public cardIconBGs: cc.SpriteFrame[] = [];
 
     // 卡片初始化
-    constructor (data, cardIconBG) {
+    constructor (data) {
         super();
         this.id = data.cardId;
-        this.cardState = data.cardState;
-        this.playState = data.playState;
+        this.cardState = data.cardState;  
+        this.cardContent = data.cardContent;  
+        this.playState = data.playState;  
         this.cardInfo = data.numbers;
-        this.cardIconBGs = cardIconBG;
+        this.cardIconBGs = BingoMegaUI.getInstance().getAllCardIconBG();
     }
 
     /** 取得卡片類型 */
@@ -88,6 +91,11 @@ export class CardMega extends BaseCardData {
     /** 取得卡片類型 */
     public getCardState() {
         return this.cardState;
+    }
+
+    /** 取得卡片內容 */
+    public getCardContent() {
+        return this.cardContent;
     }
 
     // 更新卡片數據
@@ -130,14 +138,14 @@ export class CardMega extends BaseCardData {
         let allcard = this.cardInfo.length - 1;
 
         // 檢查剩餘幾球
-        this.oneTG = false;
-        this.twoTG = false;
-        let unclaimedBalls = allcard - count;
-        if(unclaimedBalls == 1){
-            this.oneTG = true;
-        }else if(unclaimedBalls == 2){
-            this.twoTG = true;
-        }
+        // this.oneTG = false;
+        // this.twoTG = false;
+        // let unclaimedBalls = allcard - count;
+        // if(unclaimedBalls == 1){
+        //     this.oneTG = true;
+        // }else if(unclaimedBalls == 2){
+        //     this.twoTG = true;
+        // }
 
         // 卡片是否全部中獎
         if(count == allcard){
@@ -174,9 +182,12 @@ export class CardMega extends BaseCardData {
 
     /** 檢查額外玩法的中獎狀態 */
     private checkExtraPatterns() {
-        this.showClaimedRewards();
-        this.showFilteredPreRewardsForUnhitNumbers();
-        // console.log("ID : " + this.id + "    totalWin : " + this.totalWin + "     preTotalWin : " + this.preTotalWin);
+        // 額外球只計算到前44顆球
+        if(this.sendBall <= this.jackpotBall){
+            this.showClaimedRewards();
+            this.showFilteredPreRewardsForUnhitNumbers();
+            // console.log("ID : " + this.id + "    totalWin : " + this.totalWin + "     preTotalWin : " + this.preTotalWin);
+        }
     }
 
     /** 已經中獎線段 */
@@ -282,18 +293,18 @@ export class CardMega extends BaseCardData {
 
     getCardViewData() {
         let title;
-        if(this.cardState == CARD_STATUS.NORMAL)
+        if(this.cardContent == CARD_CONTENT.DIY)
+            title = "DIY";
+        else if(this.cardState == CARD_STATUS.NORMAL)
             title = "BUY";
         else if(this.cardState == CARD_STATUS.PREORDER)
             title = "PRE-BUY";
-        else if(this.cardState == CARD_STATUS.DIY)
-            title = "DIY";
         let haveBingoJackpo = (this.playState == CARD_GAMEPLAY.EXTRA) ? false : true;
         let haveExtra = (this.playState == CARD_GAMEPLAY.JACKPOT) ? false : true;
 
         let data = {
             title: title,
-            DIYCard: (this.cardState === CARD_STATUS.DIY),
+            DIYCard: (this.cardContent === CARD_CONTENT.DIY),
             haveBingoJackpo: haveBingoJackpo,
             haveExtra: haveExtra,
             numbers: this.cardInfo,
@@ -310,6 +321,7 @@ export class CardMega extends BaseCardData {
             id: this.id,
             numbers: this.cardInfo,
             cardState: this.cardState,
+            cardContent : this.cardContent,
             playState: this.playState,
         }
     }

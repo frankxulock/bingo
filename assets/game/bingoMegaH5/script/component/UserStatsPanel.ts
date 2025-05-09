@@ -1,6 +1,8 @@
 import AvatarComponent from "../../../Common/Base/component/AvatarComponent";
 import MegaComponent from "../../../Common/Base/gameMega/MegaComponent";
 import { CommonTool } from "../../../Common/Tools/CommonTool";
+import { PopupName } from "../../../Common/Tools/PopupSystem/PopupConfig";
+import PopupManager from "../../../Common/Tools/PopupSystem/PopupManager";
 
 const {ccclass, property} = cc._decorator;
 
@@ -27,6 +29,7 @@ export default class UserStatsPanel extends MegaComponent {
     /** 開啟排行榜詳情列表 */
     public OpenBingoJackpotWindow(){
         console.log("開啟排行榜詳情列表");
+        PopupManager.showPopup(PopupName.LeaderboardPage, this.data.getLeaderboardData());
     }
 
     /** 快照事件狀態還原 */

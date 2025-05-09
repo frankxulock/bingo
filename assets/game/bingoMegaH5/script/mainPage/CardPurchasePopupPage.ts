@@ -1,22 +1,37 @@
-import { IWindow } from "../../../Common/Tools/PopupManager/IWindow";
-import PopupManager, { PopupName } from "../../../Common/Tools/PopupManager/PopupManager";
+import { IWindow } from "../../../Common/Tools/PopupSystem/IWindow";
+import PopupManager from "../../../Common/Tools/PopupSystem/PopupManager";
+import { PopupName } from "../../../Common/Tools/PopupSystem/PopupConfig";
+import CardPurchasePage from "./CardPurchasePage";
 
 const {ccclass, property} = cc._decorator;
 
 @ccclass
-export default class CardPurchasePopupPage extends cc.Component implements IWindow {
-    // @property({ type: cc.Label, visible: true })
-    // private Label_title: cc.Label = null;
-    // @property({ type: cc.Label, visible: true })
-    // private Label_win: cc.Label = null;
+export default class CardPurchasePopupPage extends CardPurchasePage implements IWindow {
 
     open(data: any): void {
-        let d = data;
-
-        // CommonTool.setLabel(this.Label_title, d.title);
-        // CommonTool.setLabel(this.Label_win, d.win);
+        if(this.data == null) {
+            this.init();
+        }
+        this.setPageState();
     }
-    close(...args: any[]): void {
-        PopupManager.instance.closePopup(PopupName.CardPurchasePopupPage);
+    close(): void {
+        PopupManager.closePopup(PopupName.CardPurchasePopupPage);
+    }
+
+    /** 快照恢復 */
+    protected onSnapshot(): void {
+        this.setPageState();
+        if(!this.data.showCardPurchasePage()){
+            this.close();
+        }
+    }
+
+    /** 開啟確認買卡片頁面 */
+    protected OpenConfirmPurchasePage(): boolean {
+        const shouldProceed = super.OpenConfirmPurchasePage();
+        if (shouldProceed) {
+            this.close();
+        }
+        return shouldProceed;
     }
 }

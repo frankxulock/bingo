@@ -32,6 +32,7 @@ export default abstract class BaseCardData {
 
     public setCardState(state : number) { }
     public getCardState() {return null; }
+    public getCardContent() { return null; }
 
     public getPreData() {return null;}
 

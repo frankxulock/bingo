@@ -2,6 +2,8 @@ import MegaComponent from "../../../Common/Base/gameMega/MegaComponent";
 import { CommonTool } from "../../../Common/Tools/CommonTool";
 import EventManager, { GameStateEvent, GameStateUpdate } from "../../../Common/Tools/Base/EventManager";
 import ScrollLazyLoader from "../component/ScrollLazyLoader";
+import PopupManager from "../../../Common/Tools/PopupSystem/PopupManager";
+import { PopupName } from "../../../Common/Tools/PopupSystem/PopupConfig";
 
 const {ccclass, property} = cc._decorator;
 
@@ -45,7 +47,10 @@ export default class PurchasedTicketPage extends MegaComponent {
 
     /** 開啟購卡介面 */
     private OpenCardPurchasePage() {
-        console.log("開啟購卡介面");
+        // console.log("開啟購卡介面");
+        this.data.setCardContent(0);
+        this.data.setPlayState(0);
+        PopupManager.showPopup(PopupName.CardPurchasePopupPage);
     }
 
     /** 展示頁面 */
@@ -83,6 +88,6 @@ export default class PurchasedTicketPage extends MegaComponent {
         this.Btn_AddCard.active = (BottomBtnState == 0) ? true : false;
         this.Btn_PreBuyCard.active = (BottomBtnState == 1) ? true : false;
         this.Node_TotaiWin.active = (BottomBtnState == 2) ? true : false;
-        CommonTool.setLabel(this.Label_totaiWin, d.totalWin);
+        CommonTool.setLabel(this.Label_totaiWin, CommonTool.formatMoney2(d.totalWin, "+"));
     }
 }
