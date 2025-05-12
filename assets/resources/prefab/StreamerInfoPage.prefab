@@ -169,7 +169,7 @@
         "__uuid__": "eca5d2f2-8ef6-41c2-bbe6-f9c79d09c432"
       }
     ],
-    "_srcBlendFactor": 770,
+    "_srcBlendFactor": 1,
     "_dstBlendFactor": 771,
     "_spriteFrame": {
       "__uuid__": "a23235d1-15db-4b95-8439-a2e005bfff91"
@@ -223,7 +223,7 @@
     "asset": {
       "__id__": 0
     },
-    "fileId": "bcaiWR4jpAxoiYzhB/y+PI",
+    "fileId": "adfnKIoWZGv7p1cOmLZZ6O",
     "sync": false
   },
   {
@@ -2833,7 +2833,7 @@
   {
     "__type__": "cc.Node",
     "_name": "favorote",
-    "_objFlags": 0,
+    "_objFlags": 512,
     "_parent": {
       "__id__": 46
     },

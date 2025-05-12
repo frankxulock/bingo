@@ -1,6 +1,6 @@
 import MegaComponent from "../../../Common/Base/gameMega/MegaComponent";
 import { CommonTool } from "../../../Common/Tools/CommonTool";
-import EventManager, { GameStateUpdate } from "../../../Common/Tools/Base/EventManager";
+import EventManager, { GameStateEvent, GameStateUpdate } from "../../../Common/Tools/Base/EventManager";
 import BallCompoent from "./BallCompoent";
 import PopupManager from "../../../Common/Tools/PopupSystem/PopupManager";
 import { PopupName } from "../../../Common/Tools/PopupSystem/PopupConfig";
@@ -23,11 +23,15 @@ export default class CheerBallArea extends MegaComponent {
 
     protected addEventListener(): void {
         super.addEventListener();
+        EventManager.getInstance().on(GameStateEvent.GAME_BUY, this.Close, this);
+        EventManager.getInstance().on(GameStateEvent.GAME_DRAWTHENUMBERS, this.Open, this);
         EventManager.getInstance().on(GameStateUpdate.StateUpdate_SendBall, this.SendBall, this);
     }
 
     protected removeEventListener(): void {
         super.removeEventListener();
+        EventManager.getInstance().on(GameStateEvent.GAME_BUY, this.Close, this);
+        EventManager.getInstance().on(GameStateEvent.GAME_DRAWTHENUMBERS, this.Open, this);
         EventManager.getInstance().off(GameStateUpdate.StateUpdate_SendBall, this.SendBall, this);
     }
 
@@ -121,8 +125,6 @@ export default class CheerBallArea extends MegaComponent {
             .to(0.4, { position: new cc.Vec3(newX, curPos.y, 0) })
             .call(()=>{
                 if(i == maxBalls - 1) {
-                    console.log("下一組動畫播放");
-
                     this.userIndex = (this.userIndex + 1) % maxBalls;  // ✅ 循環更新
                     this.isAnimating = false;
                     this.tryRunAnimation(); // 繼續播放下一球
@@ -148,5 +150,13 @@ export default class CheerBallArea extends MegaComponent {
             ball.setPosition(this.StartPos);
             ball.setAction(false);
         });
+    }
+
+    public Open() {
+        this.node.active = true;
+    }
+
+    public Close() {
+        this.node.active = false;
     }
 }

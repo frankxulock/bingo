@@ -1,5 +1,7 @@
 import MegaComponent from "../../../Common/Base/gameMega/MegaComponent";
 import { CommonTool } from "../../../Common/Tools/CommonTool";
+import { PopupName } from "../../../Common/Tools/PopupSystem/PopupConfig";
+import PopupManager from "../../../Common/Tools/PopupSystem/PopupManager";
 
 const {ccclass, property} = cc._decorator;
 
@@ -18,12 +20,21 @@ export default class BottomBar extends MegaComponent {
 
     protected init(): void {
         super.init();
-        this.Btn_AddGameCoin.on('click', this.OpenAddGameCoin, this);
     }
 
     /** 開啟添加遊戲金額頁面 */
     public OpenAddGameCoin() {
         console.log("開啟添加遊戲金額頁面");
+    }
+
+    /** 開啟聊天彈窗 */
+    public OpenChatPage() {
+        PopupManager.showPopup(PopupName.ChatPage, this.data.getChatPage());
+    }
+
+    /** 開啟個人中心 */
+    public OpnePersonalCenterPage() {
+        PopupManager.showPopup(PopupName.PersonalCenterPage, this.data.getPersonalCenterPage());
     }
 
     protected onSnapshot(): void {

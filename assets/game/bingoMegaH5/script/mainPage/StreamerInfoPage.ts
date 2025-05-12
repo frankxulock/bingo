@@ -8,25 +8,18 @@ import ScrollLazyLoader from "../component/ScrollLazyLoader";
 const {ccclass, property} = cc._decorator;
 
 @ccclass
-export default class StreamerInfoPage extends cc.Component implements IWindow  {
-    @property({ type: ScrollLazyLoader, visible: true })
-    private ScrollView_AvatarList: ScrollLazyLoader = null;
-    @property({ type: cc.Sprite, visible: true })
-    private Sprite_hostImage: cc.Sprite = null;
+export default class StreamerInfoPage extends cc.Component implements IWindow {
+    @property({ type: ScrollLazyLoader }) private ScrollView_AvatarList: ScrollLazyLoader = null;
+    @property({ type: cc.Sprite }) private Sprite_hostImage: cc.Sprite = null;
 
-    @property({ type: cc.Label, visible: true })
-    private Label_hostName: cc.Label = null;
-    @property({ type: cc.Label, visible: true })
-    private Label_from: cc.Label = null;
-    @property({ type: cc.Label, visible: true })
-    private Label_birthday: cc.Label = null;
-    @property({ type: cc.Label, visible: true })
-    private Label_favorote: cc.Label = null;
-    @property({ type: cc.Label, visible: true })
-    private Label_fbName: cc.Label = null;
+    @property({ type: cc.Label }) private Label_hostName: cc.Label = null;
+    @property({ type: cc.Label }) private Label_from: cc.Label = null;
+    @property({ type: cc.Label }) private Label_birthday: cc.Label = null;
+    @property({ type: cc.Label }) private Label_favorote: cc.Label = null;
+    @property({ type: cc.Label }) private Label_fbName: cc.Label = null;
 
-    private AvatarIndex = 0;
-    private AvatarData = null;
+    private AvatarIndex: number = 0;
+    private AvatarData: any[] = [];
 
     protected onLoad(): void {
         this.ScrollView_AvatarList.node.on("ScrollItemEvent", this.onItemChanged, this);
@@ -37,9 +30,8 @@ export default class StreamerInfoPage extends cc.Component implements IWindow  {
     }
 
     open(data: any): void {
-        if(data == null)
-            return;
-        // 暫存主播資訊
+        if (!Array.isArray(data) || data.length === 0) return;
+
         this.AvatarData = data;
         this.AvatarIndex = 0;
         this.setPageState();
@@ -52,75 +44,74 @@ export default class StreamerInfoPage extends cc.Component implements IWindow  {
 
     /** 玩家點擊主播頭像 */
     private onItemChanged(data: any): void {
-        this.AvatarData.forEach((host, index)=>{
-            if(host.hostName === data.hostName) {
-                this.AvatarIndex = index;
-                return;
-            }
-        });
-        this.setPageState();
+        const index = this.AvatarData.findIndex(host => host.hostName === data.hostName);
+        if (index !== -1) {
+            this.AvatarIndex = index;
+            this.setPageState();
+        }
     }
 
     /** 切換至左邊主播 */
-    public OnLeft() {
-        this.AvatarIndex--;
-        if(this.AvatarIndex < 0){
-            this.AvatarIndex = this.AvatarData.length - 1;
-        }
+    public OnLeft(): void {
+        if (!this.AvatarData.length) return;
+        this.AvatarIndex = (this.AvatarIndex - 1 + this.AvatarData.length) % this.AvatarData.length;
         this.setPageState();
     }
 
     /** 切換至右邊主播 */
-    public OnRight() {
-        this.AvatarIndex++;
-        if(this.AvatarIndex >= this.AvatarData.length){
-            this.AvatarIndex = 0;
-        }
+    public OnRight(): void {
+        if (!this.AvatarData.length) return;
+        this.AvatarIndex = (this.AvatarIndex + 1) % this.AvatarData.length;
         this.setPageState();
     }
 
     /** 拷貝主播FB ID */
-    public OnCopyFB_ID() {
-        let showHost = this.AvatarData[this.AvatarIndex];
-        let fbID = showHost.fbID;
+    public OnCopyFB_ID(): void {
+        const host = this.AvatarData[this.AvatarIndex];
+        const fbID = host?.fbID;
+        if (!fbID) return;
 
-        // 使用 clipboard API 拷貝
-        if (navigator.clipboard && navigator.clipboard.writeText) {
-            navigator.clipboard.writeText(fbID).then(() => {
-                cc.log("✅ 已拷貝 FB ID:", fbID);
-                ToastManager.showToast("拷貝主播ID 成功")
-            }).catch((err) => {
-                cc.error("❌ 拷貝 FB ID 失敗:", err);
-                ToastManager.showToast("拷貝主播ID 失敗")
+        this.copyTextToClipboard(fbID);
+    }
+
+    /** 設置頁面狀態 */
+    private setPageState(): void {
+        const host = this.AvatarData[this.AvatarIndex];
+        if (!host) return;
+
+        CommonTool.loadRemoteImageToSprite(this.Sprite_hostImage, host.hostImage);
+        CommonTool.setLabel(this.Label_hostName, host.hostName);
+        CommonTool.setLabel(this.Label_from, host.from);
+        CommonTool.setLabel(this.Label_birthday, host.birthday);
+        CommonTool.setLabel(this.Label_favorote, host.favorote);
+        CommonTool.setLabel(this.Label_fbName, host.fbName);
+    }
+
+    /** 通用的拷貝處理方法 */
+    private copyTextToClipboard(text: string): void {
+        if (navigator.clipboard?.writeText) {
+            navigator.clipboard.writeText(text).then(() => {
+                cc.log("✅ 拷貝成功:", text);
+                ToastManager.showToast("拷貝主播ID 成功");
+            }).catch(err => {
+                cc.error("❌ 拷貝失敗:", err);
+                ToastManager.showToast("拷貝主播ID 失敗");
             });
         } else {
-            // 備援方法：建立一個 input 元素
-            const input = document.createElement('input');
-            input.value = fbID;
+            // 備援方式
+            const input = document.createElement("input");
+            input.value = text;
             document.body.appendChild(input);
             input.select();
             try {
-                document.execCommand('copy');
-                cc.log("✅ 已拷貝 FB ID (備援方法):", fbID);
+                document.execCommand("copy");
+                cc.log("✅ 備援拷貝成功:", text);
                 ToastManager.showToast("拷貝主播ID 成功");
             } catch (err) {
-                cc.error("❌ 備援方法拷貝失敗:", err);
+                cc.error("❌ 備援拷貝失敗:", err);
                 ToastManager.showToast("拷貝主播ID 失敗");
             }
             document.body.removeChild(input);
         }
-    }
-
-    /** 設置頁面狀態 */
-    setPageState() {
-        if(this.AvatarData == null)
-            return;
-        let showHost = this.AvatarData[this.AvatarIndex];
-        CommonTool.loadRemoteImageToSprite(this.Sprite_hostImage, showHost.hostImage);
-        CommonTool.setLabel(this.Label_hostName, showHost.hostName);
-        CommonTool.setLabel(this.Label_from, showHost.from);
-        CommonTool.setLabel(this.Label_birthday, showHost.birthday);
-        CommonTool.setLabel(this.Label_favorote, showHost.favorote);
-        CommonTool.setLabel(this.Label_fbName, showHost.fbName);
     }
 }

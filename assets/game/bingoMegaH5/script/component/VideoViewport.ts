@@ -1,4 +1,5 @@
 import MegaComponent from "../../../Common/Base/gameMega/MegaComponent";
+import { audioManager } from "../../../Common/Tools/AudioMgr";
 import FlvPlayer from "./FlvPlayer";
 
 const {ccclass, property} = cc._decorator;
@@ -24,6 +25,7 @@ export default class VideoViewport extends MegaComponent {
         const bgNode = toggle.node.children[0];
         if(bgNode) bgNode.active = !isChecked;
         console.log("設定音效事件  狀態 ", isChecked);
+        audioManager.setHtmlFocus(isChecked);
     }
 
     /** 設定視頻事件 */
@@ -37,5 +39,16 @@ export default class VideoViewport extends MegaComponent {
         }else {
             this.flvPlayer.cancelPlay();
         }
+    }
+
+    protected onSnapshot(): void {
+        this.playVideo();
+    }
+
+    public playVideo() {
+        this.toggle_Audio.isChecked = true;
+        audioManager.setHtmlFocus(true);
+        this.toggle_Video.isChecked = true;
+        this.flvPlayer.startPlay();
     }
 }

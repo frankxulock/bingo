@@ -35,7 +35,7 @@ export default class FlvPlayer extends cc.Component {
         this.loadFlvJs(() => {
             this.createVideoElement();
             // 为整个页面添加事件监听器
-            // this.addUserInteractionListener();
+            this.addUserInteractionListener();
         });
     }
 

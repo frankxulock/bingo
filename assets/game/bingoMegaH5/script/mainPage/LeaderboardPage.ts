@@ -52,20 +52,21 @@ export default class LeaderboardPage extends cc.Component implements IWindow {
         const isJackpot = this.PlayStateIndex === 0;
         const isLeaderboard = this.LeaderboardIndex === 0;
 
-        // 設定排行榜 or 歷史資料來源
         const rankingData = isJackpot ? this.data.JPRanking : this.data.EPRanking;
         const historyData = isJackpot ? this.data.JPHistory : this.data.EPHistory;
 
+        // 控制顯示的節點
         this.Node_JackpotGroup.active = isLeaderboard && isJackpot;
         this.Node_ExtraGroup.active = isLeaderboard && !isJackpot;
         this.ScrollView_Leaderboard.node.active = isLeaderboard;
         this.ScrollView_History.node.active = !isLeaderboard;
 
-        // 更新資料
-        if (isLeaderboard) {
-            this.ScrollView_Leaderboard.refreshData(rankingData);
-        } else {
-            this.ScrollView_History.refreshData(historyData);
+        // 根據當前頁面顯示對應資料
+        const dataToRefresh = isLeaderboard ? rankingData : historyData;
+        const scrollView = isLeaderboard ? this.ScrollView_Leaderboard : this.ScrollView_History;
+
+        if (dataToRefresh) {
+            scrollView.refreshData(dataToRefresh);
         }
     }
 

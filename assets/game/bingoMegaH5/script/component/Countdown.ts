@@ -34,7 +34,7 @@ export default class Countdown extends MegaComponent {
     /** 開始倒計時 */
     private StartTiming() {
         this.node.active = true;
-        this.timer = this.data.getBuyTime();
+        this.timer = this.data.getBettingTime();
         // 立即顯示一次初始時間
         this.updateTimerDisplay();
         // 每秒呼叫 updateTimerDisplay

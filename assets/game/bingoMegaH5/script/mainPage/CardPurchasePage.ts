@@ -1,11 +1,11 @@
 import { CARD_STATUS } from "../../../Common/Base/CommonData";
 import MegaComponent from "../../../Common/Base/gameMega/MegaComponent";
-import { CommonTool } from "../../../Common/Tools/CommonTool";
 import EventManager, { GameStateEvent, GameStateUpdate } from "../../../Common/Tools/Base/EventManager";
-import ChipItem from "../component/ChipItem";
+import { CommonTool } from "../../../Common/Tools/CommonTool";
+import { PopupName } from "../../../Common/Tools/PopupSystem/PopupConfig";
 import PopupManager from "../../../Common/Tools/PopupSystem/PopupManager";
 import ToastManager from "../../../Common/Tools/Toast/ToastManager";
-import { PopupName } from "../../../Common/Tools/PopupSystem/PopupConfig";
+import ChipItem from "../component/ChipItem";
 
 const {ccclass, property} = cc._decorator;
 
@@ -30,9 +30,8 @@ export default class CardPurchasePage extends MegaComponent {
     private Btn_Increase : cc.Node = null;
     @property({ type: cc.Node, visible: true })
     private Btn_Decrease : cc.Node = null;
-    @property({ type: cc.Label, visible: true })
-    private Label_CardValue : cc.Label = null;
-
+    @property({ type: cc.EditBox, visible: true })
+    private EditBox_Card : cc.EditBox = null;
     @property({ type: cc.Label, visible: true })
     private Label_TotalAmount : cc.Label = null;
 
@@ -40,6 +39,11 @@ export default class CardPurchasePage extends MegaComponent {
     private Btn_BuyCard : cc.Node = null;
     @property({ type: cc.Node, visible: true })
     private Btn_PreBuyCard : cc.Node = null;
+
+    private pressIndex: number = 0;
+    // 記錄長按持續時間與間隔
+    private pressTimeout: number = 0; 
+    private pressInterval: number = 0.1; // 長按持續調用間隔 (秒)
 
     protected addEventListener(): void {
         super.addEventListener();
@@ -53,11 +57,11 @@ export default class CardPurchasePage extends MegaComponent {
         EventManager.getInstance().off(GameStateEvent.GAME_BUY, this.onSnapshot, this);
         EventManager.getInstance().off(GameStateEvent.GAME_DRAWTHENUMBERS, this.onSnapshot, this);
         EventManager.getInstance().off(GameStateUpdate.StateUpdate_CardPurchasePage, this.setPageState, this);
-
     }
 
     protected init(): void {
         super.init();
+
         // 卡片選擇方式切換 (DIY / 亂數)
         this.Toggle_CardState.toggleItems.forEach((toggle, index) => {
             toggle.node.on('toggle', () => {
@@ -67,7 +71,8 @@ export default class CardPurchasePage extends MegaComponent {
                 if(index == 1 && this.data.CheckOpenDIYCardSelectionPage()) {
                     // 檢查是否已經選購DIY卡片,沒有則開啟DIY選卡頁面
                     this.OpenDIYCardSelectionPage();
-                }
+                };
+                this.EditBox_Card.enabled = (index == 0);
             }, this);
         });
 
@@ -87,6 +92,8 @@ export default class CardPurchasePage extends MegaComponent {
             }, this);
         });
 
+        this.EditBox_Card.node.on('editing-did-ended', this.onTextChanged, this);
+
         // 增加 / 減少購買數量
         this.Btn_Increase.on('click', this.OnIncrease, this);
         this.Btn_Decrease.on('click', this.OnDecrease, this);
@@ -95,6 +102,9 @@ export default class CardPurchasePage extends MegaComponent {
         // 購買按鈕
         this.Btn_BuyCard.on('click', this.OnBuyCard, this);
         this.Btn_PreBuyCard.on('click', this.OnBtnPreBuyCard, this);
+
+        // 設置長按事件
+        this.setupButtonHoldEvent();
     }
 
     /** 開啟DIY選購頁面 */
@@ -111,6 +121,29 @@ export default class CardPurchasePage extends MegaComponent {
     /** 減少購卡數量 */
     private OnDecrease() {
         this.data.ChangeReadyBuyValue(-1);
+        this.changeCardInfo();
+    }
+
+    /** 編輯數量 */
+    onTextChanged(editBox: cc.EditBox) {
+        let str = editBox.string;
+        // 取得最大可輸入的卡數
+        let maxCard = this.data.getMaxCardCount();
+    
+        // 過濾非數字
+        let filtered = str.replace(/[^0-9]/g, '');
+    
+        // 限制最大值
+        let num = parseInt(filtered || '0', 10);
+    
+        // 避免超過最大數值，並確保最小值為 1
+        num = Math.max(1, Math.min(maxCard, num));
+    
+        // 更新 EditBox 顯示內容
+        if (editBox.string !== num.toString()) {
+            editBox.string = num.toString();
+        }
+        this.data.setReadyBuy(num);
         this.changeCardInfo();
     }
 
@@ -185,8 +218,8 @@ export default class CardPurchasePage extends MegaComponent {
 
     /** 局部資訊變更 如 : 更改籌碼 購卡數量等等 */
     public changeCardInfo() {
-        let readyBuy = this.data.getReadyBuy();
-        CommonTool.setLabel(this.Label_CardValue, readyBuy);
+        let readyBuy = this.data.getCardsToBuy();
+        this.EditBox_Card.string = readyBuy.toString();
         CommonTool.setLabel(this.Label_TotalAmount, this.data.getBuyTotalCard());
 
         let buyDIYCard = this.data.buyDIYCard();
@@ -199,5 +232,51 @@ export default class CardPurchasePage extends MegaComponent {
         let buyCardThisRound = this.data.buyCardThisRound();
         this.Btn_BuyCard.active = buyCardThisRound;
         this.Btn_PreBuyCard.active = !buyCardThisRound;
+    }
+
+    private index = 0;
+
+    /** 設置長按事件 */
+    private setupButtonHoldEvent() {
+        this.Btn_Increase.on('touchstart', this.onButtonHoldStart, this);
+        this.Btn_Decrease.on('touchstart', this.onButtonHoldStart, this);
+        this.Btn_Increase.on('touchend', this.onButtonHoldEnd, this);
+        this.Btn_Decrease.on('touchend', this.onButtonHoldEnd, this);
+        this.Btn_Increase.on('touchcancel', this.onButtonHoldEnd, this);
+        this.Btn_Decrease.on('touchcancel', this.onButtonHoldEnd, this);
+    }
+
+    /** 當按鈕被長按時開始調用 */
+    private onButtonHoldStart(event: cc.Event.EventTouch) {
+        this.pressTimeout = 0;
+        this.pressInterval = 0.1; 
+        this.schedule(this.onHoldUpdate, this.pressInterval); // 每個間隔調用一次
+        if(event.target.name == "Btn_Increase") {
+            this.pressIndex = 1;
+        }else if(event.target.name == "Btn_Decrease") {
+            this. pressIndex = 2;
+        }
+    }
+
+    /** 當按鈕長按結束時停止調用 */
+    private onButtonHoldEnd(event: cc.Event.EventTouch) {
+        this.unschedule(this.onHoldUpdate); // 停止調用
+        this. pressIndex = 0;
+    }
+
+    /** 每次更新長按邏輯 */
+    private onHoldUpdate() {
+        this.pressTimeout += this.pressInterval;
+        if(this.pressTimeout == 0.5){
+            this.pressInterval = 0.01; 
+            this.unschedule(this.onHoldUpdate); // 停止調用
+            this.schedule(this.onHoldUpdate, this.pressInterval); // 每個間隔調用一次
+        }
+        // 持續調用的邏輯
+        if (this.pressIndex == 1) {
+            this.OnIncrease();
+        } else if (this.pressIndex == 2) {
+            this.OnDecrease();
+        }
     }
 }

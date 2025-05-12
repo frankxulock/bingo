@@ -1,10 +1,3 @@
-// Learn TypeScript:
-//  - https://docs.cocos.com/creator/2.4/manual/en/scripting/typescript.html
-// Learn Attribute:
-//  - https://docs.cocos.com/creator/2.4/manual/en/scripting/reference/attributes.html
-// Learn life-cycle callbacks:
-//  - https://docs.cocos.com/creator/2.4/manual/en/scripting/life-cycle-callbacks.html
-
 import MegaComponent from "../../../Common/Base/gameMega/MegaComponent";
 import EventManager, { GameStateUpdate } from "../../../Common/Tools/Base/EventManager";
 import ReelScroller from "./ReelScroller";
@@ -39,16 +32,20 @@ export default class BingoJackpotCounter extends MegaComponent {
 
     /** 設定獎池金額（右對齊）*/
     setBingoJackpotAmount() {
-        let amount = this.data.getBingoJackpotAmount();
+        let rawAmount = this.data.getBingoJackpotAmount();
+        let amount = rawAmount.replace(/\D/g, ''); // 過濾非數字（移除小數點、逗號等）
+        
         let amountIndex = amount.length - 1;
         for (let i = this.Reels.length - 1; i >= 0; i--) {
             if (amountIndex >= 0) {
                 let char = amount.charAt(amountIndex);
-                this.Reels[i].setAmount(char);
+                let digit = parseInt(char, 10);
+                if(this.Reels[i].targetDigit != digit)
+                    this.Reels[i].setAmount(digit);
                 amountIndex--;
             } else {
-                // 補 0 或空白（視設計需求）
-                this.Reels[i].setAmount("0");
+                // 數字不夠就補 0
+                this.Reels[i].setAmount(0);
             }
         }
     }

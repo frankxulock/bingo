@@ -4,12 +4,14 @@ import MegaDataManager from "./Common/Base/gameMega/MegaDataManager";
 import EventManager, { GameStateEvent, GameStateUpdate } from "./Common/Tools/Base/EventManager";
 import PopupManager from "./Common/Tools/PopupSystem/PopupManager";
 import { PopupName } from "./Common/Tools/PopupSystem/PopupConfig";
+import VideoViewport from "./bingoMegaH5/script/component/VideoViewport";
 
 const {ccclass, property} = cc._decorator;
 
 @ccclass
 export default class UnitTest extends cc.Component {
-
+    @property({ type: cc.Node, visible: true })
+    private Loading : cc.Node = null;
     private data;
     private btns = [];
 
@@ -198,12 +200,13 @@ export default class UnitTest extends cc.Component {
     /** 遊戲流程模擬 */
     private isRunning = false;
     private ballInterval = null;
-    private betTimer = 2;
+    private betTimer = 30;
     private totalBalls = 49;
     private TestState = GAME_STATUS.LOADING;
     private snedBallTime = 1;
 
     public startSimulation() {
+        this.Loading.active = false;
         this.btns[4].active = false;
         if (this.isRunning) return;
         this.unscheduleAllCallbacks(); // <-- 保險起見全部清掉
@@ -223,7 +226,6 @@ export default class UnitTest extends cc.Component {
         }
         this.data.setSnapshot(data);
         EventManager.getInstance().emit(GameStateEvent.GAME_SNAPSHOT);
-
         this.startBettingPhase();
     }
 
@@ -269,7 +271,7 @@ export default class UnitTest extends cc.Component {
         this.ballInterval = this.schedule(() => {
 
             // extra patterns獎勵事件
-            if(sentBalls === 44) {
+            if(sentBalls === 43) {
                 this.OpneRewardPopupPage();
             }
 

@@ -18,6 +18,7 @@ export default class BingoMegaH5 extends MegaComponent {
         EventManager.getInstance().on(GameStateUpdate.StateUpdate_DIYConfirmPurchase, this.DIYConfirmPurchase, this);
         EventManager.getInstance().on(GameStateUpdate.StateUpdate_SaveDIYCards, this.SaveDIYCards, this);
         EventManager.getInstance().on(GameStateUpdate.StateUpdate_DeleteDIYCard, this.DeleteDIYCard, this);
+        EventManager.getInstance().on(GameStateUpdate.StateUpdate_SendChatMessage, this.SendChat, this);
     }
 
     /** 監聽事件註銷（後期根據不同遊戲複寫） */
@@ -27,6 +28,7 @@ export default class BingoMegaH5 extends MegaComponent {
         EventManager.getInstance().off(GameStateUpdate.StateUpdate_DIYConfirmPurchase, this.DIYConfirmPurchase, this);
         EventManager.getInstance().off(GameStateUpdate.StateUpdate_SaveDIYCards, this.SaveDIYCards, this);
         EventManager.getInstance().on(GameStateUpdate.StateUpdate_DeleteDIYCard, this.DeleteDIYCard, this);
+        EventManager.getInstance().on(GameStateUpdate.StateUpdate_SendChatMessage, this.SendChat, this);
     }
 
     /** 初始化各種註冊流程（後期根據不同遊戲複寫） */
@@ -62,5 +64,11 @@ export default class BingoMegaH5 extends MegaComponent {
     private DeleteDIYCard(data) {
         this.data.DIYDelete(data);
         EventManager.getInstance().emit(GameStateUpdate.StateUpdate_DIYCardSelectionPage, this.data.getDIYCardSelectionData());
+    }
+
+    /** 發送聊天訊息 */
+    private SendChat(message : string) {
+        let newMessage = this.data.SendChat(message);
+        EventManager.getInstance().emit(GameStateUpdate.StateUpdate_ReceiveChatMessage, newMessage);
     }
 }

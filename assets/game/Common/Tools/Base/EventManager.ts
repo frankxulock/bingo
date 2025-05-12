@@ -3,7 +3,7 @@ import Singleton from "./Singleton";
 /** 廣播事件 */
 const { ccclass } = cc._decorator;
 @ccclass
-export default class EventMag extends Singleton  {
+export default class EventManager extends Singleton  {
     _eventMap: {} = [];  // 用来存储所有事件及其对应的监听器
     // 注册监听器
     on(eventName, listener, target) {
@@ -68,4 +68,8 @@ export class GameStateUpdate {
     public static StateUpdate_DIYConfirmPurchase = "StateUpdate_DIYConfirmPurchase";
     // 重置購卡頁面資訊
     public static StateUpdate_CardPurchasePage = "StateUpdate_CardPurchasePage";
+    // 發送聊天訊息
+    public static StateUpdate_SendChatMessage = "StateUpdate_SendChatMessage";
+    // 發送聊天訊息回包
+    public static StateUpdate_ReceiveChatMessage = "StateUpdate_ReceiveChatMessage";
 }

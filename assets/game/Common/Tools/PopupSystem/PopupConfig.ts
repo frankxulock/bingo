@@ -10,6 +10,8 @@ export enum PopupName {
     StreamerInfoPage =      "StreamerInfoPage",
     AllBallNumbersPage=     "AllBallNumbersPage",
     LeaderboardPage=        "LeaderboardPage",
+    ChatPage=               "ChatPage",
+    PersonalCenterPage=     "PersonalCenterPage",
 }
 
 export const PopupPrefabPath: Record<PopupName, string> = {
@@ -22,6 +24,8 @@ export const PopupPrefabPath: Record<PopupName, string> = {
     [PopupName.StreamerInfoPage]:           "prefab/StreamerInfoPage",
     [PopupName.AllBallNumbersPage]:         "prefab/AllBallNumbersPage",
     [PopupName.LeaderboardPage]:            "prefab/LeaderboardPage",
+    [PopupName.ChatPage]:                   "prefab/ChatPage",
+    [PopupName.PersonalCenterPage]:         "prefab/PersonalCenterPage",
 };
 
 // 動畫配置
@@ -35,6 +39,8 @@ export const ShowPopupAnimationConfig: Record<PopupName, PopupAnimationType> = {
     [PopupName.StreamerInfoPage]:       PopupAnimationType.SlideFromBottom,
     [PopupName.AllBallNumbersPage]:     PopupAnimationType.SlideFromBottom,
     [PopupName.LeaderboardPage]:        PopupAnimationType.SlideFromBottom,
+    [PopupName.ChatPage]:               PopupAnimationType.SlideFromBottom,
+    [PopupName.PersonalCenterPage]:     PopupAnimationType.SlideFromLeft,
 };
 
 export const ClosePopupAnimationConfig: Record<PopupName, PopupAnimationType> = {
@@ -47,4 +53,6 @@ export const ClosePopupAnimationConfig: Record<PopupName, PopupAnimationType> = 
     [PopupName.StreamerInfoPage]:       PopupAnimationType.SlideFromBottom,
     [PopupName.AllBallNumbersPage]:     PopupAnimationType.SlideFromBottom,
     [PopupName.LeaderboardPage]:        PopupAnimationType.SlideFromBottom,
-};
+    [PopupName.ChatPage]:               PopupAnimationType.SlideFromBottom,
+    [PopupName.PersonalCenterPage]:     PopupAnimationType.SlideFromLeft,
+}
