@@ -5,6 +5,7 @@ import EventManager, { GameStateEvent, GameStateUpdate } from "./Common/Tools/Ba
 import PopupManager from "./Common/Tools/PopupSystem/PopupManager";
 import { PopupName } from "./Common/Tools/PopupSystem/PopupConfig";
 import VideoViewport from "./bingoMegaH5/script/component/VideoViewport";
+import FlvPlayer from "./bingoMegaH5/script/component/FlvPlayer";
 
 const {ccclass, property} = cc._decorator;
 
@@ -12,6 +13,8 @@ const {ccclass, property} = cc._decorator;
 export default class UnitTest extends cc.Component {
     @property({ type: cc.Node, visible: true })
     private Loading : cc.Node = null;
+    @property({ type: FlvPlayer, visible: true })
+    private FlvPlayer : FlvPlayer = null;
     private data;
     private btns = [];
 
@@ -46,6 +49,7 @@ export default class UnitTest extends cc.Component {
         this.btns[10].node.on('click', this.OpneDIYEditPage, this);
         this.btns[11].node.on('click', this.setAvatarData, this);
         this.btns[12].node.on('click', this.setLeaderboardData, this);
+        this.btns[13].node.on('click', this.TestFlvPlayer, this);
     }
 
     // 模擬快照封包進入
@@ -594,5 +598,9 @@ export default class UnitTest extends cc.Component {
     
         // 根據 IsJP 返回不同的歷史紀錄
         return IsJP ? JPHistory : EPHistory;
+    }
+
+    public TestFlvPlayer() {
+        this.FlvPlayer.test = !this.FlvPlayer.test;
     }
 }

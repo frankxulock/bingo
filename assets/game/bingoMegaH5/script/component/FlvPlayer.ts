@@ -26,6 +26,8 @@ export default class FlvPlayer extends cc.Component {
     private flvPlayer: any = null;
     private videoElement: HTMLVideoElement | null = null;
 
+    public test : boolean = false;
+
     onLoad() {
         if (!cc.sys.isBrowser || !this.targetNode) {
             cc.warn('FlvPlayer 仅支持 Web，且 targetNode 必须设置。');
@@ -117,32 +119,68 @@ export default class FlvPlayer extends cc.Component {
     }
 
     update() {
-        if (!this.videoElement || !this.targetNode) return;
-
-        const canvas = cc.director.getScene().getComponentInChildren(cc.Canvas);
-        const designResolution = canvas.designResolution;
-        const nodeBox = this.targetNode.getBoundingBoxToWorld();
-
-        // 获取 canvas 的 DOM 尺寸
+        if (!this.videoElement || !this.targetNode || this.test) return;
+    
         const canvasElement = document.getElementById('GameCanvas') as HTMLCanvasElement;
         if (!canvasElement) return;
+    
+        // 取得節點的世界座標
+        const worldBox = this.targetNode.getBoundingBoxToWorld();
+    
+        // Cocos 的實際可視尺寸（會隨螢幕比例變化）
+        const visibleSize = cc.view.getVisibleSize();
+    
+        // 取得 Canvas 在網頁中的實際位置與尺寸
         const canvasRect = canvasElement.getBoundingClientRect();
+    
+        // 計算 Cocos 世界空間到螢幕像素的縮放比
+        const scaleX = canvasRect.width / visibleSize.width;
+        const scaleY = canvasRect.height / visibleSize.height;
+    
+        // 換算為螢幕座標
+        const left = worldBox.x * scaleX + canvasRect.left;
+        const top = (visibleSize.height - worldBox.y - worldBox.height) * scaleY + canvasRect.top;
+        const width = worldBox.width * scaleX;
+        const height = worldBox.height * scaleY;
 
-        const scaleX = canvasRect.width / designResolution.width;
-        const scaleY = canvasRect.height / designResolution.height;
-
-        const left = nodeBox.x;//nodeBox.x * scaleX + canvasRect.left;
-        const top = 0;//(designResolution.height - nodeBox.y - nodeBox.height) * scaleY + canvasRect.top;
-        const width = nodeBox.width * scaleX;
-        const height = nodeBox.height * scaleY;
-
-        this.videoElement.style.left = `${left}px`;
-        this.videoElement.style.top = `${top}px`;
+        let data = this.getNodeScreenStyle(this.targetNode);
+    
+        // 設定 HTML videoElement 的樣式位置
+        this.videoElement.style.position = 'absolute';
+        this.videoElement.style.left = `${data.left}px`;
+        this.videoElement.style.top = `${data.top}px`;
         this.videoElement.style.width = `${width}px`;
         this.videoElement.style.height = `${height}px`;
-
-        // console.warn(`left: ${left}px   top: ${top}px    width: ${width}px    height ${height}px`);
     }
+
+    getNodeScreenStyle(node: cc.Node): { top: number, left: number} {
+        const canvas = cc.find("Canvas");
+        const camera = canvas.getComponentInChildren(cc.Camera);
+        const winSize = cc.view.getVisibleSize(); // 螢幕大小（世界座標）
+    
+        // 1. 世界座標中心點（錨點）
+        const worldPos = node.convertToWorldSpaceAR(cc.Vec3.ZERO);
+    
+        // 2. 節點尺寸（考慮縮放）
+        const scale = node.scale; // 或 node.scaleX, scaleY 分開處理
+        const width = node.width * node.scaleX;
+        const height = node.height * node.scaleY;
+    
+        // 3. 對應螢幕座標中心
+        const screenPos = camera.getWorldToScreenPoint(worldPos);
+    
+        // 4. 左上角位置（注意座標系統差異：Cocos 原點在左下，CSS 原點在左上）
+        const left = screenPos.x - width / 2;
+        const top = winSize.height - (screenPos.y + height / 2); // 反轉 y 軸
+    
+        return {
+            left,
+            top,
+            // width,
+            // height
+        };
+    }
+    
 
     onDestroy() {
         if (this.flvPlayer) {
