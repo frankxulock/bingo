@@ -15,7 +15,7 @@ export default class FlvPlayer extends cc.Component {
     @property({ type: cc.Node, tooltip: '跟随的目标节点' })
     targetNode: cc.Node = null;
 
-    @property({ type: Boolean, tooltip: '控制视频是否可以交互' })
+    @property({ tooltip: '控制视频是否可以交互' })
     isInteractive: boolean = false; // 设置该值为 true 以启用视频交互
 
     @property({ type: cc.Node, tooltip: '等待視頻播放' })
@@ -103,6 +103,7 @@ export default class FlvPlayer extends cc.Component {
             this.videoElement.play().then(() => {
                 console.log('视频已开始播放');
                 this.setStateVideoImg(VideoState.Play);
+                console.log("videoUrl : " + this.videoUrl);
             }).catch((err: any) => {
                 cc.error('强制播放视频失败:', err);
             });

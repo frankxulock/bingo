@@ -6,6 +6,8 @@ import PopupManager from "./Common/Tools/PopupSystem/PopupManager";
 import { PopupName } from "./Common/Tools/PopupSystem/PopupConfig";
 import VideoViewport from "./bingoMegaH5/script/component/VideoViewport";
 import FlvPlayer from "./bingoMegaH5/script/component/FlvPlayer";
+import { httpSender } from "./Common/Tools/Socket/http-sender/HttpSender";
+import BaseDataManager from "./Common/Tools/Base/BaseDataManager";
 
 const {ccclass, property} = cc._decorator;
 
@@ -50,6 +52,7 @@ export default class UnitTest extends cc.Component {
         this.btns[11].node.on('click', this.setAvatarData, this);
         this.btns[12].node.on('click', this.setLeaderboardData, this);
         this.btns[13].node.on('click', this.TestFlvPlayer, this);
+        this.btns[14].node.on('click', this.getHttpID, this);
     }
 
     // 模擬快照封包進入
@@ -602,5 +605,13 @@ export default class UnitTest extends cc.Component {
 
     public TestFlvPlayer() {
         this.FlvPlayer.test = !this.FlvPlayer.test;
+    }
+
+    public getHttpID() {
+        console.warn("快照事件");
+        BaseDataManager.http =  "http://";
+        BaseDataManager.serverHost =  "localhost:3000/proxy/";
+        let data = {game_code: "BGM" }
+        httpSender.sendGet("gameApi/api/front/game/round/id", data);
     }
 }

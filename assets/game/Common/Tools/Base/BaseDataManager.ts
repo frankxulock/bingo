@@ -40,7 +40,7 @@ export default abstract class BaseDataManager extends Singleton {
     public static set offLineMode(value) {
         BaseDataManager._offLineMode = value;
     }
-
+    public static http: string = "https://";
     public static serverHost: string = "";
     public static token: string = "";
     public static traceId: string = "";

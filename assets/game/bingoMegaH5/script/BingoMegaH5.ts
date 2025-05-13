@@ -4,6 +4,7 @@ import { UrlManager } from "../../Common/Tools/UrlManager";
 import MegaComponent from "../../Common/Base/gameMega/MegaComponent";
 import PopupManager from "../../Common/Tools/PopupSystem/PopupManager";
 import { PopupName } from "../../Common/Tools/PopupSystem/PopupConfig";
+import { httpSender, HttpSender } from "../../Common/Tools/Socket/http-sender/HttpSender";
 
 /*** 與其他操作系統處理處 */
 const {ccclass, property} = cc._decorator;

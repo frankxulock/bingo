@@ -8,7 +8,7 @@ export class HttpSender {
     async sendGet<T>(apiUrl: string, queryParam?: {}): Promise<T> {
         cc.log("%c %s", "background: Gray; color: White;", `Http 發送 ${apiUrl} `, queryParam || {});
         const response = await sendGet(
-            `https://${BaseDataManager.serverHost}${apiUrl}`,
+            `${BaseDataManager.http}${BaseDataManager.serverHost}${apiUrl}`,
             {
                 'x-session-token': BaseDataManager.token,
                 'Content-Type': 'application/x-www-form-urlencoded;charset=utf-8',
