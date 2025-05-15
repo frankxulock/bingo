@@ -1,7 +1,7 @@
-import AvatarComponent from "../../../common/Base/component/AvatarComponent";
-import MegaComponent from "../../../common/Base/gameMega/MegaComponent";
-import { PopupName } from "../../../common/Tools/PopupSystem/PopupConfig";
-import PopupManager from "../../../common/Tools/PopupSystem/PopupManager";
+import AvatarComponent from "../../../Common/Base/component/AvatarComponent";
+import MegaComponent from "../../../Common/Base/gameMega/MegaComponent";
+import { PopupName } from "../../../Common/Tools/PopupSystem/PopupConfig";
+import PopupManager from "../../../Common/Tools/PopupSystem/PopupManager";
 
 const { ccclass, property } = cc._decorator;
 

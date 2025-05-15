@@ -1,6 +1,6 @@
-import { IWindow } from "../../../common/Tools/PopupSystem/IWindow";
-import PopupManager from "../../../common/Tools/PopupSystem/PopupManager";
-import { PopupName } from "../../../common/Tools/PopupSystem/PopupConfig";
+import { IWindow } from "../../../Common/Tools/PopupSystem/IWindow";
+import PopupManager from "../../../Common/Tools/PopupSystem/PopupManager";
+import { PopupName } from "../../../Common/Tools/PopupSystem/PopupConfig";
 import CardPurchasePage from "./CardPurchasePage";
 
 const {ccclass, property} = cc._decorator;

@@ -1,11 +1,11 @@
-import { CARD_STATUS } from "../../../common/Base/CommonData";
-import ChipItem from "../../../common/Base/component/ChipItem";
-import MegaComponent from "../../../common/Base/gameMega/MegaComponent";
-import EventManager, { GameStateEvent, GameStateUpdate } from "../../../common/Tools/Base/EventManager";
-import { CommonTool } from "../../../common/Tools/CommonTool";
-import { PopupName } from "../../../common/Tools/PopupSystem/PopupConfig";
-import PopupManager from "../../../common/Tools/PopupSystem/PopupManager";
-import ToastManager from "../../../common/Tools/Toast/ToastManager";
+import { CARD_STATUS } from "../../../Common/Base/CommonData";
+import ChipItem from "../../../Common/Base/component/ChipItem";
+import MegaComponent from "../../../Common/Base/gameMega/MegaComponent";
+import EventManager, { GameStateEvent, GameStateUpdate } from "../../../Common/Tools/Base/EventManager";
+import { CommonTool } from "../../../Common/Tools/CommonTool";
+import { PopupName } from "../../../Common/Tools/PopupSystem/PopupConfig";
+import PopupManager from "../../../Common/Tools/PopupSystem/PopupManager";
+import ToastManager from "../../../Common/Tools/Toast/ToastManager";
 
 const {ccclass, property} = cc._decorator;
 

@@ -1,10 +1,10 @@
-import MegaComponent from "../../common/Base/gameMega/MegaComponent";
-import SocketManager from "../../common/Base/SocketManager";
-import { audioManager } from "../../common/Tools/AudioMgr";
-import EventManager, { GameStateUpdate } from "../../common/Tools/Base/EventManager";
-import { PopupName } from "../../common/Tools/PopupSystem/PopupConfig";
-import PopupManager from "../../common/Tools/PopupSystem/PopupManager";
-import { UrlManager } from "../../common/Tools/UrlManager";
+import MegaComponent from "../../Common/Base/gameMega/MegaComponent";
+import SocketManager from "../../Common/Base/SocketManager";
+import { audioManager } from "../../Common/Tools/AudioMgr";
+import EventManager, { GameStateUpdate } from "../../Common/Tools/Base/EventManager";
+import { PopupName } from "../../Common/Tools/PopupSystem/PopupConfig";
+import PopupManager from "../../Common/Tools/PopupSystem/PopupManager";
+import { UrlManager } from "../../Common/Tools/UrlManager";
 
 
 /*** 與其他操作系統處理處 */

@@ -1,4 +1,4 @@
-import { CommonTool } from "../../../../common/Tools/CommonTool";
+import { CommonTool } from "../../../../Common/Tools/CommonTool";
 import CardIcon from "./CardIcon";
 
 const { ccclass, property } = cc._decorator;

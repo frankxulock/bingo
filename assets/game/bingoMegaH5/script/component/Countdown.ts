@@ -1,7 +1,7 @@
-import { GAME_STATUS } from "../../../common/Base/CommonData";
-import MegaComponent from "../../../common/Base/gameMega/MegaComponent";
-import { CommonTool } from "../../../common/Tools/CommonTool";
-import EventManager, { GameStateEvent } from "../../../common/Tools/Base/EventManager";
+import { GAME_STATUS } from "../../../Common/Base/CommonData";
+import MegaComponent from "../../../Common/Base/gameMega/MegaComponent";
+import { CommonTool } from "../../../Common/Tools/CommonTool";
+import EventManager, { GameStateEvent } from "../../../Common/Tools/Base/EventManager";
 
 const { ccclass, property } = cc._decorator;
 

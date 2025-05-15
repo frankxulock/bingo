@@ -1,6 +1,6 @@
 import BingoMegaUI from "../../../bingoMegaH5/script/BingoMegaUI";
-import AvatarComponent from "../../../common/Base/component/AvatarComponent";
-import { CommonTool } from "../../../common/Tools/CommonTool";
+import AvatarComponent from "../../../Common/Base/component/AvatarComponent";
+import { CommonTool } from "../../../Common/Tools/CommonTool";
 
 const { ccclass, property } = cc._decorator;
 

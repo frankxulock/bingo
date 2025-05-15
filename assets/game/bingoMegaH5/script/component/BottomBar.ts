@@ -1,7 +1,7 @@
-import MegaComponent from "../../../common/Base/gameMega/MegaComponent";
-import { CommonTool } from "../../../common/Tools/CommonTool";
-import { PopupName } from "../../../common/Tools/PopupSystem/PopupConfig";
-import PopupManager from "../../../common/Tools/PopupSystem/PopupManager";
+import MegaComponent from "../../../Common/Base/gameMega/MegaComponent";
+import { CommonTool } from "../../../Common/Tools/CommonTool";
+import { PopupName } from "../../../Common/Tools/PopupSystem/PopupConfig";
+import PopupManager from "../../../Common/Tools/PopupSystem/PopupManager";
 
 const { ccclass, property } = cc._decorator;
 

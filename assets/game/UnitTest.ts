@@ -1,12 +1,12 @@
-import { CardMega } from "./common/Base/card/CardMega";
-import { CARD_CONTENT, GAME_STATUS } from "./common/Base/CommonData";
-import FlvPlayer from "./common/Base/component/FlvPlayer";
-import MegaDataManager from "./common/Base/gameMega/MegaDataManager";
-import BaseDataManager from "./common/Tools/Base/BaseDataManager";
-import EventManager, { GameStateEvent, GameStateUpdate } from "./common/Tools/Base/EventManager";
-import { PopupName } from "./common/Tools/PopupSystem/PopupConfig";
-import PopupManager from "./common/Tools/PopupSystem/PopupManager";
-import { httpSender } from "./common/Tools/Socket/http-sender/HttpSender";
+import { CardMega } from "./Common/Base/card/CardMega";
+import { CARD_CONTENT, GAME_STATUS } from "./Common/Base/CommonData";
+import FlvPlayer from "./Common/Base/component/FlvPlayer";
+import MegaDataManager from "./Common/Base/gameMega/MegaDataManager";
+import BaseDataManager from "./Common/Tools/Base/BaseDataManager";
+import EventManager, { GameStateEvent, GameStateUpdate } from "./Common/Tools/Base/EventManager";
+import { PopupName } from "./Common/Tools/PopupSystem/PopupConfig";
+import PopupManager from "./Common/Tools/PopupSystem/PopupManager";
+import { httpSender } from "./Common/Tools/Socket/http-sender/HttpSender";
 
 const {ccclass, property} = cc._decorator;
 

@@ -1,9 +1,9 @@
-import MegaComponent from "../../../common/Base/gameMega/MegaComponent";
-import { CommonTool } from "../../../common/Tools/CommonTool";
-import EventManager, { GameStateEvent, GameStateUpdate } from "../../../common/Tools/Base/EventManager";
-import PopupManager from "../../../common/Tools/PopupSystem/PopupManager";
-import { PopupName } from "../../../common/Tools/PopupSystem/PopupConfig";
-import ScrollLazyLoader from "../../../common/Tools/Scroll/ScrollLazyLoader";
+import MegaComponent from "../../../Common/Base/gameMega/MegaComponent";
+import { CommonTool } from "../../../Common/Tools/CommonTool";
+import EventManager, { GameStateEvent, GameStateUpdate } from "../../../Common/Tools/Base/EventManager";
+import PopupManager from "../../../Common/Tools/PopupSystem/PopupManager";
+import { PopupName } from "../../../Common/Tools/PopupSystem/PopupConfig";
+import ScrollLazyLoader from "../../../Common/Tools/Scroll/ScrollLazyLoader";
 
 const {ccclass, property} = cc._decorator;
 

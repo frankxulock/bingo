@@ -1,5 +1,5 @@
-import PrizeIcon from "../../../common/Base/component/PrizeIcon";
-import MegaComponent from "../../../common/Base/gameMega/MegaComponent";
+import PrizeIcon from "../../../Common/Base/component/PrizeIcon";
+import MegaComponent from "../../../Common/Base/gameMega/MegaComponent";
 
 const { ccclass, property } = cc._decorator;
 

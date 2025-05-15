@@ -1,6 +1,6 @@
-import ReelScroller from "../../../common/Base/component/ReelScroller";
-import MegaComponent from "../../../common/Base/gameMega/MegaComponent";
-import EventManager, { GameStateUpdate } from "../../../common/Tools/Base/EventManager";
+import ReelScroller from "../../../Common/Base/component/ReelScroller";
+import MegaComponent from "../../../Common/Base/gameMega/MegaComponent";
+import EventManager, { GameStateUpdate } from "../../../Common/Tools/Base/EventManager";
 
 const { ccclass, property } = cc._decorator;
 

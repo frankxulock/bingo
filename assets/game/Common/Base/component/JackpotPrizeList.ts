@@ -1,5 +1,5 @@
-import MegaDataManager from "../../../common/Base/gameMega/MegaDataManager";
-import { CommonTool } from "../../../common/Tools/CommonTool";
+import MegaDataManager from "../../../Common/Base/gameMega/MegaDataManager";
+import { CommonTool } from "../../../Common/Tools/CommonTool";
 
 const { ccclass, property } = cc._decorator;
 

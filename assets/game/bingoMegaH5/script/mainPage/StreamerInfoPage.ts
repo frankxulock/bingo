@@ -1,9 +1,9 @@
-import { CommonTool } from "../../../common/Tools/CommonTool";
-import { IWindow } from "../../../common/Tools/PopupSystem/IWindow";
-import { PopupName } from "../../../common/Tools/PopupSystem/PopupConfig";
-import PopupManager from "../../../common/Tools/PopupSystem/PopupManager";
-import ScrollLazyLoader from "../../../common/Tools/Scroll/ScrollLazyLoader";
-import ToastManager from "../../../common/Tools/Toast/ToastManager";
+import { CommonTool } from "../../../Common/Tools/CommonTool";
+import { IWindow } from "../../../Common/Tools/PopupSystem/IWindow";
+import { PopupName } from "../../../Common/Tools/PopupSystem/PopupConfig";
+import PopupManager from "../../../Common/Tools/PopupSystem/PopupManager";
+import ScrollLazyLoader from "../../../Common/Tools/Scroll/ScrollLazyLoader";
+import ToastManager from "../../../Common/Tools/Toast/ToastManager";
 
 const {ccclass, property} = cc._decorator;
 

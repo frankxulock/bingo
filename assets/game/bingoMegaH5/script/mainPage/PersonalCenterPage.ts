@@ -1,9 +1,9 @@
-import MegaDataManager from "../../../common/Base/gameMega/MegaDataManager";
-import { audioManager } from "../../../common/Tools/AudioMgr";
-import { CommonTool } from "../../../common/Tools/CommonTool";
-import { IWindow } from "../../../common/Tools/PopupSystem/IWindow";
-import { PopupName } from "../../../common/Tools/PopupSystem/PopupConfig";
-import PopupManager from "../../../common/Tools/PopupSystem/PopupManager";
+import MegaDataManager from "../../../Common/Base/gameMega/MegaDataManager";
+import { audioManager } from "../../../Common/Tools/AudioMgr";
+import { CommonTool } from "../../../Common/Tools/CommonTool";
+import { IWindow } from "../../../Common/Tools/PopupSystem/IWindow";
+import { PopupName } from "../../../Common/Tools/PopupSystem/PopupConfig";
+import PopupManager from "../../../Common/Tools/PopupSystem/PopupManager";
 
 const {ccclass, property} = cc._decorator;
 

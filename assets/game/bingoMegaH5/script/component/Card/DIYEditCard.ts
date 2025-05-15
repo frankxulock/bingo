@@ -1,5 +1,5 @@
-import EventManager, { GameStateUpdate } from "../../../../common/Tools/Base/EventManager";
-import ToastManager from "../../../../common/Tools/Toast/ToastManager";
+import EventManager, { GameStateUpdate } from "../../../../Common/Tools/Base/EventManager";
+import ToastManager from "../../../../Common/Tools/Toast/ToastManager";
 import CardIcon from "./CardIcon";
 
 const { ccclass, property } = cc._decorator;
