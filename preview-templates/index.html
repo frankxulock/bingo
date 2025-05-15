@@ -1,21 +1,73 @@
 <html>
+
 <head>
-  <link rel="icon" href="app/editor/static/preview-templates/favicon.ico"></link>
+  <link rel="icon" href="app/editor/static/preview-templates/favicon.ico">
+  </link>
   <meta charset="utf-8">
-  <title><%=title%></title>
-  <link rel="stylesheet" type="text/css" href="style.css"/>
+  <title>MegaBingo</title>
+  <link rel="stylesheet" type="text/css" href="style.css" />
 </head>
+
 <body>
   <canvas id="GameCanvas" oncontextmenu="event.preventDefault()" tabindex="0"></canvas>
   <div id="splash">
-    <div class="progress-bar stripes">
-      <span style="width: 0%"></span>
+    <img id="gameBG" src="gameBG.png">
+    <div class="background-container">
+      <img id="logo-animation" src="logo/logo_000.png" alt="logo animation">
+      <div class="progress-bar stripes">
+        <span style="width: 0%"></span>
+      </div>
     </div>
   </div>
-<script src="settings.js" charset="utf-8"></script>
-<script src="boot.js" charset="utf-8"></script>
-<script src="/socket.io/socket.io.js" charset="utf-8"></script>
-<script src="app/engine/bin/<%=cocos2d%>"</script> charset="utf-8"></script>
-<script src="preview-scripts/__quick_compile__.js" charset="utf-8"></script>
+  <script src="gameConfig.js" charset="utf-8"></script>
+  <script src="settings.js" charset="utf-8"></script>
+  <script src="main.js" charset="utf-8"></script>
+  <script src="/socket.io/socket.io.js" charset="utf-8"></script>
+  <script src="app/engine/bin/<%=cocos2d%>" charset="utf-8"></script>
+  <script src="preview-scripts/__quick_compile__.js" charset="utf-8"></script>
+  <script>
+    const totalFrames = 104;
+    const fps = 30;
+    let currentFrame = 0;
+  
+    const img = document.getElementById('logo-animation');
+    const splash = document.getElementById('splash');
+
+    // ✅ 預載圖片
+    const frames = [];
+    for (let i = 0; i < totalFrames; i++) {
+      const frame = new Image();
+      const frameNumber = String(i).padStart(3, '0');
+      frame.src = `logo/logo_${frameNumber}.png`;
+      frames.push(frame);
+    }
+  
+    // ✅ 播放動畫使用已預載的圖
+    const animationTimer = setInterval(() => {
+      img.src = frames[currentFrame].src;
+      currentFrame = (currentFrame + 1) % totalFrames;
+    }, 1000 / fps);
+
+    // 👉 隱藏 splash
+    window.hideSplash = function () {
+      splash.style.display = 'none';
+      clearInterval(animationTimer);
+      console.log('Splash manually hidden, animation stopped.');
+    }
+  </script>
+  <script>
+    window.addEventListener('beforeunload', () => {
+      // 清理動畫定時器
+      if (window.animationTimer) {
+        clearInterval(window.animationTimer);
+      }
+      document.querySelectorAll('video').forEach(el => el.remove());
+    });
+    window.addEventListener('load', () => {
+      // 頁面刷新剛載入時，也檢查一次是否有殘留
+      document.querySelectorAll('video').forEach(el => el.remove());
+    });
+  </script>
 </body>
+
 </html>

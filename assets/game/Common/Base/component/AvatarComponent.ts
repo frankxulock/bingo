@@ -1,4 +1,4 @@
-import { CommonTool } from "../../../Common/Tools/CommonTool";
+import { CommonTool } from "../../../common/Tools/CommonTool";
 
 const {ccclass, property} = cc._decorator;
 

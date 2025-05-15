@@ -1,8 +1,8 @@
-import EventManager, { GameStateUpdate } from "../../../Common/Tools/Base/EventManager";
-import { IWindow } from "../../../Common/Tools/PopupSystem/IWindow";
-import { PopupName } from "../../../Common/Tools/PopupSystem/PopupConfig";
-import PopupManager from "../../../Common/Tools/PopupSystem/PopupManager";
-import ChatItem from "../component/ChatItem";
+import ChatItem from "../../../common/Base/component/ChatItem";
+import EventManager, { GameStateUpdate } from "../../../common/Tools/Base/EventManager";
+import { IWindow } from "../../../common/Tools/PopupSystem/IWindow";
+import { PopupName } from "../../../common/Tools/PopupSystem/PopupConfig";
+import PopupManager from "../../../common/Tools/PopupSystem/PopupManager";
 
 const {ccclass, property} = cc._decorator;
 

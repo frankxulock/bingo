@@ -1,8 +1,8 @@
 import BaseSingletonComponent from "../Base/BaseSingletonComponent";
-import { IWindow } from "./IWindow";
-import PrefabManager from "./PrefabManager";
 import { PopupName, ClosePopupAnimationConfig, ShowPopupAnimationConfig } from "./PopupConfig";
 import { PopupAnimationType } from "./PopupAnimationComponent";
+import PrefabManager from "./PrefabManager";
+import { IWindow } from "./IWindow";
 
 const { ccclass, property } = cc._decorator;
 

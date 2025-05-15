@@ -1,39 +1,58 @@
-import AvatarComponent from "../../../Common/Base/component/AvatarComponent";
-import MegaComponent from "../../../Common/Base/gameMega/MegaComponent";
-import { CommonTool } from "../../../Common/Tools/CommonTool";
-import { PopupName } from "../../../Common/Tools/PopupSystem/PopupConfig";
-import PopupManager from "../../../Common/Tools/PopupSystem/PopupManager";
+import AvatarComponent from "../../../common/Base/component/AvatarComponent";
+import MegaComponent from "../../../common/Base/gameMega/MegaComponent";
+import { CommonTool } from "../../../common/Tools/CommonTool";
+import { PopupName } from "../../../common/Tools/PopupSystem/PopupConfig";
+import PopupManager from "../../../common/Tools/PopupSystem/PopupManager";
 
-const {ccclass, property} = cc._decorator;
+const { ccclass, property } = cc._decorator;
 
 @ccclass
 export default class UserStatsPanel extends MegaComponent {
+    // 用戶排名節點，包含多個 AvatarComponent 子節點
     @property({ type: cc.Node, visible: true })
-    private Node_UserRanking : cc.Node = null;
-    @property({ type: cc.Label, visible: true })
-    private Label_Online : cc.Label = null;
-    private Avatars : AvatarComponent[] = [];
+    private Node_UserRanking: cc.Node = null;
 
+    // 在線人數的顯示標籤
+    @property({ type: cc.Label, visible: true })
+    private Label_Online: cc.Label = null;
+
+    // 存放所有 AvatarComponent 的陣列
+    private Avatars: AvatarComponent[] = [];
+
+    /**
+     * 初始化元件
+     * 取得 Node_UserRanking 下的所有 AvatarComponent，並綁定點擊事件
+     */
     protected init(): void {
         super.init();
         this.Avatars = this.Node_UserRanking.getComponentsInChildren(AvatarComponent);
+
+        // 綁定點擊事件，開啟排行榜詳情視窗
         this.node.on('click', this.OpenBingoJackpotWindow, this);
     }
 
+    /**
+     * 元件啟動時設定 Avatar 尺寸
+     */
     protected start(): void {
-        this.Avatars.forEach((avatar)=>{
+        this.Avatars.forEach(avatar => {
             avatar.setSize(24, 1);
-        })
+        });
     }
 
-    /** 開啟排行榜詳情列表 */
-    public OpenBingoJackpotWindow(){
-        console.log("開啟排行榜詳情列表");
-        PopupManager.showPopup(PopupName.LeaderboardPage, this.data.getLeaderboardData());
+    /**
+     * 點擊事件處理，開啟 Bingo Jackpot 排行榜視窗並傳入資料
+     */
+    public OpenBingoJackpotWindow(): void {
+        const leaderboardData = this.data.getLeaderboardData();
+        PopupManager.showPopup(PopupName.LeaderboardPage, leaderboardData);
     }
 
-    /** 快照事件狀態還原 */
+    /**
+     * 快照事件回調，更新在線人數顯示
+     */
     protected onSnapshot(): void {
-        CommonTool.setLabel(this.Label_Online, this.data.getOnline());
+        const onlineCount = this.data.getOnline();
+        CommonTool.setLabel(this.Label_Online, onlineCount);
     }
 }

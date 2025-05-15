@@ -1,10 +1,11 @@
-import { audioManager } from "../../Common/Tools/AudioMgr";
-import EventManager, { GameStateUpdate } from "../../Common/Tools/Base/EventManager";
-import { UrlManager } from "../../Common/Tools/UrlManager";
-import MegaComponent from "../../Common/Base/gameMega/MegaComponent";
-import PopupManager from "../../Common/Tools/PopupSystem/PopupManager";
-import { PopupName } from "../../Common/Tools/PopupSystem/PopupConfig";
-import { httpSender, HttpSender } from "../../Common/Tools/Socket/http-sender/HttpSender";
+import MegaComponent from "../../common/Base/gameMega/MegaComponent";
+import SocketManager from "../../common/Base/SocketManager";
+import { audioManager } from "../../common/Tools/AudioMgr";
+import EventManager, { GameStateUpdate } from "../../common/Tools/Base/EventManager";
+import { PopupName } from "../../common/Tools/PopupSystem/PopupConfig";
+import PopupManager from "../../common/Tools/PopupSystem/PopupManager";
+import { UrlManager } from "../../common/Tools/UrlManager";
+
 
 /*** 與其他操作系統處理處 */
 const {ccclass, property} = cc._decorator;
@@ -39,6 +40,8 @@ export default class BingoMegaH5 extends MegaComponent {
         this.data.gameID = Number(UrlManager.getGameID());
         audioManager.init({bgmVolume : 1, soundVolume : 1});
         audioManager.setNode();
+        /** 加載遊戲內容關閉Loading頁面 */
+        SocketManager.getInstance().init();
     }
 
     /** 開啟DIY編輯頁面 */

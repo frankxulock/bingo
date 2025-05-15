@@ -11,7 +11,18 @@ window.boot = function () {
     cc.macro.ENABLE_TRANSPARENT_CANVAS = true;  // Enable transparent canvas
     cc.macro.ENABLE_WEBGL_ANTIALIAS = true;     // Enable WebGL antialiasing
 
-    function setLoadingDisplay () {
+    /** 快照與遊戲素材加載狀態 */
+    var snapshotReady = false;
+    var assetsReady = false;
+
+    /** 嘗試啟動遊戲（快照與素材都載入後才執行） */
+    function tryStartGame() {
+        if (snapshotReady && assetsReady) {
+            window.hideSplash();  // 等兩者都完成後才隱藏 loading splash
+        }
+    }
+
+    function setLoadingDisplay() {
         // Loading splash scene
         var splash = document.getElementById('splash');
         var progressBar = splash.querySelector('.progress-bar span');
@@ -23,14 +34,9 @@ window.boot = function () {
         };
         splash.style.display = 'block';
         progressBar.style.width = '0%';
-
-        cc.director.once(cc.Director.EVENT_AFTER_SCENE_LAUNCH, function () {
-            splash.style.display = 'none';
-        });
     }
 
     var onStart = function () {
-
         cc.view.enableRetina(true);
         cc.view.resizeWithBrowserSize(true);
 
@@ -57,8 +63,6 @@ window.boot = function () {
         }
 
         // Limit downloading max concurrent task to 2,
-        // more tasks simultaneously may cause performance draw back on some android system / browsers.
-        // You can adjust the number based on your own test result, you have to set it before any loading process to take effect.
         if (cc.sys.isBrowser && cc.sys.os === cc.sys.OS_ANDROID) {
             cc.assetManager.downloader.maxConcurrency = 2;
             cc.assetManager.downloader.maxRequestsPerFrame = 2;
@@ -68,7 +72,7 @@ window.boot = function () {
         var bundle = cc.assetManager.bundles.find(function (b) {
             return b.getSceneInfo(launchScene);
         });
-        
+
         bundle.loadScene(launchScene, null, onProgress,
             function (err, scene) {
                 if (!err) {
@@ -86,7 +90,6 @@ window.boot = function () {
                 }
             }
         );
-
     };
 
     var option = {
@@ -108,17 +111,72 @@ window.boot = function () {
     settings.hasResourcesBundle && bundleRoot.push(RESOURCES);
 
     var count = 0;
-    function cb (err) {
-        if (err) return console.error(err.message, err.stack);
+    function cb(err) {
+        if (err) return console.error(err);
         count++;
         if (count === bundleRoot.length + 1) {
             cc.assetManager.loadBundle(MAIN, function (err) {
-                if (!err) cc.game.run(option, onStart);
+                if (!err) {
+                    assetsReady = true;
+                    tryStartGame();  // 等待快照與素材都完成後才啟動遊戲
+                    cc.game.run(option, onStart);  // 遊戲初始化
+                }
             });
         }
     }
 
-    cc.assetManager.loadScript(settings.jsList.map(function (x) { return 'src/' + x;}), cb);
+    /** 請求快照資料的重試機制 */
+    var retryAttempts = 0;
+    const maxRetries = 3;
+
+    function handleEmptyData(data) {
+        return (data) ? data : null; // Return null if data is empty or invalid
+    }
+
+    function fetchSnapshots() {
+        window.Snapshots = {};
+        // 請求不同類型的資料
+        Promise.all([
+            fetch(window.GameConfig.getIDUrl()),
+            fetch(window.GameConfig.getJACKPOTUrl(), window.GameConfig.getHeaders()),
+            fetch(window.GameConfig.getLISTUrl()),
+            fetch(window.GameConfig.getONLINEUrl()),
+        ])
+            .then(responses => Promise.all(responses.map(r => {
+                if (!r.ok) throw new Error("Network error");
+                return r.json();
+            })))
+            .then(([idData, jackpotData, listData, onlineData]) => {
+                window.Snapshots["id"] = handleEmptyData(idData.data);
+                window.Snapshots["jackpot"] = handleEmptyData(jackpotData.data);
+                window.Snapshots["list"] = handleEmptyData(listData.data);
+                window.Snapshots["online"] = handleEmptyData(onlineData.data);
+
+                console.log("快照資料:", window.Snapshots);
+
+                // Check if all necessary data is valid
+                if (window.Snapshots["id"] && window.Snapshots["jackpot"] && window.Snapshots["list"] && window.Snapshots["online"]) {
+                    snapshotReady = true;
+                    tryStartGame();
+                } else {
+                    throw new Error("Invalid snapshot data received");
+                }
+            })
+            .catch(error => {
+                console.log("快照資料請求錯誤:", error);
+                if (retryAttempts < maxRetries) {
+                    retryAttempts++;
+                    console.log(`Retrying... Attempt ${retryAttempts}`);
+                    fetchSnapshots(); // Retry fetching data
+                } else {
+                    console.log("Reached maximum retry attempts. No further actions will be taken.");
+                }
+            });
+    }
+
+    // 開始加載快照資料
+    fetchSnapshots();
+    cc.assetManager.loadScript(settings.jsList.map(function (x) { return 'src/' + x; }), cb);
 
     for (var i = 0; i < bundleRoot.length; i++) {
         cc.assetManager.loadBundle(bundleRoot[i], cb);

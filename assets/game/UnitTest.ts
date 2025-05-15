@@ -1,13 +1,12 @@
-import { CardMega } from "./Common/Base/card/cardMega";
-import { CARD_CONTENT, CARD_STATUS, GAME_STATUS } from "./Common/Base/CommonData";
-import MegaDataManager from "./Common/Base/gameMega/MegaDataManager";
-import EventManager, { GameStateEvent, GameStateUpdate } from "./Common/Tools/Base/EventManager";
-import PopupManager from "./Common/Tools/PopupSystem/PopupManager";
-import { PopupName } from "./Common/Tools/PopupSystem/PopupConfig";
-import VideoViewport from "./bingoMegaH5/script/component/VideoViewport";
-import FlvPlayer from "./bingoMegaH5/script/component/FlvPlayer";
-import { httpSender } from "./Common/Tools/Socket/http-sender/HttpSender";
-import BaseDataManager from "./Common/Tools/Base/BaseDataManager";
+import { CardMega } from "./common/Base/card/CardMega";
+import { CARD_CONTENT, GAME_STATUS } from "./common/Base/CommonData";
+import FlvPlayer from "./common/Base/component/FlvPlayer";
+import MegaDataManager from "./common/Base/gameMega/MegaDataManager";
+import BaseDataManager from "./common/Tools/Base/BaseDataManager";
+import EventManager, { GameStateEvent, GameStateUpdate } from "./common/Tools/Base/EventManager";
+import { PopupName } from "./common/Tools/PopupSystem/PopupConfig";
+import PopupManager from "./common/Tools/PopupSystem/PopupManager";
+import { httpSender } from "./common/Tools/Socket/http-sender/HttpSender";
 
 const {ccclass, property} = cc._decorator;
 
@@ -213,7 +212,7 @@ export default class UnitTest extends cc.Component {
     private snedBallTime = 1;
 
     public startSimulation() {
-        this.Loading.active = false;
+        // this.Loading.active = false;
         this.btns[4].active = false;
         if (this.isRunning) return;
         this.unscheduleAllCallbacks(); // <-- 保險起見全部清掉
@@ -604,7 +603,7 @@ export default class UnitTest extends cc.Component {
     }
 
     public TestFlvPlayer() {
-        this.FlvPlayer.test = !this.FlvPlayer.test;
+       // this.FlvPlayer.test = !this.FlvPlayer.test;
     }
 
     public getHttpID() {

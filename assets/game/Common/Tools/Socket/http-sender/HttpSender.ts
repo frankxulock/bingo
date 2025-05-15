@@ -77,7 +77,6 @@ export class HttpSender {
             return <any>{success: false, msg: 'fail', code: 318}
         }
     }
-
 }
 
 export const httpSender = new HttpSender()

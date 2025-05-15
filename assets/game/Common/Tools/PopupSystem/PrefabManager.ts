@@ -6,10 +6,6 @@ const { ccclass, property } = cc._decorator;
 @ccclass
 export default class PrefabManager extends BaseSingletonComponent {
     public static instance: PrefabManager = null;
-
-    // @property({ type: [cc.Prefab] })
-    // public prefabList: cc.Prefab[] = [];
-
     private prefabMap: Map<string, cc.Prefab> = new Map();
 
     public static getInstance(): PrefabManager {
@@ -45,10 +41,4 @@ export default class PrefabManager extends BaseSingletonComponent {
             });
         });
     }
-
-    // protected init() {
-    //     this.prefabList.forEach(prefab => {
-    //         if (prefab) this.prefabMap.set(prefab.name, prefab);
-    //     });
-    // }
 }

@@ -1,4 +1,5 @@
 import Singleton from "./Singleton";
+
 export enum CURRENCY_SYMBOL {
     CNY = "¥", // 人民幣
     VND = "₫", // 越南盾

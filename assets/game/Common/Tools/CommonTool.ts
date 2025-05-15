@@ -89,12 +89,6 @@ export class CommonTool {
         });
     }
 
-    // public static async sleep(delayTime: number): Promise<void> {
-    //     return new Promise<void>((resolve) => {
-    //         setTimeout(resolve, delayTime);
-    //     });
-    // }
-
     public static async sleep(delayTime: number): Promise<void> {
         return new Promise<void>(resolve => cc.director.getScene().getChildByName("Canvas").getComponent(cc.Canvas).scheduleOnce(resolve, delayTime / 1000));
     }
@@ -137,8 +131,8 @@ export class CommonTool {
 
     /** 金額轉換函式 顯示貨幣 */
     public static formatMoney2(value: number, specialSymbols? : string): string {
-        let data = MegaDataManager.getInstance();
-        return specialSymbols + data.currency + (value).toString();
+        let currency = MegaDataManager.getInstance().currency;
+        return specialSymbols + currency + (value).toString();
     }
 
     /** 圖片轉換 */

@@ -1,7 +1,7 @@
-import { IWindow } from "../../../Common/Tools/PopupSystem/IWindow";
-import { PopupName } from "../../../Common/Tools/PopupSystem/PopupConfig";
-import PopupManager from "../../../Common/Tools/PopupSystem/PopupManager";
-import ScrollLazyLoader from "../component/ScrollLazyLoader";
+import { IWindow } from "../../../common/Tools/PopupSystem/IWindow";
+import { PopupName } from "../../../common/Tools/PopupSystem/PopupConfig";
+import PopupManager from "../../../common/Tools/PopupSystem/PopupManager";
+import ScrollLazyLoader from "../../../common/Tools/Scroll/ScrollLazyLoader";
 
 const {ccclass, property} = cc._decorator;
 

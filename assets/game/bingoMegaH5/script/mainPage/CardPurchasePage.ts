@@ -1,11 +1,11 @@
-import { CARD_STATUS } from "../../../Common/Base/CommonData";
-import MegaComponent from "../../../Common/Base/gameMega/MegaComponent";
-import EventManager, { GameStateEvent, GameStateUpdate } from "../../../Common/Tools/Base/EventManager";
-import { CommonTool } from "../../../Common/Tools/CommonTool";
-import { PopupName } from "../../../Common/Tools/PopupSystem/PopupConfig";
-import PopupManager from "../../../Common/Tools/PopupSystem/PopupManager";
-import ToastManager from "../../../Common/Tools/Toast/ToastManager";
-import ChipItem from "../component/ChipItem";
+import { CARD_STATUS } from "../../../common/Base/CommonData";
+import ChipItem from "../../../common/Base/component/ChipItem";
+import MegaComponent from "../../../common/Base/gameMega/MegaComponent";
+import EventManager, { GameStateEvent, GameStateUpdate } from "../../../common/Tools/Base/EventManager";
+import { CommonTool } from "../../../common/Tools/CommonTool";
+import { PopupName } from "../../../common/Tools/PopupSystem/PopupConfig";
+import PopupManager from "../../../common/Tools/PopupSystem/PopupManager";
+import ToastManager from "../../../common/Tools/Toast/ToastManager";
 
 const {ccclass, property} = cc._decorator;
 
@@ -193,26 +193,41 @@ export default class CardPurchasePage extends MegaComponent {
 
     /** 更新下注頁面的狀態內容 */
     public setPageState() {
-        let d = this.data.getCardPurchasePageData();
-        // 設置頁面
-        this.Toggle_PlayState.toggleItems[d.playState].isChecked = true;
-        this.Label_CardPrice.node.active = d.playJackpot;
-        this.Label_Currency.node.active = !d.playJackpot;
-        this.Label_UserManual.node.active = d.playCombo;
-        this.Toggle_BettingChipList.node.active = !d.playJackpot;
-        if(d.chipList) {
-            // 設置籌碼列表
+        const data = this.data.getCardPurchasePageData();
+
+        // 設定目前卡片狀態的 Toggle 為勾選
+        this.Toggle_CardState.toggleItems[data.cardContent].isChecked = true;
+        // 更新所有卡片狀態的外觀顯示（選中的顯示樣式不同）
+        this.Toggle_CardState.toggleItems.forEach((toggle, index) => {
+            const isSelected = index === data.cardContent;
+            // 第一個子節點為選中標記或樣式切換節點
+            toggle.node.children[0].active = !isSelected;
+        });
+
+        // 設定目前玩法狀態的 Toggle 為勾選
+        this.Toggle_PlayState.toggleItems[data.playState].isChecked = true;
+
+        // 根據是否為 Jackpot 模式，切換顯示的 UI 標籤
+        this.Label_CardPrice.node.active = data.playJackpot;   // 顯示卡片價格（Jackpot 模式）
+        this.Label_Currency.node.active = !data.playJackpot;   // 顯示一般貨幣（非 Jackpot 模式）
+        // 若為連線玩法，顯示使用說明
+        this.Label_UserManual.node.active = data.playCombo;
+        // 若非 Jackpot 模式，顯示籌碼選項列表
+        this.Toggle_BettingChipList.node.active = !data.playJackpot;
+        // 設定籌碼列表內容與選中狀態
+        if (data.chipList) {
             this.Toggle_BettingChipList.toggleItems.forEach((toggle, index) => {
-                let chipItem = toggle.getComponent(ChipItem);
-                // 設置籌碼金額
-                chipItem.setChipAmount(d.chipList[index]);
-                if(index == d.curChipIndex) {
-                    toggle.isChecked = true;
-                }
+                const chipItem = toggle.getComponent(ChipItem);
+                // 設定籌碼金額
+                chipItem.setChipAmount(data.chipList[index]);
+                // 設定當前選中的籌碼
+                toggle.isChecked = (index === data.curChipIndex);
             });
         }
 
+        // 顯示/隱藏按鈕狀態檢查
         this.CheckShowBtn();
+        // 更新卡片資訊顯示
         this.changeCardInfo();
     }
 

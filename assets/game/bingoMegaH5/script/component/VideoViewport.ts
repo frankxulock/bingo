@@ -1,6 +1,6 @@
-import MegaComponent from "../../../Common/Base/gameMega/MegaComponent";
-import { audioManager } from "../../../Common/Tools/AudioMgr";
-import FlvPlayer from "./FlvPlayer";
+import FlvPlayer from "../../../common/Base/component/FlvPlayer";
+import MegaComponent from "../../../common/Base/gameMega/MegaComponent";
+import { audioManager } from "../../../common/Tools/AudioMgr";
 
 const {ccclass, property} = cc._decorator;
 

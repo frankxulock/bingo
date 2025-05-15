@@ -1,10 +1,10 @@
 import UnitTest from "../../../UnitTest";
 import BaseDataManager from "../../Tools/Base/BaseDataManager";
 import EventManager, { GameStateEvent, GameStateUpdate } from "../../Tools/Base/EventManager";
-import PopupManager from "../../Tools/PopupSystem/PopupManager";
 import { PopupName } from "../../Tools/PopupSystem/PopupConfig";
+import PopupManager from "../../Tools/PopupSystem/PopupManager";
 import ToastManager from "../../Tools/Toast/ToastManager";
-import { CardMega } from "../card/cardMega";
+import { CardMega } from "../card/CardMega";
 import { CARD_CONTENT, CARD_GAMEPLAY, CARD_STATUS, GAME_STATUS } from "../CommonData";
 const { ccclass } = cc._decorator;
 
@@ -329,6 +329,7 @@ export default class MegaDataManager extends BaseDataManager {
     /** 取得下注頁面相關資訊 */
     public getCardPurchasePageData() {
         let data = {
+            cardContent: this.selectedCardContent,                                  // 卡片內容
             playState : this.selectedPlayMode,                                 // 玩法類型
             curChipIndex : this.selectedChipIndex,                           // 目前玩家選擇的籌碼編號
             chipList : this.getChipList(),                              // 籌碼列表

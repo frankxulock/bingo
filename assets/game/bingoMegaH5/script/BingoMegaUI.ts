@@ -1,5 +1,4 @@
-import prizeData from "../../Common/Base/CommonData";
-import BaseSingletonComponent from "../../Common/Tools/Base/BaseSingletonComponent";
+import BaseSingletonComponent from "../../common/Tools/Base/BaseSingletonComponent";
 
 const { ccclass, property } = cc._decorator;
 

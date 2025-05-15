@@ -1,7 +1,7 @@
-import { CommonTool } from "../../../Common/Tools/CommonTool";
-import { IWindow } from "../../../Common/Tools/PopupSystem/IWindow";
-import PopupManager from "../../../Common/Tools/PopupSystem/PopupManager";
-import { PopupName } from "../../../Common/Tools/PopupSystem/PopupConfig";
+import { CommonTool } from "../../../common/Tools/CommonTool";
+import { IWindow } from "../../../common/Tools/PopupSystem/IWindow";
+import PopupManager from "../../../common/Tools/PopupSystem/PopupManager";
+import { PopupName } from "../../../common/Tools/PopupSystem/PopupConfig";
 
 const { ccclass, property } = cc._decorator;
 
