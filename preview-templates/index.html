@@ -139,7 +139,7 @@
     async function startGame() {
       let currentScript = ''; // 用於錯誤提示
       try {
-        currentScript = 'gameConfig_.js';
+        currentScript = 'gameConfig.js';
         await loadScriptWithRetry(currentScript);
 
         currentScript = 'settings.js';
