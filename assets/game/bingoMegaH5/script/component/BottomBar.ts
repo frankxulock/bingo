@@ -14,23 +14,19 @@ export default class BottomBar extends MegaComponent {
     private Label_Amount: cc.Label = null;
 
     @property({ type: cc.Label, visible: true })
-    private Label_coin: cc.Label = null;
+    private Label_card: cc.Label = null;
 
     @property({ type: cc.Label, visible: true })
-    private Label_wallet: cc.Label = null;
-
-    @property({ type: cc.Node, visible: true })
-    private Btn_AddGameCoin: cc.Node = null;
+    private Label_betCoin: cc.Label = null;
 
     /** 初始化元件（由 MegaComponent 呼叫） */
     protected init(): void {
         super.init();
     }
 
-    /** 開啟添加遊戲金額頁面（待實作） */
+    /** 開啟充值頁面 */
     public OpenAddGameCoin(): void {
-        console.log("開啟添加遊戲金額頁面");
-        // 可在此調用彈窗管理器或跳轉頁面邏輯
+        console.log("開啟充值頁面");
     }
 
     /** 開啟聊天彈窗 */
@@ -50,13 +46,13 @@ export default class BottomBar extends MegaComponent {
         this.updateUserData();
     }
 
-    /** 更新顯示的用戶資料（幣種、金額、代幣、錢包） */
+    /** 更新顯示的用戶資料（幣種、金額、卡片數、下注金額） */
     private updateUserData(): void {
         const userData = this.data.getUserData();
 
         CommonTool.setLabel(this.Label_Currency, this.data.currency);
         CommonTool.setLabel(this.Label_Amount, userData.amount);
-        CommonTool.setLabel(this.Label_coin, userData.coin);
-        CommonTool.setLabel(this.Label_wallet, userData.wallet);
+        CommonTool.setLabel(this.Label_card, userData.cardCount);
+        CommonTool.setLabel(this.Label_betCoin, userData.betCoin);
     }
 }

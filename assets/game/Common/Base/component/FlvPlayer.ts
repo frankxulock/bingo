@@ -11,7 +11,7 @@ enum VideoState {
 @ccclass
 export default class FlvPlayer extends cc.Component {
     @property({ tooltip: 'FLV 视频 URL，例如：https://example.com/video.flv' })
-    videoUrl: string = 'https://mister-ben.github.io/videojs-flvjs/bbb.flv';
+    videoUrl: string = 'https://example.com/video.flv';
 
     @property({ type: cc.Node, tooltip: '跟随的目标节点' })
     targetNode: cc.Node = null;
@@ -50,7 +50,7 @@ export default class FlvPlayer extends cc.Component {
         // 動態載入 flv.js，完成後建立 video 元素
         this.loadFlvJs(() => {
             this.createVideoElement();
-            this.addUserInteractionListener();
+            // this.addUserInteractionListener();
         });
     }
 

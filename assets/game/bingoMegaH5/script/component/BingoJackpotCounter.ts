@@ -40,7 +40,14 @@ export default class BingoJackpotCounter extends MegaComponent {
     protected setBingoJackpotAmount(): void {
         // 取得並過濾金額字串，只保留數字
         const rawAmount = this.data.getBingoJackpotAmount();
-        const amount = rawAmount.replace(/\D/g, "");
+        let amount;
+        if (/^0\.\d+$/.test(rawAmount)) {
+            // 是 0.xx 形式 → 去除 "0." 並保留小數部分（最多兩位）
+            amount = rawAmount.slice(2); // 去掉前面的 "0."
+        } else {
+            // 其他狀況 → 僅保留數字
+            amount = rawAmount.replace(/\D/g, "");
+        }
 
         // 從右往左對齊數字至對應的 Reel 上
         let amountIndex = amount.length - 1;

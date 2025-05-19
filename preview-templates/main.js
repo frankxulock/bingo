@@ -11,57 +11,39 @@
     function tryStartGame() {
       if (snapshotReady && assetsReady) {
         window.hideSplash();
+        // 廣播遊戲資料給主場景
+        const scene = cc.director.getScene();
+        if (scene && scene.isValid) {
+          scene.emit("Game:InitData", window.snapshotData); // 可以附帶資料
+        } else {
+          console.warn("主場景尚未就緒，無法廣播 Game:InitData");
+        }
       }
-    }
-  
-    /** 快照請求重試次數 */
-    let retryAttempts = 0;
-    const maxRetries = 3;
-  
-    /** 檢查資料有效性 */
-    function handleEmptyData(data) {
-      return data ? data : null;
     }
   
     /** 請求快照資料 */
     function fetchSnapshots() {
-      window.Snapshots = {};
-  
-      Promise.all([
-        fetch(window.GameConfig.getIDUrl()),
-        fetch(window.GameConfig.getJACKPOTUrl(), window.GameConfig.getHeaders()),
-        fetch(window.GameConfig.getLISTUrl()),
-        fetch(window.GameConfig.getONLINEUrl()),
-      ])
-        .then(responses => Promise.all(responses.map(r => {
-          if (!r.ok) throw new Error("Network error");
-          return r.json();
-        })))
-        .then(([idData, jackpotData, listData, onlineData]) => {
-          window.Snapshots["id"] = handleEmptyData(idData.data);
-          window.Snapshots["jackpot"] = handleEmptyData(jackpotData.data);
-          window.Snapshots["list"] = handleEmptyData(listData.data);
-          window.Snapshots["online"] = handleEmptyData(onlineData.data);
-  
-          console.log("快照資料:", window.Snapshots);
-  
-          if (window.Snapshots.id && window.Snapshots.jackpot && window.Snapshots.list && window.Snapshots.online) {
+      window.serverData = {};
+
+      window.DataFetcher.fetchAll({
+        endpoints: window.snapshotEndpoints,
+        target: window.serverData,
+        onComplete: () => {
+          const requiredKeys = window.snapshotEndpoints.map(item => item.key);
+          const ready = requiredKeys.every(k => window.serverData[k]);
+      
+          if (ready) {
             snapshotReady = true;
             tryStartGame();
           } else {
             throw new Error("Invalid snapshot data received");
           }
-        })
-        .catch(error => {
-          console.error("快照資料請求錯誤:", error);
-          if (retryAttempts < maxRetries) {
-            retryAttempts++;
-            console.log(`Retrying... Attempt ${retryAttempts}`);
-            fetchSnapshots();
-          } else {
-            console.warn("已達到最大重試次數，停止請求。");
-          }
-        });
+        },
+        onError: (err) => {
+          window.showReloadDialog("載入錯誤，請檢查網路或伺服器狀態。");
+        },
+        maxRetries: 3
+      });
     }
 
     /** 頁面載入後主程序 */
@@ -129,26 +111,37 @@
       if (_CCSettings.hasResourcesBundle) bundleRoot.push(RESOURCES);
   
       let count = 0;
+      const totalTasks = bundleRoot.length + 1; // 所有 loadBundle + 1 次 loadScript
+
       function cb(err) {
-        if (err) return console.error(err);
+        if (err) {
+          console.error(err);
+          return;
+        }
+
         count++;
-        if (count === bundleRoot.length + 1) {
+
+        if (count === totalTasks) {
+          // 所有 bundle + script 都完成後，再載入主 bundle
           cc.assetManager.loadBundle(MAIN, function (err) {
-            if (!err) {
-              assetsReady = true;
-              tryStartGame();
-              cc.game.run(option, onStart);
+            if (err) {
+              console.error("載入主 bundle 失敗:", err);
+              return;
             }
+
+            assetsReady = true;
+            tryStartGame(); // 這裡才會啟動遊戲邏輯
+            cc.game.run(option, onStart);
           });
         }
       }
-  
+
       // 加載外部插件腳本
       cc.assetManager.loadScript(
         _CCSettings.jsList.map(x => '/plugins/' + x),
         cb
       );
-  
+
       // 載入內建 bundle
       for (let i = 0; i < bundleRoot.length; i++) {
         cc.assetManager.loadBundle('assets/' + bundleRoot[i], cb);

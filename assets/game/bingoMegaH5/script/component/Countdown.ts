@@ -36,6 +36,8 @@ export default class Countdown extends MegaComponent {
         const gameState = this.data.getGameState();
         if (gameState === GAME_STATUS.BUY) {
             this.startTiming();
+        }else {
+            this.node.active = false;
         }
     }
 

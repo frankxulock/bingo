@@ -398,7 +398,7 @@
     },
     "_contentSize": {
       "__type__": "cc.Size",
-      "width": 77.2,
+      "width": 78.45,
       "height": 22.68
     },
     "_anchorPoint": {
@@ -1273,7 +1273,7 @@
     },
     "_contentSize": {
       "__type__": "cc.Size",
-      "width": 113.18,
+      "width": 110.66,
       "height": 20.16
     },
     "_anchorPoint": {
@@ -1689,7 +1689,7 @@
     },
     "_contentSize": {
       "__type__": "cc.Size",
-      "width": 67.28,
+      "width": 65.83,
       "height": 17.64
     },
     "_anchorPoint": {
@@ -3576,7 +3576,7 @@
     },
     "_contentSize": {
       "__type__": "cc.Size",
-      "width": 72.8,
+      "width": 73.08,
       "height": 17.64
     },
     "_anchorPoint": {
@@ -3732,7 +3732,7 @@
   },
   {
     "__type__": "cc.Node",
-    "_name": "Currency",
+    "_name": "Node_Currency",
     "_objFlags": 0,
     "_parent": {
       "__id__": 90
@@ -4020,7 +4020,7 @@
     },
     "_contentSize": {
       "__type__": "cc.Size",
-      "width": 18.63,
+      "width": 19.51,
       "height": 17.64
     },
     "_anchorPoint": {
@@ -4130,7 +4130,7 @@
     },
     "_contentSize": {
       "__type__": "cc.Size",
-      "width": 185.41,
+      "width": 188.94,
       "height": 15.12
     },
     "_anchorPoint": {
@@ -4657,7 +4657,7 @@
     },
     "_contentSize": {
       "__type__": "cc.Size",
-      "width": 54.17,
+      "width": 55.02,
       "height": 17.64
     },
     "_anchorPoint": {
@@ -6301,7 +6301,7 @@
     },
     "_contentSize": {
       "__type__": "cc.Size",
-      "width": 87.63,
+      "width": 87.38,
       "height": 17.64
     },
     "_anchorPoint": {
@@ -6411,7 +6411,7 @@
     },
     "_contentSize": {
       "__type__": "cc.Size",
-      "width": 11.97,
+      "width": 11.32,
       "height": 22.68
     },
     "_anchorPoint": {
@@ -6999,7 +6999,7 @@
     },
     "_contentSize": {
       "__type__": "cc.Size",
-      "width": 83.03,
+      "width": 79.03,
       "height": 22.68
     },
     "_anchorPoint": {
@@ -7493,6 +7493,9 @@
     },
     "Toggle_PlayState": {
       "__id__": 83
+    },
+    "Node_Currency": {
+      "__id__": 91
     },
     "Label_CardPrice": {
       "__id__": 95

@@ -35,6 +35,7 @@ export default abstract class BaseCardData {
     public getCardContent() { return null; }
 
     public getPreData() {return null;}
+    public getCardInfo() { return this.cardInfo; }
 
     public getID() {
         return this.id;

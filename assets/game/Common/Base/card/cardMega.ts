@@ -98,6 +98,18 @@ export class CardMega extends BaseCardData {
         return this.cardContent;
     }
 
+    /** 取得卡片內容 */
+    public getPlayState() {
+        if(this.playState == CARD_GAMEPLAY.COMDO)
+            return "combo";
+        else if(this.playState == CARD_GAMEPLAY.EXTRA)
+            return "extra patterns"
+        else if(this.playState == CARD_GAMEPLAY.JACKPOT)
+            return "bingo&jackpot";
+        else 
+            return null;
+    }
+
     // 更新卡片數據
     public updateCard(ball: number): void {
         // 預購卡不做更新
@@ -279,16 +291,6 @@ export class CardMega extends BaseCardData {
         return 0;
     }
 
-    /** 計算二進制中1的個數（即差異位的數量） */
-    private countSetBits(number: number): number {
-        let count = 0;
-        while (number) {
-            count += (number & 1);
-            number >>= 1;
-        }
-        return count;
-    }
-
     //#endregion
 
     getCardViewData() {
@@ -354,6 +356,15 @@ export class CardMega extends BaseCardData {
 
     public getPreData() {
         return this.preData;
+    }
+
+    public getCardInfoString(): string {
+        // 複製一份陣列，避免修改 this.cardInfo 原始資料
+        let card : any = [...this.cardInfo];   
+        // 替換第 13 格（中間格 index 12）為 "DIY" 或 "Free"
+        card[12] = this.cardContent === CARD_CONTENT.DIY ? "DIY" : "Free";
+        // 回傳逗號分隔的字串
+        return card.join(",");
     }
 }
 

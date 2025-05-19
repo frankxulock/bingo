@@ -43,13 +43,26 @@ export class HttpSender {
         }
     }
 
-    async sendPost<T>(apiUrl: string, bodyData?: FormData): Promise<T> {
+    async sendPost<T>(apiUrl: string, bodyData?: FormData | object): Promise<T> {
         cc.log("%c %s", "background: Gray; color: White;", `Http 發送 ${apiUrl} `, bodyData || {});
         const traceId: string = new Date().getTime().toString().slice(-8);
+
+        // 建立 request options
+        let headers = { ...window.url._commonHeaders };
+        let body: BodyInit;
+
+        if(bodyData instanceof FormData) {
+            body = bodyData;
+        }else {
+            // 是 JSON 格式
+            headers['Content-Type'] = 'application/json';
+            body = JSON.stringify(bodyData || {});
+        }
+
         const response = await sendPost(
-            `${BaseDataManager.serverHost}${apiUrl}?traceId=${traceId}`,
-            {},
-            bodyData,
+            `${BaseDataManager.http}${BaseDataManager.serverHost}${apiUrl}`,
+            window.url._commonHeaders,
+            body,
         )
 
         if(response && response.status === 401) {

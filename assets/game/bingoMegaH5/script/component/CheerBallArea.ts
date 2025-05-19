@@ -96,7 +96,7 @@ export default class CheerBallArea extends MegaComponent {
 
         // 根據快照資料設定球號、狀態與位置
         for (let i = 0; i < ballList.length && i < this.Balls.length; i++) {
-            const ballNum = ballList[i];
+            const ballNum = ballList[(ballList.length - (i + 1))];
             const ballObj = this.Balls[i];
 
             ballObj.setBallNumber(ballNum);

@@ -40,7 +40,7 @@ export default class ReelScroller extends cc.Component {
         this.Label_txt[2].string = "";
 
         // 從數字 0 開始滾動
-        let currentNum = 0;
+        let currentNum = Number(this.Label_txt[0].string) ?? 0;
         // 總步數 = 完整滾動圈數 * 10 (數字個數) + 目標數字
         const totalSteps = this.rollCount * 10 + targetDigit;
         let step = 0;

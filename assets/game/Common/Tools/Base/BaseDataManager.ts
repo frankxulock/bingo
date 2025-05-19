@@ -48,8 +48,6 @@ export default abstract class BaseDataManager extends Singleton {
 
     /** 玩家ID */
     public playerID: string = "";
-    /** 目前的遊戲ID */
-    public gameID: number = 0;
 
     /** 使用的貨幣 */
     public currency: string = "";
@@ -62,19 +60,5 @@ export default abstract class BaseDataManager extends Singleton {
     /** 初始化 */
     public init(): void {
 
-    }
-
-    public saveBetIndex(betIndex: number) {
-        let key: string = "betIndex_" + this.gameID.toString();
-        cc.sys.localStorage.setItem(key, betIndex);
-    }
-
-    public getBetIndex(): number {
-        let key: string = "betIndex_" + this.gameID.toString();
-        let betIndex: string = cc.sys.localStorage.getItem(key);
-        if (!cc.isValid(betIndex)) {
-            return 0;
-        }
-        return Number(betIndex);
     }
 }

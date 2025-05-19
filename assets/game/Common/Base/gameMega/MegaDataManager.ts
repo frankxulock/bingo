@@ -1,4 +1,4 @@
-import UnitTest from "../../../UnitTest";
+import { HttpServer } from "../../../bingoMegaH5/script/HttpServer";
 import BaseDataManager from "../../Tools/Base/BaseDataManager";
 import EventManager, { GameStateEvent, GameStateUpdate } from "../../Tools/Base/EventManager";
 import { PopupName } from "../../Tools/PopupSystem/PopupConfig";
@@ -6,6 +6,7 @@ import PopupManager from "../../Tools/PopupSystem/PopupManager";
 import ToastManager from "../../Tools/Toast/ToastManager";
 import { CardMega } from "../card/CardMega";
 import { CARD_CONTENT, CARD_GAMEPLAY, CARD_STATUS, GAME_STATUS } from "../CommonData";
+import CardNumberManager from "./CardNumberManager";
 const { ccclass } = cc._decorator;
 
 @ccclass
@@ -15,17 +16,24 @@ export default class MegaDataManager extends BaseDataManager {
     protected gameState: GAME_STATUS = GAME_STATUS.LOADING;
     /** 對應遊戲狀態的事件，用於狀態切換處理 */
     protected gameStateEvent = { 
-        [GAME_STATUS.LOADING]        : (GameStateEvent.GAME_LOADING),
         [GAME_STATUS.BUY]            : (GameStateEvent.GAME_BUY),
         [GAME_STATUS.DRAWTHENUMBERS] : (GameStateEvent.GAME_DRAWTHENUMBERS),
         [GAME_STATUS.REWARD]         : (GameStateEvent.GAME_REWARD),
+    }
+    /** 對應server遊戲狀態的事件，用於狀態切換處理 */
+    protected serverStateEvent = {
+        "begin"                      : GAME_STATUS.BUY,
+        "prize_on_going"             : GAME_STATUS.DRAWTHENUMBERS,
+        "wait_prize"                 : GAME_STATUS.REWARD,
     }
 
     /** 當前下注倒數時間（秒） */
     protected bettingTime : number = 0;
 
-    /** 當前遊戲輪次 ID */
-    protected roundId : number = 0;
+    /** 當前遊戲局號 */
+    protected GameRoundID : string = "";
+    /** 下局遊戲局號 */
+    protected NextGameRound : string = "";
 
     /** 當前玩家下注金額 */
     protected currentBetAmount : number = 1;
@@ -90,8 +98,14 @@ export default class MegaDataManager extends BaseDataManager {
 
     /** 顯示中的 Jackpot 金額字串 */
     protected jackpotAmountDisplay : string = "";
+    /** 顯示中的 Jackpot 金額字串 */
+    protected bingoAmountDisplay : string = "";
+    /** 顯示中的 1TG 金額字串 */
+    protected OneTGAmountDisplay : string = "";
+    /** 顯示中的 2TG 金額字串 */
+    protected TwoTGAmountDisplay : string = "";
     /** 不同中獎等級的額外玩法獎金清單 */
-    protected prizeList = [5.5, 5.5, 10, 27.5, 57.5, 57.5, 150, 1000, 1800, 20000];
+    protected prizeList = [];
     /** 當局的 Jackpot 排行榜資料 */
     protected currentJPRanking : any = null;
     /** 歷史的 Jackpot 排行榜資料 */
@@ -129,7 +143,7 @@ export default class MegaDataManager extends BaseDataManager {
 
     /** 當前線上人數 */
     public getOnline() {
-        return this.online;
+        return (this.online).toLocaleString();
     }
 
     /** 取得不同玩法的籌碼列表 */
@@ -302,13 +316,8 @@ export default class MegaDataManager extends BaseDataManager {
 
     //#region 不同頁面的業務邏輯
      
-    // 避免某些資料沒有 Client自行設定
-    public DefaultData() {
-        this.currency = "₱";
-    }
-
-    // 快照資料處理
-    public setSnapshot(data) {
+    // 快照資料處理 test
+    public setTestSnapshot(data) {
         this.nickname = data.nickName;
         this.coin = data.coin;
         this.currency = data.currency;
@@ -441,8 +450,8 @@ export default class MegaDataManager extends BaseDataManager {
     public getUserData() {
         let data = {
             amount : this.coin,
-            coin : 0,
-            wallet : 0,
+            cardCount : this.ownedCards.length,
+            betCoin : this.currentBetAmount,
         }
         return data;
     }
@@ -451,29 +460,179 @@ export default class MegaDataManager extends BaseDataManager {
 
     //#region 與Server交互訊息
 
-    /** 發送確認購卡請求(確認頁面) 亂數卡片 */
-    public SendConfirmPurchase() {
-        if(this.selectedCardContent == CARD_CONTENT.NORMAL) {
-            let data = {
-                gameRoundID : this.roundId,         // 當局ID
-                cardState : this.selectedCardType,             // 卡片類型
-                cardContent: this.selectedCardContent,          // 卡片內容
-                playState : this.selectedPlayMode,             // 玩法類型
-                chipPries : this.getChipPrice(),        // 籌碼金額
-                readyBuy : this.getCardsToBuy(),               // 購買數量
-            }
-            UnitTest.instance.SimulationData_OpenConfirm(data);
-        }else {
-            let data = {
-                gameRoundID : this.roundId,         // 當局ID
-                cardState : this.selectedCardType,             // 卡片類型
-                cardContent: 1,                         // 卡片內容
-                playState : this.selectedPlayMode,             // 玩法類型
-                chipPries : this.getChipPrice(),        // 籌碼金額
-                cardInfo : this.selectedDIYCards,    // 玩家選擇的DIY卡片
-            }
-            UnitTest.instance.DIYData_OpenConfirm(data);
+    // 初始化快照資訊
+    public init() {
+        // 解析伺服器傳來的主要 ID 與狀態資訊
+        const idData = window.serverData["id"];
+        this.GameRoundID = idData.game_round_id;
+        this.NextGameRound = idData.next_game_round;
+        this.gameState = this.serverStateEvent[idData.game_event];
+        this.currentBallSequence = idData.prize_number.split(',').map(Number);
+
+        // 解析玩家基本資訊
+        const info = window.serverData["info"];
+        this.currency = "₱";
+        this.coin = Number(info.balance ?? "0");
+        this.nickname = info.nickname ?? "";
+
+        // 解析獎池資訊
+        const jackpot = window.serverData["jackpot"];
+        this.jackpotAmountDisplay = jackpot.Jackpot ?? "0";
+        this.bingoAmountDisplay = jackpot.Bingo ?? "0";
+
+        // 解析獎金清單（前 10 為獎項，11、12 為 OneTG 與 TwoTG）
+        const prizeListData = window.serverData["list"].list;
+        for (let i = 0; i < 10; i++) {
+            this.prizeList[i] = Number(prizeListData[i]?.bonus ?? 0);
         }
+        this.OneTGAmountDisplay = prizeListData[10]?.bonus ?? "0";
+        this.TwoTGAmountDisplay = prizeListData[11]?.bonus ?? "0";
+
+        // 在線人數
+        this.online = window.serverData["online"];
+
+        // 解析卡片訂單清單，分類與處理投注金額
+        const cardList = window.serverData["cardList"];
+        const orders = this.classifyOrders(cardList.list);
+        const totalAmount = this.processOrders(orders);
+        this.currentBetAmount = totalAmount;
+
+        // 通知系統快照初始化完成
+        EventManager.getInstance().emit(GameStateEvent.GAME_SNAPSHOT);
+    }
+
+    /**
+     * 將訂單依照 order_number 分組，並依照 play_code 分類為對應的玩法類型
+     * @param orders 訂單清單
+     * @returns 整理後的訂單陣列，每筆附上 items 與 cardplay 屬性
+     */
+    private classifyOrders(orders: any[]): any[] {
+        const grouped: { [orderNumber: string]: any[] } = {};
+
+        // 依 order_number 將訂單分組
+        for (const order of orders) {
+            const orderNumber = order.order_number;
+            if (!grouped[orderNumber]) {
+                grouped[orderNumber] = [];
+            }
+            grouped[orderNumber].push(order);
+        }
+
+        const result: any[] = [];
+
+        // 分析每個訂單群組，決定卡片玩法類型
+        for (const [orderNumber, items] of Object.entries(grouped)) {
+            const playCodes = new Set(items.map(o => o.play_code));
+
+            let type: CARD_GAMEPLAY;
+            if (playCodes.size > 1) {
+                type = CARD_GAMEPLAY.COMDO; 
+            } else if (playCodes.has("100")) {
+                type = CARD_GAMEPLAY.EXTRA;   
+            } else {
+                type = CARD_GAMEPLAY.JACKPOT;  
+            }
+
+            const firstItem = items[0];
+            firstItem.items = items;              // 將整組訂單附加至第一項
+            firstItem.cardplay = type;            // 標記玩法類型
+
+            result.push(firstItem);
+        }
+
+        return result;
+    }
+
+    /**
+     * 處理訂單資料，將每張卡片解析並建立對應的 CardMega 物件
+     * @param orders 從伺服器取得的訂單列表
+     * @returns 該批訂單的總投注金額
+     */
+    private processOrders(orders: any[]): number {
+        let totalAmount = 0;
+
+        orders.forEach((order) => {
+            // 累加投注金額
+            totalAmount += Number(order.amount);
+
+            order.bet_content.forEach((card) => {
+                // 處理號碼字串 -> 轉為數字陣列，無法轉換則為 null
+                const rawNumbers = card.numbers.split(',').map(n => {
+                    const num = Number(n);
+                    return isNaN(num) ? null : num;
+                });
+
+                // 分離有效數字與 null，並對有效數字排序
+                const numericPart = rawNumbers.filter(n => typeof n === 'number') as number[];
+                const nullCount = rawNumbers.filter(n => n === null).length;
+                numericPart.sort((a, b) => a - b);
+
+                // 將 null 插入中間（維持原邏輯）
+                const mid = Math.floor(numericPart.length / 2);
+                const sortedNumbers = [
+                    ...numericPart.slice(0, mid),
+                    ...Array(nullCount).fill(null),
+                    ...numericPart.slice(mid)
+                ];
+
+                // 加入號碼至號碼管理器（用於統一顯示等）
+                CardNumberManager.getInstance().addCard(sortedNumbers);
+
+                // 判斷卡片是否為 DIY 類型
+                const cardContent = card.numbers.includes("DIY") ? 1 : 0;
+
+                // 根據期號判斷卡片屬於本期還是下期
+                let cardState: number | null = null;
+                if (this.GameRoundID === order.issue_number) {
+                    cardState = 0; // 本期
+                } else if (this.NextGameRound === order.issue_number) {
+                    cardState = 1; // 下期
+                }
+                if (cardState === null) return;
+
+                // 建立卡片資料並實例化卡片
+                const data = {
+                    cardId: card.id,
+                    cardState,
+                    cardContent,
+                    playState: order.cardplay,
+                    numbers: sortedNumbers
+                };
+                const megaCard = new CardMega(data);
+                this.ownedCards.push(megaCard);
+            });
+        });
+
+        return totalAmount;
+    }
+
+    /** 取得目前擁有的卡片號碼 */
+    public gethaveCardNumberList() {
+        let number = [];
+        this.ownedCards.forEach((item)=>{
+            number.push(item.getCardInfo());
+        })
+        return number;
+    }
+
+    /** 發送確認購卡請求（亂數卡片 + DIY卡片統一處理） */
+    public SendConfirmPurchase() {
+        const isNormalCard = this.selectedCardContent === CARD_CONTENT.NORMAL;
+
+        const data: any = {
+            gameRoundID: this.NextGameRound,                // 當局 ID
+            cardState: this.selectedCardType,               // 卡片類型
+            cardContent: isNormalCard ? this.selectedCardContent : 1,  // 卡片內容（DIY 固定為 1）
+            playState: this.selectedPlayMode,               // 玩法
+            chipPries: this.getChipPrice(),                 // 籌碼金額
+        };
+
+        if (isNormalCard) {
+            data.readyBuy = this.getCardsToBuy();           // 亂數卡片的購買數量
+        } else {
+            data.cardInfo = this.selectedDIYCards;          // DIY 卡片資訊
+        }
+        CardNumberManager.getInstance().createPurchaseCards(data);
     }
 
     /** 確認購卡回包(確認頁面) */
@@ -507,20 +666,49 @@ export default class MegaDataManager extends BaseDataManager {
 
             data.push(cardData);
         }
-        UnitTest.instance.SnedChangeCardData(data);
+        CardNumberManager.getInstance().SnedChangeCardData(data);
     }
 
     /** 發送玩家確定購卡(將進入已購卡頁面)  */
     public SendPurchasedCardList() {
-        let data = {
-            gameRoundID: this.roundId,
-            cardInfo: this.confirmedPurchaseCards,
+        let cards = [];
+        this.confirmedPurchaseCards.forEach((item) =>{
+            let card = {
+                "card_detail": item.getCardInfoString(),
+                "card_id": item.getID(),
+                "gameType": item.getPlayState(),
+            }
+            cards.push(card);
+        });
+
+        let play_code = null;
+        switch(this.selectedPlayMode) {
+            case CARD_GAMEPLAY.COMDO:
+                play_code = 103;
+                break;
+            case CARD_GAMEPLAY.EXTRA:
+                play_code = 100;
+                break;
+            case CARD_GAMEPLAY.JACKPOT:
+                play_code = 101;
+                break;
         }
-        UnitTest.instance.SendPurchaseConfirmation(data);
+        // 傳送請求給伺服器建立卡片
+        HttpServer.CardCreate_POST(cards, this.getChipPrice(), play_code)
+        .then(results => {
+            // 解析伺服器回傳的訂單資料
+            const orders = this.classifyOrders(results.data);
+            console.warn("成功 orders => ", orders);
+
+            // 處理訂單內容並更新當前投注金額
+            const totalAmount = this.processOrders(orders);
+            this.currentBetAmount += totalAmount;
+        });
     }
 
     /** 發送玩家確定購卡回包  */
     public SendPurchasedCardListResponse(data) {
+        CardNumberManager.getInstance().clearConfirmedPurchaseCards();
         this.confirmedPurchaseCards = [];
         this.selectedDIYCards = [];          // 清除玩家選擇的DIY卡片
         this.cardsToBuy = 1;    
@@ -569,10 +757,10 @@ export default class MegaDataManager extends BaseDataManager {
     /** 取得結算頁面相關資訊 */
     public getResultPageData() {
         let data = {
-            cost : 0,       // 成本
-            extral : 1,     // extral玩法贏分
-            jackpot : 1,    // Jackpot玩法贏分
-            total : 0,      // 總贏分
+            cost : this.currentBetAmount, // 總下注金額
+            extral : 1,                   // extral玩法贏分
+            jackpot : 1,                  // Jackpot玩法贏分
+            total : 0,                    // 總贏分
         }
         return data;
     }
@@ -582,6 +770,7 @@ export default class MegaDataManager extends BaseDataManager {
         this.bettingTime = (buyTime) ? buyTime : 60;
         this.currentBall = null;
         this.currentBallSequence = [];
+        CardNumberManager.getInstance().clearOwnedCards();
         // 檢查玩家當局是否買卡
         let HasTheCurrentPlayerPurchasedCard = (this.ownedCards.length > 0);
 
@@ -589,6 +778,7 @@ export default class MegaDataManager extends BaseDataManager {
         const nextRoundCards = this.ownedCards.filter(card => {
             if (card.getCardState() === CARD_STATUS.PREORDER) {
                 card.setCardState(CARD_STATUS.NORMAL);
+                CardNumberManager.getInstance().addCard(card.getCardInfo());
                 return true;
             }
             return false;
@@ -652,7 +842,7 @@ export default class MegaDataManager extends BaseDataManager {
             }
         }else {
             let newCardData = {
-                cardId: UnitTest.generateCardID(),
+                cardId: CardNumberManager.getInstance().generateCardID(),
                 numbers: data,
             }
             let newCard = new CardMega(newCardData);
@@ -765,7 +955,7 @@ export default class MegaDataManager extends BaseDataManager {
     public getAllBallNumbersData() {
         let data = {
             ballList : this.currentBallSequence,
-            tableId : this.gameID,
+            // tableId : this.gameID,
         }
         return data;
     }
@@ -773,10 +963,10 @@ export default class MegaDataManager extends BaseDataManager {
     /** Jackpot中獎金額資訊 */
     public getJackpotAndBingoWinData() {
         let data = {
-            Jackpot : 986890.21,
-            Bingo: 986890.21,
-            OneTG: 3000,
-            TWOTG: 300,
+            Jackpot: this.jackpotAmountDisplay,
+            Bingo: this.bingoAmountDisplay,
+            OneTG: this.OneTGAmountDisplay,
+            TWOTG: this.TwoTGAmountDisplay,
         }
         return data;
     }

@@ -1,5 +1,4 @@
 import MegaComponent from "../../Common/Base/gameMega/MegaComponent";
-import SocketManager from "../../Common/Base/SocketManager";
 import { audioManager } from "../../Common/Tools/AudioMgr";
 import EventManager, { GameStateUpdate } from "../../Common/Tools/Base/EventManager";
 import { PopupName } from "../../Common/Tools/PopupSystem/PopupConfig";
@@ -11,6 +10,10 @@ import { UrlManager } from "../../Common/Tools/UrlManager";
 const {ccclass, property} = cc._decorator;
 @ccclass
 export default class BingoMegaH5 extends MegaComponent {
+
+    private initialized : boolean = false;
+    private initStart: boolean = false;
+
     /** 監聽事件（後期根據不同遊戲複寫） */
     protected addEventListener() {
         super.addEventListener();
@@ -21,6 +24,7 @@ export default class BingoMegaH5 extends MegaComponent {
         EventManager.getInstance().on(GameStateUpdate.StateUpdate_SaveDIYCards, this.SaveDIYCards, this);
         EventManager.getInstance().on(GameStateUpdate.StateUpdate_DeleteDIYCard, this.DeleteDIYCard, this);
         EventManager.getInstance().on(GameStateUpdate.StateUpdate_SendChatMessage, this.SendChat, this);
+        cc.director.getScene().on("Game:InitData", this.onReceiveInitData, this);
     }
 
     /** 監聽事件註銷（後期根據不同遊戲複寫） */
@@ -36,12 +40,21 @@ export default class BingoMegaH5 extends MegaComponent {
     /** 初始化各種註冊流程（後期根據不同遊戲複寫） */
     protected init(): void {
         super.init();
-        this.data.DefaultData();
-        this.data.gameID = Number(UrlManager.getGameID());
         audioManager.init({bgmVolume : 1, soundVolume : 1});
         audioManager.setNode();
-        /** 加載遊戲內容關閉Loading頁面 */
-        SocketManager.getInstance().init();
+    }
+
+    protected start(): void {
+        this.initStart = true;
+        this.onReceiveInitData();
+    }
+
+    private onReceiveInitData() {
+        // 避免初始化執行兩次 快照更新
+        if (!this.initialized && this.initStart && (window.serverData && Object.keys(window.serverData).length > 0)) {
+            this.data.init();
+            this.initialized = true;
+        }
     }
 
     /** 開啟DIY編輯頁面 */

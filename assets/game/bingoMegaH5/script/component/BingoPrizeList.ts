@@ -14,12 +14,8 @@ export default class BingoPrizeList extends MegaComponent {
      */
     protected init(): void {
         super.init();
-
         // 取得所有子節點中的 PrizeIcon 元件
         this.prizeList = this.node.getComponentsInChildren(PrizeIcon);
-
-        // 設定獎勵金額顯示
-        this.updatePrizeAmounts();
     }
 
     /**

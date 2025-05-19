@@ -15,6 +15,8 @@ export default class CardPurchasePage extends MegaComponent {
     private Toggle_CardState: cc.ToggleContainer = null;
     @property({ type: cc.ToggleContainer, visible: true })
     private Toggle_PlayState : cc.ToggleContainer = null;
+    @property({ type: cc.Node, visible: true })
+    private Node_Currency : cc.Node = null;
     @property({ type: cc.Label, visible: true })
     private Label_CardPrice : cc.Label = null;
     @property({ type: cc.Label, visible: true })
@@ -197,17 +199,11 @@ export default class CardPurchasePage extends MegaComponent {
 
         // 設定目前卡片狀態的 Toggle 為勾選
         this.Toggle_CardState.toggleItems[data.cardContent].isChecked = true;
-        // 更新所有卡片狀態的外觀顯示（選中的顯示樣式不同）
-        this.Toggle_CardState.toggleItems.forEach((toggle, index) => {
-            const isSelected = index === data.cardContent;
-            // 第一個子節點為選中標記或樣式切換節點
-            toggle.node.children[0].active = !isSelected;
-        });
-
         // 設定目前玩法狀態的 Toggle 為勾選
         this.Toggle_PlayState.toggleItems[data.playState].isChecked = true;
 
         // 根據是否為 Jackpot 模式，切換顯示的 UI 標籤
+        this.Node_Currency.active = data.playJackpot;
         this.Label_CardPrice.node.active = data.playJackpot;   // 顯示卡片價格（Jackpot 模式）
         this.Label_Currency.node.active = !data.playJackpot;   // 顯示一般貨幣（非 Jackpot 模式）
         // 若為連線玩法，顯示使用說明
@@ -240,6 +236,12 @@ export default class CardPurchasePage extends MegaComponent {
         let buyDIYCard = this.data.buyDIYCard();
         this.Btn_Increase.active = this.Btn_Decrease.active = !buyDIYCard;
         this.Btn_OpenDIYPage.active = buyDIYCard;
+
+        // 更新所有卡片狀態的外觀顯示（選中的顯示樣式不同）
+        this.Toggle_CardState.toggleItems.forEach((toggle, index) => {
+            // 第一個子節點為選中標記或樣式切換節點
+            toggle.node.children[0].active = !toggle.isChecked;
+        });
     }
 
     /** 檢查要展示的按鈕類型 */

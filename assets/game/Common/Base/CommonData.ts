@@ -54,13 +54,10 @@ export const ERROR_CODE = cc.Enum({
     UNKNOWN_ERROR: "20000",
 })
 
-/** 中獎圖片的數據資料 */
-@ccclass('prizeData')
-export default class prizeData {
-    @property({ type: cc.Float })
-    public coin: number = 0;
-    @property(cc.SpriteFrame)
-    public default : cc.SpriteFrame = null;
-    @property(cc.SpriteFrame)
-    public winning : cc.SpriteFrame = null;
+declare global {
+    interface Window {
+        serverData: {};
+        url: any;
+        DataFetcher: any;
+    }
 }

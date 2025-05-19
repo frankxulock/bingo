@@ -1,3 +1,4 @@
+import { HttpServer } from "./bingoMegaH5/script/HttpServer";
 import { CardMega } from "./Common/Base/card/CardMega";
 import { CARD_CONTENT, GAME_STATUS } from "./Common/Base/CommonData";
 import FlvPlayer from "./Common/Base/component/FlvPlayer";
@@ -16,7 +17,7 @@ export default class UnitTest extends cc.Component {
     private Loading : cc.Node = null;
     @property({ type: FlvPlayer, visible: true })
     private FlvPlayer : FlvPlayer = null;
-    private data;
+    private data : MegaDataManager = null;
     private btns = [];
 
     private static _instance: UnitTest = null;
@@ -37,21 +38,21 @@ export default class UnitTest extends cc.Component {
     start () {
         this.data = MegaDataManager.getInstance();
         this.btns = this.node.getComponentsInChildren(cc.Button);
-        this.btns[0].node.on('click', this.onSnapshot, this)
-        this.btns[1].node.on('click', this.onSendBall, this)
-        this.btns[2].node.on('click', this.SimulationData_OpenConfirm, this);
-        this.btns[3].node.on('click', this.testCardSimulationGeneration, this);
-        this.btns[4].node.on('click', this.startSimulation, this);
-        this.btns[5].node.on('click', this.TestMegaCard, this);
-        this.btns[6].node.on('click', this.TestMegaCardView, this);
-        this.btns[7].node.on('click', this.OpenResultPage, this);
-        this.btns[8].node.on('click', this.OpneRewardPopupPage, this);
-        this.btns[9].node.on('click', this.OpneDIYCardSelectionPage, this);
-        this.btns[10].node.on('click', this.OpneDIYEditPage, this);
-        this.btns[11].node.on('click', this.setAvatarData, this);
-        this.btns[12].node.on('click', this.setLeaderboardData, this);
-        this.btns[13].node.on('click', this.TestFlvPlayer, this);
-        this.btns[14].node.on('click', this.getHttpID, this);
+        this.btns[0]?.node.on('click', this.onSnapshot, this)
+        this.btns[1]?.node.on('click', this.onSendBall, this)
+        this.btns[2]?.node.on('click', this.SimulationData_OpenConfirm, this);
+        this.btns[3]?.node.on('click', this.testCardSimulationGeneration, this);
+        this.btns[4]?.node.on('click', this.startSimulation, this);
+        this.btns[5]?.node.on('click', this.TestMegaCard, this);
+        this.btns[6]?.node.on('click', this.TestMegaCardView, this);
+        this.btns[7]?.node.on('click', this.OpenResultPage, this);
+        this.btns[8]?.node.on('click', this.OpneRewardPopupPage, this);
+        this.btns[9]?.node.on('click', this.OpneDIYCardSelectionPage, this);
+        this.btns[10]?.node.on('click', this.OpneDIYEditPage, this);
+        this.btns[11]?.node.on('click', this.setAvatarData, this);
+        this.btns[12]?.node.on('click', this.setLeaderboardData, this);
+        this.btns[13]?.node.on('click', this.TestFlvPlayer, this);
+        this.btns[14]?.node.on('click', this.getHttpID, this);
     }
 
     // 模擬快照封包進入
@@ -86,7 +87,7 @@ export default class UnitTest extends cc.Component {
         const cards = [];
         for (let i = 0; i < data.readyBuy; i++) {
             const cardId = this.generateCardID(i);
-            const numbers = this.generateCardNumbersFlat(); // 陣列
+            const numbers = this.generateUniqueCardNumbersFlat(); // 陣列
 
             const cardData = {
                 cardId: cardId,
@@ -126,7 +127,7 @@ export default class UnitTest extends cc.Component {
     /** 模擬Server處理更新數據 */
     public SnedChangeCardData(data) {
         for(let i = 0; i < data.length; i++) {
-            data[i].numbers = this.generateCardNumbersFlat(); // 陣列
+            data[i].numbers = this.generateUniqueCardNumbersFlat(); // 陣列
         }
         this.data.ConfirmPurchaseResponse(data);
     }
@@ -143,38 +144,61 @@ export default class UnitTest extends cc.Component {
         return `card_${Date.now()}_0`;
     }
     public generateCardID(index: number): string {
-        return `card_${Date.now()}_${index}`;
+        return crypto.randomUUID();;
     }
 
 
-    /** 生成賓果卡數據：一維陣列，25 格，中間為 null */
-    public generateCardNumbersFlat(): (number | null)[] {
+    /**
+     * 生成不重複的賓果卡數據（25 格，中間為 null）
+     * @param existingCards 已擁有的卡片集合
+     */
+    public generateUniqueCardNumbersFlat(): number[] {
+        let existingCards = this.data.gethaveCardNumberList();
         const getRandom = (range: number[], count: number): number[] =>
             this.shuffle(range).slice(0, count).sort((a, b) => a - b);
-    
-        const columns = [
-            getRandom(this.range(1, 15), 5),    // B
-            getRandom(this.range(16, 30), 5),   // I
-            getRandom(this.range(31, 45), 5),   // N
-            getRandom(this.range(46, 60), 5),   // G
-            getRandom(this.range(61, 75), 5),   // O
-        ];
-    
-        const flat: (number | null)[] = [];
- 
-        for (let row = 0; row < 5; row++) {
-            for (let col = 0; col < 5; col++) {
-                // 中央位置設為 null（第13格）
-                if (row === 2 && col === 2) {
-                    flat.push(null);
-                } else {
-                    flat.push(columns[row][col]);
+
+        const isDuplicate = (card: (number | null)[]): boolean => {
+            return existingCards.some(existing => 
+                existing.every((val, i) => val === card[i])
+            );
+        };
+
+        let newCard: (number | null)[] = [];
+
+        let attempts = 0;
+        const MAX_ATTEMPTS = 1000;
+
+        do {
+            const columns = [
+                getRandom(this.range(1, 15), 5),    // B
+                getRandom(this.range(16, 30), 5),   // I
+                getRandom(this.range(31, 45), 5),   // N
+                getRandom(this.range(46, 60), 5),   // G
+                getRandom(this.range(61, 75), 5),   // O
+            ];
+
+            const flat: (number | null)[] = [];
+
+            for (let row = 0; row < 5; row++) {
+                for (let col = 0; col < 5; col++) {
+                    if (row === 2 && col === 2) {
+                        flat.push(null);
+                    } else {
+                        flat.push(columns[col][row]); // 修正原本 col/row 順序錯置
+                    }
                 }
             }
-        }
-        return flat;
-    }
 
+            newCard = flat;
+            attempts++;
+        } while (isDuplicate(newCard) && attempts < MAX_ATTEMPTS);
+
+        if (attempts >= MAX_ATTEMPTS) {
+            console.warn('無法在限制次數內生成不重複的賓果卡。');
+        }
+
+        return newCard;
+    }
 
     /** 工具：範圍陣列 */
     public range(start: number, end: number): number[] {
@@ -230,7 +254,7 @@ export default class UnitTest extends cc.Component {
             online : 30,                            // 當前在線人數
             ballNumberWinMap: this.generateRandomWinData(),                   // 每個球的中獎次數
         }
-        this.data.setSnapshot(data);
+        this.data.setTestSnapshot(data);
         EventManager.getInstance().emit(GameStateEvent.GAME_SNAPSHOT);
         this.startBettingPhase();
     }
@@ -320,7 +344,7 @@ export default class UnitTest extends cc.Component {
         }
 
         let card = new CardMega(data);
-        console.warn(this.generateCardNumbersFlat());
+        console.warn(this.generateUniqueCardNumbersFlat());
         // 用這樣的方式檢查每個中獎圖形
         for(let i = 0; i < 5; i++){
             let v = 1 + i;
@@ -366,7 +390,7 @@ export default class UnitTest extends cc.Component {
             cardState : 0,
             cardContent: 0,
             playState : 0,
-            numbers : this.generateCardNumbersFlat(), 
+            numbers : this.generateUniqueCardNumbersFlat(), 
         }
         let card = new CardMega(cardInfo);
         // let card2 = new CardMega(cardInfo2);
@@ -434,7 +458,7 @@ export default class UnitTest extends cc.Component {
     
         for (let i = 0; i < count; i++) {
             const cardId = this.generateCardID(i);
-            const numbers = this.generateCardNumbersFlat(); // 陣列
+            const numbers = this.generateUniqueCardNumbersFlat(); // 陣列
     
             const cardData = {
                 cardId: cardId,
@@ -458,7 +482,7 @@ export default class UnitTest extends cc.Component {
     
         for (let i = 0; i < count; i++) {
             const cardId = this.generateCardID(i);
-            const numbers = this.generateCardNumbersFlat(); // 陣列
+            const numbers = this.generateUniqueCardNumbersFlat(); // 陣列
     
             const cardData = {
                 cardId: cardId,
@@ -607,10 +631,11 @@ export default class UnitTest extends cc.Component {
     }
 
     public getHttpID() {
-        console.warn("快照事件");
-        BaseDataManager.http =  "http://";
-        BaseDataManager.serverHost =  "localhost:3000/proxy/";
-        let data = {game_code: "BGM" }
-        httpSender.sendGet("gameApi/api/front/game/round/id", data);
+        // console.warn("快照事件");
+        // BaseDataManager.http =  "http://";
+        // BaseDataManager.serverHost =  "localhost:3000/proxy/";
+        // let data = {game_code: "BGM" }
+        // httpSender.sendGet("gameApi/api/front/game/round/id", data);
     }
+
 }

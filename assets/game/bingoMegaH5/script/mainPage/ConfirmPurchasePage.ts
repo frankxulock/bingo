@@ -11,8 +11,6 @@ const {ccclass, property} = cc._decorator;
 @ccclass
 export default class ConfirmPurchasePage extends MegaComponent implements IWindow {
 
-    @property({ type: cc.Node, visible: true })
-    private Node_Modal: cc.Node = null;
     @property({ type: ScrollLazyLoader, visible: true })
     private ScrollView_ConfirmedCardList: ScrollLazyLoader = null;
     @property({ type: cc.Node, visible: true })

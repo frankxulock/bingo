@@ -53,7 +53,7 @@ export default class Card extends cc.Component {
         this.Node_E.active = data.haveExtra;
 
         // 初始化 cardItems（一次性抓取 CardIcon 組件）
-        if (this.cardItems == null) {
+        if (this.cardItems.length == 0) {
             this.cardItems = this.Node_NumberGroup.getComponentsInChildren(CardIcon);
         }
 

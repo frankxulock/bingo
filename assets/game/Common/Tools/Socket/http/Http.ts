@@ -38,7 +38,7 @@ export async function sendGet(url: string, headers?: {}, queryParam?: {}): Promi
     return undefined
 }
 
-export async function sendPost(url: string, headers?: {}, bodyData?: FormData) {
+export async function sendPost(url: string, headers?: {}, bodyData?: any) {
     try {
         const res = await fetch(`${url}`, {
             method: "POST",

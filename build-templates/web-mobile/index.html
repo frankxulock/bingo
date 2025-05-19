@@ -210,6 +210,8 @@
     if (typeof VConsole !== 'undefined') {
       window.vConsole = new VConsole();
     }
+    // 掛載到全域 window 物件，讓其他腳本能使用
+    window.showReloadDialog = showReloadDialog; 
   </script>
 </body>
 

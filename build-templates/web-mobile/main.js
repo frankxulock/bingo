@@ -19,6 +19,13 @@ window.boot = function () {
     function tryStartGame() {
         if (snapshotReady && assetsReady) {
             window.hideSplash();  // 等兩者都完成後才隱藏 loading splash
+            // 廣播遊戲資料給主場景
+            const scene = cc.director.getScene();
+            if (scene && scene.isValid) {
+            scene.emit("Game:InitData", window.snapshotData); // 可以附帶資料
+            } else {
+            console.warn("主場景尚未就緒，無法廣播 Game:InitData");
+            }
         }
     }
 
@@ -125,53 +132,31 @@ window.boot = function () {
         }
     }
 
-    /** 請求快照資料的重試機制 */
-    var retryAttempts = 0;
-    const maxRetries = 3;
-
-    function handleEmptyData(data) {
-        return (data) ? data : null; // Return null if data is empty or invalid
-    }
-
+    /** 請求快照資料 */
     function fetchSnapshots() {
-        window.Snapshots = {};
+        window.serverData = {};
         // 請求不同類型的資料
-        Promise.all([
-            fetch(window.GameConfig.getIDUrl()),
-            fetch(window.GameConfig.getJACKPOTUrl(), window.GameConfig.getHeaders()),
-            fetch(window.GameConfig.getLISTUrl()),
-            fetch(window.GameConfig.getONLINEUrl()),
-        ])
-            .then(responses => Promise.all(responses.map(r => {
-                if (!r.ok) throw new Error("Network error");
-                return r.json();
-            })))
-            .then(([idData, jackpotData, listData, onlineData]) => {
-                window.Snapshots["id"] = handleEmptyData(idData.data);
-                window.Snapshots["jackpot"] = handleEmptyData(jackpotData.data);
-                window.Snapshots["list"] = handleEmptyData(listData.data);
-                window.Snapshots["online"] = handleEmptyData(onlineData.data);
-
-                console.log("快照資料:", window.Snapshots);
-
-                // Check if all necessary data is valid
-                if (window.Snapshots["id"] && window.Snapshots["jackpot"] && window.Snapshots["list"] && window.Snapshots["online"]) {
-                    snapshotReady = true;
-                    tryStartGame();
-                } else {
-                    throw new Error("Invalid snapshot data received");
-                }
-            })
-            .catch(error => {
-                console.log("快照資料請求錯誤:", error);
-                if (retryAttempts < maxRetries) {
-                    retryAttempts++;
-                    console.log(`Retrying... Attempt ${retryAttempts}`);
-                    fetchSnapshots(); // Retry fetching data
-                } else {
-                    console.log("Reached maximum retry attempts. No further actions will be taken.");
-                }
-            });
+        window.DataFetcher.fetchAll({
+            endpoints: window.snapshotEndpoints,
+            target: window.serverData,
+            onComplete: () => {
+              console.log("快照資料:", window.serverData);
+          
+              const requiredKeys = window.snapshotEndpoints.map(item => item.key);
+              const ready = requiredKeys.every(k => window.serverData[k]);
+          
+              if (ready) {
+                snapshotReady = true;
+                tryStartGame();
+              } else {
+                throw new Error("Invalid snapshot data received");
+              }
+            },
+            onError: (err) => {
+                window.showReloadDialog("載入錯誤，請檢查網路或伺服器狀態。");
+            },
+            maxRetries: 3
+          });
     }
 
     // 開始加載快照資料
