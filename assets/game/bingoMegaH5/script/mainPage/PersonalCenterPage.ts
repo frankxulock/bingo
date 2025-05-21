@@ -22,16 +22,14 @@ export default class PersonalCenterPage extends cc.Component implements IWindow 
     private ToggleContainer_Language : cc.ToggleContainer = null;
 
     private data : any = null;
-    private dataManager : any = null;
+    private dataManager : MegaDataManager = null;
 
-    open(data: any): void {
-        if(data == null)
-            return;
-        this.data = data;
+    open(): void {
         this.dataManager = MegaDataManager.getInstance();
-        CommonTool.setLabel(this.Label_nickName, data.nickName);
-        CommonTool.setLabel(this.Label_id, data.id);
-        CommonTool.setLabel(this.Label_coin, data.coin);
+        this.data = this.dataManager.getPersonalCenterPageData();
+        CommonTool.setLabel(this.Label_nickName, this.data.nickName);
+        CommonTool.setLabel(this.Label_id, this.data.id);
+        CommonTool.setLabel(this.Label_coin, this.data.coin);
 
         this.ToggleContainer_Language.toggleItems.forEach((item, index) => {
             item.node.off("toggle", this.OnChangeLanguage, this);

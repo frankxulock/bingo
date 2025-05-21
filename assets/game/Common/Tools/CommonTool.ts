@@ -131,7 +131,7 @@ export class CommonTool {
 
     /** 金額轉換函式 顯示貨幣 */
     public static formatMoney2(value: number, specialSymbols? : string): string {
-        let currency = MegaDataManager.getInstance().currency;
+        let currency = MegaDataManager.getInstance().getCurrency();
         return specialSymbols + currency + (value).toString();
     }
 

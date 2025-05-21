@@ -41,21 +41,6 @@ export default abstract class BaseDataManager extends Singleton {
     public static set offLineMode(value) {
         BaseDataManager._offLineMode = value;
     }
-    public static http: string = "https://";
-    public static serverHost: string = "";
-    public static token: string = "";
-    public static traceId: string = "";
-
-    /** 玩家ID */
-    public playerID: string = "";
-
-    /** 使用的貨幣 */
-    public currency: string = "";
-    /** 暱稱 */
-    public nickname: string = "";
-    /** 玩家金錢 */
-    public coin: number = 0;
-    public loginData: loginData = null;
 
     /** 初始化 */
     public init(): void {

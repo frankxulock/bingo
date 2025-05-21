@@ -30,13 +30,23 @@
         target: window.serverData,
         onComplete: () => {
           const requiredKeys = window.snapshotEndpoints.map(item => item.key);
-          const ready = requiredKeys.every(k => window.serverData[k]);
-      
+          const invalidKeys = [];
+          const ready = requiredKeys.every(k => {
+            const data = window.serverData[k];
+            // 檢查是否有 code 屬性且值為 10000
+            if (data.hasOwnProperty('code') && (data.code === 10000)) { return true; }
+            // 檢查資料是否存在
+            if (!data) { 
+              invalidKeys.push(`${k}: 資料缺失`);
+              return false; 
+            }
+            return true;
+          });
           if (ready) {
             snapshotReady = true;
             tryStartGame();
           } else {
-            throw new Error("Invalid snapshot data received");
+            throw new Error(`快照資料無效: ${invalidKeys.join(', ')}`);
           }
         },
         onError: (err) => {

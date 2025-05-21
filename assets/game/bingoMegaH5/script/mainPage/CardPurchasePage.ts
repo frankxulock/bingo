@@ -163,7 +163,7 @@ export default class CardPurchasePage extends MegaComponent {
 
     /** 開啟確認買卡片頁面 */
     protected OpenConfirmPurchasePage(): boolean {
-        if ((this.data.coin - this.data.getBuyTotalCard()) < 0) {
+        if ((this.data.getCoin() - this.data.getBuyTotalCard()) < 0) {
             ToastManager.showToast("余额不足");
             return false;
         }
@@ -218,6 +218,7 @@ export default class CardPurchasePage extends MegaComponent {
                 chipItem.setChipAmount(data.chipList[index]);
                 // 設定當前選中的籌碼
                 toggle.isChecked = (index === data.curChipIndex);
+                toggle.interactable = (data.multiples == 0) ? true : false;
             });
         }
 

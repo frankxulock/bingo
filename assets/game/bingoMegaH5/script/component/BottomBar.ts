@@ -37,8 +37,7 @@ export default class BottomBar extends MegaComponent {
 
     /** 開啟個人中心彈窗 */
     public OpnePersonalCenterPage(): void {
-        const personalData = this.data.getPersonalCenterPage();
-        PopupManager.showPopup(PopupName.PersonalCenterPage, personalData);
+        PopupManager.showPopup(PopupName.PersonalCenterPage);
     }
 
     /** 快照回調，用於畫面更新時觸發 */
@@ -48,9 +47,9 @@ export default class BottomBar extends MegaComponent {
 
     /** 更新顯示的用戶資料（幣種、金額、卡片數、下注金額） */
     private updateUserData(): void {
-        const userData = this.data.getUserData();
+        const userData = this.data.getUserPageData();
 
-        CommonTool.setLabel(this.Label_Currency, this.data.currency);
+        CommonTool.setLabel(this.Label_Currency, userData.currency);
         CommonTool.setLabel(this.Label_Amount, userData.amount);
         CommonTool.setLabel(this.Label_card, userData.cardCount);
         CommonTool.setLabel(this.Label_betCoin, userData.betCoin);

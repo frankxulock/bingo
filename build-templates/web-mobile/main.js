@@ -134,29 +134,34 @@ window.boot = function () {
 
     /** 請求快照資料 */
     function fetchSnapshots() {
-        window.serverData = {};
-        // 請求不同類型的資料
-        window.DataFetcher.fetchAll({
-            endpoints: window.snapshotEndpoints,
-            target: window.serverData,
-            onComplete: () => {
-              console.log("快照資料:", window.serverData);
-          
-              const requiredKeys = window.snapshotEndpoints.map(item => item.key);
-              const ready = requiredKeys.every(k => window.serverData[k]);
-          
-              if (ready) {
-                snapshotReady = true;
-                tryStartGame();
-              } else {
-                throw new Error("Invalid snapshot data received");
-              }
-            },
-            onError: (err) => {
-                window.showReloadDialog("載入錯誤，請檢查網路或伺服器狀態。");
-            },
-            maxRetries: 3
+      window.serverData = {};
+
+      window.DataFetcher.fetchAll({
+        endpoints: window.snapshotEndpoints,
+        target: window.serverData,
+        onComplete: () => {
+          const requiredKeys = window.snapshotEndpoints.map(item => item.key);
+          const ready = requiredKeys.every(k => {
+            const data = window.serverData[k];
+            // 檢查是否有 code 屬性且值為 10000
+            if (data.hasOwnProperty('code') && (data.code === 10000)) { return true; }
+            // 檢查資料是否存在
+            if (!data) { return false; }
+            // 如果沒有 code 屬性但有 data 屬性，也視為有效
+            return data.hasOwnProperty('data');
           });
+          if (ready) {
+            snapshotReady = true;
+            tryStartGame();
+          } else {
+            throw new Error("Invalid snapshot data received");
+          }
+        },
+        onError: (err) => {
+          window.showReloadDialog("載入錯誤，請檢查網路或伺服器狀態。");
+        },
+        maxRetries: 3
+      });
     }
 
     // 開始加載快照資料

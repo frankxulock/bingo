@@ -99,11 +99,10 @@ const url = {
   
     /** 共用 token 與驗證 Header 參數 */
     _commonHeaders: {
-      Authorization:
-        "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImNhbGVyIiwibm0iOiJjYWxlciIsIm1kIjoib2tfand0X21lcl9hcGlfY29kZV9ib2Jib2IiLCJybSI6MTc0NzYxODM3NTQ1Nn0.5OU_9eUPx4qZfDB48TG3iN44d-50wqKhv17s_ekIjac",
-      Current_Time: "1747618393513",
-      Signature_Nonce: "sIPBTjAQp4C3DgN0jVqoi",
-      Signature: "a8799f3ac062d979b43b4d2752dfdbc6",
+      Authorization:"Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImNhbGVyIiwibm0iOiJjYWxlciIsIm1kIjoib2tfand0X21lcl9hcGlfY29kZV9ib2Jib2IiLCJybSI6MTc0NzczMjM3OTgzM30.pFmoI7L3ln7MelDSpBSVMoo4TrhXJSh_9tp39A9MgWw",
+      Current_Time: "1747735104849",
+      Signature_Nonce: "irUCsNnKVOJtljq2HdHBA",
+      Signature: "f2c7ca0e45ca93d13e36fc5246371beb",
       Merchant_Code: "mer_api_code_bobbob",
     },
   
@@ -146,7 +145,15 @@ const DataFetcher = (() => {
       const response = await fetch(url, options);
       if (!response.ok) throw new Error(`Network error on ${key}`);
       const json = await response.json();
-      const result = { key, data: json.data };
+      // 檢查回應是否成功 (code === 0 或 code === 10000)
+      if (json.code !== 0 && json.code !== 10000) {
+        throw new Error(`API error on ${key}: ${json.code}`);
+      }
+      const result = { 
+        key, 
+        data: json.data,
+        code: json.code  // 加入 code 資訊
+      };
       return result;
     } catch (err) {
       throw err;
@@ -165,20 +172,27 @@ const DataFetcher = (() => {
     const executeFetch = () => {
       Promise.all(endpoints.map(fetchSingle))
         .then(results => {
-          results.forEach(({ key, data }) => {
-            target[key] = validateData(data);
+          results.forEach(({ key, data, code }) => {
+            let targetData = validateData(data);
+            if (targetData === null) {
+              targetData = {};
+            }
+            // 將 code 添加到數據中
+            target[key] = {
+              ...targetData,
+              code: code
+            };
           });
-          retryAttempts = 0;
           onComplete();
         })
         .catch(error => {
           console.error("資料請求錯誤:", error);
           if (retryAttempts < maxRetries) {
             retryAttempts++;
-            console.warn(`重試中... 第 ${retryAttempts} 次`);
             executeFetch();
           } else {
             console.error("已達最大重試次數，請檢查網路或伺服器狀態。");
+            retryAttempts = 0;  // 重置重試次數，為下次請求做準備
             onError(error);
           }
         });
@@ -199,14 +213,14 @@ const DataFetcher = (() => {
   
   const snapshotEndpoints = [
     { key: "id", url: url.getIDUrl() },
-    // { key: "currency", url: GameConfig.getCURRENCYUrl() },
+    { key: "currency", url: url.getCURRENCYUrl(), options: url.getHeaders_POST() },
     { key: "info", url: url.getINFOUrl(), options: url.getHeaders() },
     { key: "jackpot", url: url.getJACKPOTUrl(), options: url.getHeaders() },
     { key: "list", url: url.getLISTUrl() },
     { key: "online", url: url.getONLINEUrl() },
-    // { key: "maintain", url: GameConfig.getMAINTAINSTATEUrl() },
-    // { key: "infoLock", url: GameConfig.getINFOLOCK() },
-    // { key: "version", url: GameConfig.getVERSION(), options: GameConfig.getHeaders() },
+    { key: "maintain", url: url.getMAINTAINSTATEUrl(), options: url.getHeaders_POST() },
+    { key: "infoLock", url: url.getINFOLOCK(), options: url.getHeaders_POST() },
+    { key: "version", url: url.getVERSION(), options: url.getHeaders() },
     { key: "setting", url: url.getSETTING(), options: url.getHeaders() },
     { key: "video", url: url.getVIDEO(), options: url.getHeaders() },
     {

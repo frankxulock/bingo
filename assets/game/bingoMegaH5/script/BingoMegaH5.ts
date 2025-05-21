@@ -61,7 +61,7 @@ export default class BingoMegaH5 extends MegaComponent {
     private OpneDIYEditPage(data) {
         this.data.setDIYEditCard(data);
         // console.log("開啟DIY編輯頁面  可能需要Server請求參數等等事件先保留")
-        PopupManager.showPopup(PopupName.DIYEditPage, this.data.getDIYEditData());
+        PopupManager.showPopup(PopupName.DIYEditPage, this.data.getDIYEditPageData());
     }
 
     /** DIY選購卡片完畢事件 */
