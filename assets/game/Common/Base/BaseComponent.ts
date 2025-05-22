@@ -1,10 +1,10 @@
-import MegaDataManager from "./gameMega/MegaDataManager";
+import MegaManager from "./gameMega/MegaManager";
 
 // 賓果遊戲的Controller
 const { ccclass, property } = cc._decorator;
 @ccclass
 export default class BaseUIComponent extends cc.Component {
-    protected data : MegaDataManager = null;
+    protected data : MegaManager = null;
 
     protected onLoad(): void {
         /** 註冊監聽事件 */

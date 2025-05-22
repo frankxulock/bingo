@@ -72,6 +72,51 @@
     };
   </script>
 
+  <!-- 遊戲url解密 -->
+  <script src="https://cdn.jsdelivr.net/npm/crypto-js@4.1.1/crypto-js.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/blueimp-md5/2.3.0/js/md5.min.js"></script>
+  <script>
+    // 取得完整的 query string
+    const queryString = window.location.search.substring(1);
+    console.log("query string:", queryString);
+
+    // 原始密文（Base64 編碼）
+    const encryptedBase64 = queryString ? queryString : ``;
+
+    // 密鑰與 IV（相同）
+    const secretKey = "123456789mer-api";
+    const key = CryptoJS.enc.Utf8.parse(secretKey);
+    const iv = CryptoJS.enc.Utf8.parse(secretKey);
+
+    // 解密
+    const decrypted = CryptoJS.AES.decrypt(encryptedBase64, key, {
+      iv: iv,
+      mode: CryptoJS.mode.CBC,
+      padding: CryptoJS.pad.Pkcs7
+    });
+
+    const decryptedText = decrypted.toString(CryptoJS.enc.Utf8);
+    // 
+    function parseQueryString(str) {
+      return str
+        .split('&')
+        .map(kv => kv.split('='))
+        .reduce((acc, [k, v]) => {
+          acc[decodeURIComponent(k)] = decodeURIComponent(v || '');
+          return acc;
+        }, {});
+    }
+
+    // 若是 JSON，轉成物件（可選）
+    try {
+      window.decryptedTokenData = parseQueryString(decryptedText);
+      console.log("[Token 解密成功]", window.decryptedTokenData);
+    } catch (e) {
+      console.error("[解密成功但非 JSON 格式]", decryptedText);
+      window.decryptedTokenData = decryptedText;
+    }
+  </script>
+
   <!-- 🚀 核心載入與容錯處理 -->
   <script>
     const failedResources = [];

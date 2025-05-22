@@ -96,16 +96,40 @@ const url = {
     getCreateCard() {
       return this.buildUrl(this.PATHS.CREATECARD);
     },
-  
+
     /** 共用 token 與驗證 Header 參數 */
-    _commonHeaders: {
-      Authorization:"Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImNhbGVyIiwibm0iOiJjYWxlciIsIm1kIjoib2tfand0X21lcl9hcGlfY29kZV9ib2Jib2IiLCJybSI6MTc0Nzc5MTA1MjE3M30.vZxQFWB8WErKbqknTM0b0v0XtVXoqtT1yr3tf1KHsxE",
-      Current_Time: "1747791062568",
-      Signature_Nonce: "BH8re17LK7_G-b8Fpjt68",
-      Signature: "44b01db9a2696f1d55397a3fca7be9bd",
-      Merchant_Code: "mer_api_code_bobbob",
+    generateAuthHeaders() {
+      const token = window.decryptedTokenData.token;
+      const merchantCode = window.decryptedTokenData.code;
+
+      let currentTime = new Date().getTime();; // 留下給 Current_Time 與 Signature 用
+      let nanoid2 = (e = 21) =>
+      crypto.getRandomValues(new Uint8Array(e)).reduce((acc, t) => {
+        t &= 63;
+        return acc += t < 36
+          ? t.toString(36)
+          : t < 62
+          ? (t - 26).toString(36).toUpperCase()
+          : t > 62
+          ? "-"
+          : "_";
+      }, "");
+      let signatureNonce = nanoid2();
+      let signatureRaw = `${window.decryptedTokenData.code}${signatureNonce}mer-api-test${currentTime}`;
+      let signature = md5(signatureRaw);
+
+      // console.log('token => ', token);
+      // console.log('Signature_Nonce => ', signatureNonce);
+      // console.log("Signature => ", signature)
+      return {
+        Authorization: `Bearer ${token}`,
+        Current_Time: currentTime,
+        Signature_Nonce: signatureNonce,
+        Signature: signature,
+        Merchant_Code: merchantCode,
+      };
     },
-  
+
     /**
      * 取得自訂的 fetch 請求 headers（GET）
      * @returns {object} fetch 的設定物件
@@ -113,7 +137,7 @@ const url = {
     getHeaders() {
       return {
         method: "GET",
-        headers: { ...this._commonHeaders },
+        headers: { ...this.generateAuthHeaders() },
       };
     },
   
@@ -126,7 +150,7 @@ const url = {
       return {
         method: "POST",
         headers: {
-          ...this._commonHeaders,
+          ...this.generateAuthHeaders(),
           "Content-Type": "application/json",
         },
         body: JSON.stringify(body),
@@ -147,7 +171,7 @@ const DataFetcher = (() => {
       const json = await response.json();
       // 檢查回應是否成功 (code === 0 或 code === 10000)
       if (json.code !== 0 && json.code !== 10000) {
-        throw new Error(`API error on ${key}: ${json.code}`);
+        throw new Error(`API error on ${key}: ${json.code}  data ${json.data} message : ${json.message}`);
       }
       const result = { 
         key, 
@@ -240,7 +264,6 @@ const DataFetcher = (() => {
         const requiredKeys = window.snapshotEndpoints.map(item => item.key);
         const invalidKeys = [];
         const ready = requiredKeys.every(k => {
-          debugger;
           const data = window.serverData[k];
           // 檢查是否有 code 屬性且值為 10000
           if (data.hasOwnProperty('code') && (data.code === 10000)) { return true; }

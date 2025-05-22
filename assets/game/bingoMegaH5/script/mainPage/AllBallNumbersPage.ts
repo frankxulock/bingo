@@ -1,6 +1,6 @@
 import BallComponent from "../../../Common/Base/component/BallCompoent";
-import MegaDataManager from "../../../Common/Base/gameMega/MegaDataManager";
-import EventManager, { GameStateUpdate } from "../../../Common/Tools/Base/EventManager";
+import MegaManager from "../../../Common/Base/gameMega/MegaManager";
+import EventManager, { GameStateEvent, GameStateUpdate } from "../../../Common/Tools/Base/EventManager";
 import { CommonTool } from "../../../Common/Tools/CommonTool";
 import { IWindow } from "../../../Common/Tools/PopupSystem/IWindow";
 import { PopupName } from "../../../Common/Tools/PopupSystem/PopupConfig";
@@ -20,10 +20,7 @@ export default class AllBallNumbersPage extends cc.Component implements IWindow 
     private Label_TableID: cc.Label = null;
 
     protected onLoad(): void {
-        EventManager.getInstance().on(GameStateUpdate.StateUpdate_SendBall, this.setPageState, this);
-    }
-
-    protected onDestroy(): void {
+        EventManager.getInstance().on(GameStateEvent.GAME_OVER, this.gameOver, this);
         EventManager.getInstance().on(GameStateUpdate.StateUpdate_SendBall, this.setPageState, this);
     }
 
@@ -37,26 +34,65 @@ export default class AllBallNumbersPage extends cc.Component implements IWindow 
         this.setPageState();
     }
     close(): void {
+        EventManager.getInstance().off(GameStateEvent.GAME_OVER, this.gameOver, this);
+        EventManager.getInstance().off(GameStateUpdate.StateUpdate_SendBall, this.setPageState, this);
         PopupManager.closePopup(PopupName.AllBallNumbersPage);
+    }
+
+    gameOver() {
+        this.balls.forEach((ball) => {
+            ball.setAction(false);
+            cc.Tween.stopAllByTarget(ball.node); // 停止所有動畫
+            ball.node.opacity = 255; // 還原透明度
+        });
     }
 
     /** 更新頁面內容 */
     setPageState() {
-        let data = MegaDataManager.getInstance().getAllBallNumbersData();
-        // 球號列表更新
-        if(data.ballList == null) {
-            // 沒有數值不展示任何內容
-            this.balls.forEach((ball)=> { ball.setAction(false) });
-        }else{
-            this.balls.forEach((ball, index)=> {
-                if((index < data.ballList.length)) {
+        const data = MegaManager.getInstance().getAllBallNumbersPageData();
+        const latestBall = data.ballList?.[data.ballList.length - 1];  // 最新球號
+
+        if (!data.ballList) {
+            this.balls.forEach((ball) => {
+                ball.setAction(false);
+                cc.Tween.stopAllByTarget(ball.node); // 停止所有動畫
+                ball.node.opacity = 255; // 還原透明度
+            });
+        } else {
+            this.balls.forEach((ball, index) => {
+                const num = data.ballList[index];
+                const node = ball.node;
+
+                if (index < data.ballList.length) {
                     ball.setAction(true);
-                    ball.setBallNumber(data.ballList[index]);
-                }else {
+                    ball.setBallNumber(num);
+
+                    cc.Tween.stopAllByTarget(node);
+                    node.opacity = 255;
+
+                    if (num === latestBall) {
+                        // 明暗閃爍 5 秒
+                        const blink = cc.tween(node)
+                            .repeatForever(
+                                cc.tween()
+                                    .to(0.3, { opacity: 80 })
+                                    .to(0.3, { opacity: 255 })
+                            )
+                            .start();
+
+                        this.scheduleOnce(() => {
+                            cc.Tween.stopAllByTarget(node);
+                            node.opacity = 255;
+                        }, 5);
+                    }
+                } else {
                     ball.setAction(false);
+                    cc.Tween.stopAllByTarget(node);
+                    node.opacity = 255;
                 }
-            })
+            });
         }
+
         CommonTool.setLabel(this.Label_TableID, data.tableId);
     }
 }

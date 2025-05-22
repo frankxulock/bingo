@@ -1,4 +1,5 @@
 import MegaComponent from "../../Common/Base/gameMega/MegaComponent";
+import { SocketManager } from "../../Common/Base/SocketManager";
 import { audioManager } from "../../Common/Tools/AudioMgr";
 import EventManager, { GameStateUpdate } from "../../Common/Tools/Base/EventManager";
 import { PopupName } from "../../Common/Tools/PopupSystem/PopupConfig";
@@ -53,6 +54,8 @@ export default class BingoMegaH5 extends MegaComponent {
         // 避免初始化執行兩次 快照更新
         if (!this.initialized && this.initStart && (window.serverData && Object.keys(window.serverData).length > 0)) {
             this.data.init();
+            const socket = SocketManager.getInstance();
+            socket.connect("wss://bg-nats.vipsroom.net/");
             this.initialized = true;
         }
     }
@@ -74,13 +77,13 @@ export default class BingoMegaH5 extends MegaComponent {
     private SaveDIYCards(data) {
         // console.log("儲存DIY卡片  可能需要Server請求參數等等事件先保留")
         this.data.DIYCardEditUpdate(data);
-        EventManager.getInstance().emit(GameStateUpdate.StateUpdate_DIYCardSelectionPage, this.data.getDIYCardSelectionData());
+        EventManager.getInstance().emit(GameStateUpdate.StateUpdate_DIYCardSelectionPage, this.data.getDIYCardSelectionPageData());
     }
 
     /** DIY刪除卡片事件 */
     private DeleteDIYCard(data) {
         this.data.DIYDelete(data);
-        EventManager.getInstance().emit(GameStateUpdate.StateUpdate_DIYCardSelectionPage, this.data.getDIYCardSelectionData());
+        EventManager.getInstance().emit(GameStateUpdate.StateUpdate_DIYCardSelectionPage, this.data.getDIYCardSelectionPageData());
     }
 
     /** 發送聊天訊息 */

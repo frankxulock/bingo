@@ -6,7 +6,7 @@
 import { CardMega } from "./Common/Base/card/CardMega";
 import { CARD_CONTENT, GAME_STATUS } from "./Common/Base/CommonData";
 import FlvPlayer from "./Common/Base/component/FlvPlayer";
-import MegaDataManager from "./Common/Base/gameMega/MegaDataManager";
+import MegaManager from "./Common/Base/gameMega/MegaManager";
 import EventManager, { GameStateEvent, GameStateUpdate } from "./Common/Tools/Base/EventManager";
 import { PopupName } from "./Common/Tools/PopupSystem/PopupConfig";
 import PopupManager from "./Common/Tools/PopupSystem/PopupManager";
@@ -19,7 +19,7 @@ export default class UnitTest extends cc.Component {
     private btns: cc.Button[] = [];
 
     // 遊戲數據管理
-    private data : MegaDataManager = null;
+    private data : MegaManager = null;
 
     // 單例模式實現
     private static _instance: UnitTest = null;
@@ -47,7 +47,7 @@ export default class UnitTest extends cc.Component {
      * 初始化按鈕事件綁定
      */
     start() {
-        this.data = MegaDataManager.getInstance();
+        this.data = MegaManager.getInstance();
 
         this.btns = this.node.getComponentsInChildren(cc.Button);
         

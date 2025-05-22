@@ -24,14 +24,14 @@ export class MegaDataStore {
     public selectedCardContent: CARD_CONTENT = CARD_CONTENT.NORMAL;
     public selectedPlayMode: CARD_GAMEPLAY = CARD_GAMEPLAY.COMDO;
     public currentBetAmount: number = 0;
-    public readonly comboChips: number[] = [10, 25, 55, 105, 205, 505];
-    public readonly extraChips: number[] = [5, 20, 50, 100, 200, 500];
-    public readonly jackpotChipCost: number = 5;
+    public comboChips: number[] = [10, 25, 55, 105, 205, 505];
+    public extraChips: number[] = [5, 20, 50, 100, 200, 500];
+    public jackpotChipCost: number = 5;
     public selectedChipIndex: number = 0;
     public multiples: number = 0;
 
     // 卡片數量
-    public cardsToBuy: number = 1;
+    public cardsToBuy: number = 0;
     public readonly maxCardCount: number = 500;
     public readonly maxDIYCardCount: number = 60;
 
@@ -68,7 +68,6 @@ export class MegaDataStore {
 
     // 其他
     public hostAvatarData: any = null;
-    public isBuyButtonEnabled: boolean = true;
 
     /**
      * 從服務器數據初始化存儲
@@ -76,46 +75,84 @@ export class MegaDataStore {
     public initFromServer(serverData: any): void {
         // 解析伺服器傳來的主要 ID 與狀態資訊
         const idData = serverData["id"];
-        this.GameRoundID = idData.game_round_id;
-        this.NextGameRound = idData.next_game_round;
-        this.gameState = this.getGameStateFromServer(idData.game_event);
-        this.currentBallSequence = idData.prize_number.split(',').map(Number);
+        if(idData) {
+            this.GameRoundID = idData.game_round_id;
+            this.NextGameRound = idData.next_game_round;
+            this.gameState = this.getGameStateFromServer(idData.game_event);
+            this.currentBallSequence = idData.prize_number ? idData.prize_number.split(',').map(Number) : [];
+        }
 
         // 解析玩家基本資訊
         const info = serverData["info"];
+        if(info) {
+            this.coin = Number(info.balance ?? "0");
+            this.nickname = info.nickname ?? "";
+        }
         const currency = serverData["currency"];
-        this.currency = CURRENCY_SYMBOL[currency.currency_type];
-        this.coin = Number(info.balance ?? "0");
-        this.nickname = info.nickname ?? "";
+        if(currency) {
+            this.currency = CURRENCY_SYMBOL[currency.currency_type];
+        }
+
+        // 解析設定資訊
+        const setting = serverData['setting']
+        if(setting) {
+            const settings: any = setting.list;
+            const extraPattern = settings.find(item => item.category_id === 100);
+            const jackpotPattern = settings.find(item => item.category_id === 101);
+            if (extraPattern && jackpotPattern) {
+                this.jackpotChipCost = Number(jackpotPattern.base_price);
+                this.extraChips = extraPattern.multiple_setting
+                    .split(',')
+                    .map(str => Number(str.trim()))
+                    .filter(n => !isNaN(n));
+                this.comboChips = this.extraChips.map(extra => extra + this.jackpotChipCost);
+            }
+        }
 
         // 解析獎池資訊
         const jackpot = serverData["jackpot"];
-        this.jackpotAmountDisplay = jackpot.Jackpot ?? "0";
-        this.bingoAmountDisplay = jackpot.Bingo ?? "0";
+        if(jackpot) {
+            this.jackpotAmountDisplay = jackpot.Jackpot ?? "0";
+            this.bingoAmountDisplay = jackpot.Bingo ?? "0";
+        }
 
         // 解析獎金清單（前 10 為獎項，11、12 為 OneTG 與 TwoTG）
-        const prizeListData = serverData["list"].list;
-        for (let i = 0; i < 10; i++) {
-            this.prizeList[i] = Number(prizeListData[i]?.bonus ?? 0);
+        const prizeListData = serverData["list"]?.list;
+        if(prizeListData) {
+            for (let i = 0; i < 10; i++) {
+                this.prizeList[i] = Number(prizeListData[i]?.bonus ?? 0);
+            }
+            this.OneTGAmountDisplay = prizeListData[10]?.bonus ?? "0";
+            this.TwoTGAmountDisplay = prizeListData[11]?.bonus ?? "0";
         }
-        this.OneTGAmountDisplay = prizeListData[10]?.bonus ?? "0";
-        this.TwoTGAmountDisplay = prizeListData[11]?.bonus ?? "0";
 
         // 在線人數
         this.online = serverData["online"];
 
         // 解析卡片訂單清單，分類與處理投注金額
         const cardList = serverData["cardList"];
-        const orders = this.classifyOrders(cardList.list);
-        const totalAmount = this.processOrders(orders);
-        this.currentBetAmount = totalAmount;
+        if(cardList && cardList.list) {
+            this.currentBetAmount = 0;
+            const orders = this.classifyOrders(cardList.list);
+            this.processOrders(orders);
 
-        if(orders[0]) {
-            this.selectedCardType = (this.GameRoundID == orders[0].issue_number) 
-                ? CARD_STATUS.NORMAL : CARD_STATUS.PREORDER;
-            this.multiples = orders[0].multiples;
-            this.selectedChipIndex = this.extraChips.findIndex(chip => chip === this.multiples);
-            if (this.selectedChipIndex === -1) this.selectedChipIndex = 0;
+            const extraPatternsItem = cardList.list.find(
+                (item) => item.play_name === "BGM Extra Patterns"
+            );
+    
+            if(extraPatternsItem) {
+                this.selectedCardType = (this.GameRoundID == extraPatternsItem.issue_number) 
+                    ? CARD_STATUS.NORMAL : CARD_STATUS.PREORDER;
+                this.multiples = extraPatternsItem.multiples;
+                this.selectedChipIndex = this.extraChips.findIndex(chip => chip === this.multiples);
+                if (this.selectedChipIndex === -1) this.selectedChipIndex = 0;
+            }
+
+            this.currentBallSequence.forEach((ball)=> {
+                this.ownedCards.forEach((card)=>{
+                    card.updateCard(ball);
+                })
+            })
         }
     }
 
@@ -126,15 +163,17 @@ export class MegaDataStore {
         // 解析伺服器回傳的訂單資料
         const orders = this.classifyOrders(data.data);
         console.warn("成功 orders => ", orders);
+        // 處理訂單內容
+        this.processOrders(orders);
 
-        // 處理訂單內容並更新當前投注金額
-        const totalAmount = this.processOrders(orders);
-        this.currentBetAmount += totalAmount;
-
-        if(orders[0]) {
-            this.selectedCardType = (this.GameRoundID == orders[0].issue_number) 
+        const extraPatternsItem = data.data.find(
+            (item) => item.play_name === "BGM Extra Patterns"
+        );
+    
+        if(extraPatternsItem) {
+            this.selectedCardType = (this.GameRoundID == extraPatternsItem.issue_number) 
                 ? CARD_STATUS.NORMAL : CARD_STATUS.PREORDER;
-            this.multiples = orders[0].multiples;
+            this.multiples = extraPatternsItem.multiples;
             this.selectedChipIndex = this.extraChips.findIndex(chip => chip === this.multiples);
             if (this.selectedChipIndex === -1) this.selectedChipIndex = 0;
         }
@@ -163,16 +202,18 @@ export class MegaDataStore {
      */
     private classifyOrders(orders: any[]): any[] {
         const grouped: { [orderNumber: string]: any[] } = {};
-
+        let betAmount = 0;
         // 依 order_number 將訂單分組
         for (const order of orders) {
+            // 累加投注金額
+            betAmount += Number(order.amount);
             const orderNumber = order.order_number;
             if (!grouped[orderNumber]) {
                 grouped[orderNumber] = [];
             }
             grouped[orderNumber].push(order);
         }
-
+        this.currentBetAmount += betAmount;
         const result: any[] = [];
 
         // 分析每個訂單群組，決定卡片玩法類型
@@ -201,15 +242,10 @@ export class MegaDataStore {
     /**
      * 處理訂單資料，將每張卡片解析並建立對應的 CardMega 物件
      * @param orders 從伺服器取得的訂單列表
-     * @returns 該批訂單的總投注金額
      */
-    private processOrders(orders: any[]): number {
-        let totalAmount = 0;
+    private processOrders(orders: any[]): void {
 
         orders.forEach((order) => {
-            // 累加投注金額
-            totalAmount += Number(order.amount);
-
             order.bet_content.forEach((card) => {
                 // 處理號碼字串 -> 轉為數字陣列，無法轉換則為 null
                 const rawNumbers = card.numbers.split(',').map(n => {
@@ -257,8 +293,6 @@ export class MegaDataStore {
                 this.ownedCards.push(megaCard);
             });
         });
-
-        return totalAmount;
     }
 
     /** 當前購買卡片數量 */
@@ -305,6 +339,12 @@ export class MegaDataStore {
 
     /** 取得要給Server的倍數 */
     public getMultiples() {
-        return (this.selectedPlayMode == CARD_GAMEPLAY.EXTRA) ? this.extraChips[this.selectedChipIndex] : this.jackpotChipCost;
+        if(this.selectedPlayMode == CARD_GAMEPLAY.EXTRA)
+            return this.extraChips[this.selectedChipIndex]
+        else if(this.selectedPlayMode == CARD_GAMEPLAY.COMDO)
+            return this.comboChips[this.selectedChipIndex];
+        else if(this.selectedPlayMode == CARD_GAMEPLAY.JACKPOT)
+            return this.jackpotChipCost;
+        return null;
     }
 } 

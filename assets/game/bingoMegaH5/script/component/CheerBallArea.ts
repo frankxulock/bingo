@@ -43,7 +43,7 @@ export default class CheerBallArea extends MegaComponent {
         super.addEventListener();
 
         // 購買時關閉球號區
-        EventManager.getInstance().on(GameStateEvent.GAME_BUY, this.Close, this);
+        EventManager.getInstance().on(GameStateEvent.GAME_OVER, this.Close, this);
         // 抽號碼時開啟球號區
         EventManager.getInstance().on(GameStateEvent.GAME_DRAWTHENUMBERS, this.Open, this);
         // 發球時播放球號動畫
@@ -56,7 +56,7 @@ export default class CheerBallArea extends MegaComponent {
     protected removeEventListener(): void {
         super.removeEventListener();
 
-        EventManager.getInstance().off(GameStateEvent.GAME_BUY, this.Close, this);
+        EventManager.getInstance().off(GameStateEvent.GAME_OVER, this.Close, this);
         EventManager.getInstance().off(GameStateEvent.GAME_DRAWTHENUMBERS, this.Open, this);
         EventManager.getInstance().off(GameStateUpdate.StateUpdate_SendBall, this.SendBall, this);
     }
@@ -78,7 +78,7 @@ export default class CheerBallArea extends MegaComponent {
      * 開啟所有球號資訊詳細視窗
      */
     public OpenBallDetailsWindow() {
-        PopupManager.showPopup(PopupName.AllBallNumbersPage, this.data.getAllBallNumbersData());
+        PopupManager.showPopup(PopupName.AllBallNumbersPage, this.data.getAllBallNumbersPageData());
     }
 
     /**
@@ -86,29 +86,53 @@ export default class CheerBallArea extends MegaComponent {
      * 用於重播或切換場景時還原球號狀態與位置
      */
     protected onSnapshot(): void {
+        this.node.active = !this.data.GameState_BUY();
         this.UpdateLabel();
 
-        const ballList = this.data.getBallList(); // 取得已開出球號列表
-        this.userIndex = 0;
+        const ballList = this.data.getBallList(); // 所有已開球號碼
+        const maxBalls = this.Balls.length;
+        const totalBalls = ballList.length;
 
-        // 停止所有球動畫
+        // 停止所有動畫
         this.Balls.forEach(ball => cc.Tween.stopAllByTarget(ball.node));
 
-        // 根據快照資料設定球號、狀態與位置
-        for (let i = 0; i < ballList.length && i < this.Balls.length; i++) {
-            const ballNum = ballList[(ballList.length - (i + 1))];
-            const ballObj = this.Balls[i];
+        // 從最後往前數）
+        for (let i = 0; i < maxBalls; i++) {
+            const reverseIndex = totalBalls - 1 - i;
+            if (reverseIndex < 0) break;
 
-            ballObj.setBallNumber(ballNum);
-            ballObj.setAction(true);
+            const ballNum = ballList[reverseIndex];
+            const ball = this.Balls[i];
 
-            // 計算新位置：StartPos + (i + 1) * 球寬度
-            const offsetX = ballObj.getSize() * (i + 1);
+            ball.setBallNumber(ballNum);
+            ball.setAction(true);
+
+            const offsetX = ball.getSize() * (i + 1);
             const newPos = this.StartPos.add(new cc.Vec2(offsetX, 0));
-            ballObj.setPosition(newPos);
-
-            this.userIndex++;
+            ball.setPosition(newPos);
         }
+
+        // ✅ 計算 x 最大的球，並將 userIndex 設為下一個
+        let maxX = Number.NEGATIVE_INFINITY;
+        let nextIndex = 0;
+        for (let i = 0; i < maxBalls; i++) {
+            const x = this.Balls[i].getPosition().x;
+            if (x > maxX) {
+                maxX = x;
+                nextIndex = (i) % maxBalls;
+            }
+        }
+        this.userIndex = nextIndex;
+
+        // // 🔍 Debug：列印快照結果
+        // cc.log(`=== 快照復原 Debug Info ===`);
+        // cc.log(`userIndex（下一顆應插入位置）: ${this.userIndex}`);
+        // this.Balls.forEach((b, idx) => {
+        //     const pos = b.getPosition();
+        //     // const num = b.getBallNumber?.(); // 確保你有這方法
+        //     cc.log(`Ball[${idx}] -> 編號: ${""}, 位置: (${pos.x.toFixed(2)}, ${pos.y.toFixed(2)})`);
+        // });
+        // cc.log(`============================`);
     }
 
     /**
@@ -181,9 +205,21 @@ export default class CheerBallArea extends MegaComponent {
                 .call(() => {
                     // 最後一個球的動畫結束後，更新索引並繼續下一個動畫
                     if (i === maxBalls - 1) {
-                        this.userIndex = (this.userIndex + 1) % maxBalls;
+                        this.userIndex = (this.userIndex - 1) % maxBalls;
+                        if(this.userIndex < 0)
+                            this.userIndex = maxBalls -1;
                         this.isAnimating = false;
                         this.tryRunAnimation();
+
+                        // // 🔍 Debug：列印所有球資訊
+                        // cc.log(`=== 球動畫完成 Debug Info ===`);
+                        // cc.log(`userIndex（下一顆插入位置）: ${this.userIndex}`);
+                        // this.Balls.forEach((b, idx) => {
+                        //     const pos = b.getPosition();
+                        //     // const num = b.getBallNumber?.(); // 如果你有這個 getter
+                        //     cc.log(`Ball[${idx}] -> 編號: ${""}, 位置: (${pos.x.toFixed(2)}, ${pos.y.toFixed(2)})`);
+                        // });
+                        // cc.log(`============================`);
                     }
                 })
                 .start();

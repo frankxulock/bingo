@@ -11,6 +11,11 @@ export default class BingoMegaUI extends BaseSingletonComponent {
 
     @property({ type: [cc.SpriteFrame], visible: true })
     protected cardIconBGs: cc.SpriteFrame[] = [];
+    private cardText: cc.Color[] = [
+        new cc.Color(29, 29, 29),
+        new cc.Color(255, 255, 255),
+        new cc.Color(254, 88, 42),
+    ];
 
     @property({ type: [cc.SpriteFrame], visible: true })
     protected leaderboardBG: cc.SpriteFrame[] = [];
@@ -19,6 +24,7 @@ export default class BingoMegaUI extends BaseSingletonComponent {
     @property({ type: [cc.SpriteFrame], visible: true })
     protected dengji: cc.SpriteFrame[] = [];
 
+
     public static getInstance(): BingoMegaUI {
         return this._getInstance(BingoMegaUI);
     }
@@ -26,6 +32,9 @@ export default class BingoMegaUI extends BaseSingletonComponent {
     /** 取得所有卡牌背景 */
     public getAllCardIconBG(): cc.SpriteFrame[] {
         return this.cardIconBGs;
+    }
+    public getAllCardText() : cc.Color[] {
+        return this.cardText;
     }
 
     /** 取得卡牌背景 */

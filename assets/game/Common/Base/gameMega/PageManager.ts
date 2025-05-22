@@ -1,3 +1,4 @@
+import { CommonTool } from "../../Tools/CommonTool";
 import { CARD_GAMEPLAY, CARD_STATUS, GAME_STATUS, CARD_CONTENT } from "../CommonData";
 import { MegaDataStore } from "./MegaDataStore";
 
@@ -50,7 +51,7 @@ export default class PageManager {
             gameTypeStr : gameTypeStr,                                  // 玩法類型文字
             cardsPriceStr : (this.dataStore.currency + cardsPrice),                  // 卡片售價金額
             numberOfCardStr : ("X" + this.dataStore.getCardsToBuy()),                       // 購買卡片數量
-            totalAmountStr : (this.dataStore.currency + this.dataStore.getBuyTotalCard()),     // 卡片總金額
+            totalAmountStr : (this.dataStore.currency + CommonTool.formatNumber(this.dataStore.getBuyTotalCard())),     // 卡片總金額
         }
         return data;
     }
@@ -101,10 +102,29 @@ export default class PageManager {
             }
         }
 
+        // 取得已購卡頁面的卡片資訊 (根據中獎金額>預中獎金額排序>原生排序)
+        const cardData = this.dataStore.ownedCards.map((card, index) => ({
+            card,
+            index,
+            totalWin: card.getTotalWin(),
+            preWin: card.getPreTotalWin(),
+        }));
+        cardData.sort((a, b) => {
+            if (b.totalWin !== a.totalWin) {
+                return b.totalWin - a.totalWin; // 中獎金額高的排前面
+            }
+            if (b.preWin !== a.preWin) {
+                return b.preWin - a.preWin;     // 預中獎金額高的排前面
+            }
+            return a.index - b.index;           // 保留原本順序
+        });
+
+
         let d = {
             pendingWinnerItem: PreItems,                    // 即將中獎內容列表
             BottomBtnState: BottomBtnState,                 // 下方顯示列表
             totalWin : totalWin,                            // 總贏分
+            cardData: (cardData.map(entry => entry.card)),
         }
 
         return d;
@@ -132,10 +152,10 @@ export default class PageManager {
     /** 取得用戶資訊 */
     public getUserPageData() {
         let data = {
-            currency: this.dataStore.currency,
-            amount : this.dataStore.coin,
+            currency:  this.dataStore.currency,
+            amount : CommonTool.formatNumber(this.dataStore.coin),
             cardCount : this.dataStore.ownedCards.length,
-            betCoin : this.dataStore.currentBetAmount,
+            betCoin : CommonTool.formatNumber(this.dataStore.currentBetAmount),
         }
         return data;
     }
@@ -208,5 +228,74 @@ export default class PageManager {
                 ball.ratio = 0.1 + 0.9 * ((ball.winCount - min) / (max - min));
             }
         }
+    }
+
+    /** 歷史紀錄頁面 */
+    public getGameRecordPageData() {
+        let data = {
+
+        }
+        return data;
+    }
+
+    /** 取得主播頁面資訊 */
+    public getAvatarPageData() {
+        return this.dataStore.hostAvatarData;
+    }
+
+    /** 取得總球數頁面資訊 */
+    public getAllBallNumbersPageData() {
+        let data = {
+            ballList : this.dataStore.currentBallSequence,
+            tableId : this.dataStore.GameRoundID,
+        }
+        return data;
+    }
+
+    /** DIY購卡頁面參數 */
+    public getDIYCardSelectionPageData() {
+        // 取得目前已經購買的 DIY 卡片
+        const DIYCard = this.dataStore.ownedCards.filter(card => {
+            return (card.getCardContent() === CARD_CONTENT.DIY);
+        });
+        // 建立卡片資料並加上是否已選擇（給 UI 用），並把已購買的卡片排後面
+        const listData = this.dataStore.savedDIYCards
+            .map(card => {
+                const isPurchased = DIYCard.some(c => c.getID() === card.getID());
+                return {
+                    ...card,
+                    isPurchased,
+                    isSelected: false,
+                };
+            })
+            .sort((a, b) => Number(a.isPurchased) - Number(b.isPurchased));
+
+        let data = {
+            DIYmaxCard: this.dataStore.maxDIYCardCount,      // 同時收藏最多DIY卡片數量
+            listData: listData,               // UI使用卡片
+        };
+        return data;
+    }
+
+    /** 排行榜資訊頁面 */
+    public getLeaderboardPageData() {
+        let data = {
+            JPRanking : this.dataStore.currentJPRanking,   // 當局Jackpot榜單
+            JPHistory : this.dataStore.historicalJPRanking,   // 歷史中獎Jackpot榜單
+            EPRanking : this.dataStore.currentEPRanking,   // 當局額外球榜單
+            EPHistory : this.dataStore.historicalEPRanking,   // 歷史中獎額外球榜單
+        }
+        return data;
+    }
+
+    /** 請求目前有的聊天記錄 */
+    public getChatPageData() {
+        let data = [
+            {name : "Caler", content : "test"},
+            {name : "Caler1", content : "test1"},
+            {name : "Caler2", content : "test2"},
+            {name : "Caler3", content : "test3"},
+        ];
+        return data;
     }
 }               

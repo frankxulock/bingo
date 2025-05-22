@@ -35,7 +35,7 @@ export default class HostAvatar extends MegaComponent {
      * 開啟主播資訊頁面，並傳遞目前頭像相關的資料
      */
     public openHostAvatarWindow(): void {
-        const avatarData = this.data.getAvatarData();
+        const avatarData = this.data.getAvatarPageData();
         PopupManager.showPopup(PopupName.StreamerInfoPage, avatarData);
     }
 

@@ -29,6 +29,12 @@ export default class ScrollLazyLoader extends cc.Component {
         this.scrollView.scrollToTop(0);
     }
 
+    /** 不刷新資料的更新方式 */
+    public UpdateData(newData: any[]) {
+        // 重設資料
+        this.allData = newData;
+    }
+
     /** 更新資料並刷新顯示 */
     public refreshData(newData: any[]) {
         const content = this.content;

@@ -56,7 +56,7 @@ export const ERROR_CODE = cc.Enum({
 
 declare global {
     interface Window {
-        serverData: {};
+        serverData: any;
         url: any;
         DataFetcher: any;
     }

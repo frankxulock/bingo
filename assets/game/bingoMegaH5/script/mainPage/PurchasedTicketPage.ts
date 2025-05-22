@@ -80,8 +80,7 @@ export default class PurchasedTicketPage extends MegaComponent {
     /** 更新確認頁面的內容 */
     public setPageState() {
         let d = this.data.getPurchasedTicketPageData();
-        let cardData = this.data.getPurchasedCardList();
-        this.ScrollView_CardGroup.refreshData(cardData);
+        this.ScrollView_CardGroup.refreshData(d.cardData);
         this.ScrollView_PrizeOverview.refreshData(d.pendingWinnerItem);
         // 底部欄位展示內容( 0:可以購買當局卡,1:可以購買預購卡,2顯示已經中獎金額,3:不展示 )
         let BottomBtnState = d.BottomBtnState;

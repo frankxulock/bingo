@@ -1,5 +1,5 @@
 import Singleton from "../../Tools/Base/Singleton";
-import MegaDataManager from "./MegaDataManager";
+import MegaManager from "./MegaManager";
 
 const { ccclass } = cc._decorator;
 
@@ -44,15 +44,15 @@ export default class CardNumberManager extends Singleton {
             }
         }
 
-        MegaDataManager.getInstance().ConfirmPurchaseResponse(cards);
+        MegaManager.getInstance().ConfirmPurchaseResponse(cards);
     }
 
-    /** 模擬Server處理更新數據 */
+    /** 處理更新數據 */
     public SnedChangeCardData(data) {
         for(let i = 0; i < data.length; i++) {
             data[i].numbers = this.generateUniqueCardNumbersFlat(); // 陣列
         }
-        MegaDataManager.getInstance().ConfirmPurchaseResponse(data);
+        return data;
     }
 
     /** 生成唯一卡片ID */

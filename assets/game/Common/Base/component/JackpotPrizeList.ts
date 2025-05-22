@@ -1,4 +1,4 @@
-import MegaDataManager from "../../../Common/Base/gameMega/MegaDataManager";
+import MegaManager from "../gameMega/MegaManager";
 import { CommonTool } from "../../../Common/Tools/CommonTool";
 
 const { ccclass, property } = cc._decorator;
@@ -17,12 +17,12 @@ export default class JackpotPrizeList extends cc.Component {
     private Label_2TG_Amount: cc.Label = null;   // 2TG 獎金標籤
 
     /**
-     * 初始化時呼叫，從 MegaDataManager 取得最新獎金數據，
+     * 初始化時呼叫，從 MegaManager 取得最新獎金數據，
      * 並更新至對應的 Label 上顯示
      */
     protected start(): void {
-        // 從 MegaDataManager 取得獎金和 Bingo 獲勝資料
-        const data = MegaDataManager.getInstance().getJackpotAndBingoWinData();
+        // 從 MegaManager 取得獎金和 Bingo 獲勝資料
+        const data = MegaManager.getInstance().getJackpotAndBingoWinData();
 
         // 利用共用工具函式設定 Label 文字，確保格式統一
         CommonTool.setLabel(this.Label_JP_Amount, data.Jackpot);

@@ -1,6 +1,6 @@
 import EventManager, { GameStateEvent } from "../../Tools/Base/EventManager";
 import BaseComponent from "../BaseComponent";
-import MegaDataManager from "./MegaDataManager";
+import MegaManager from "./MegaManager";
 
 // 賓果遊戲的Controller
 const { ccclass, property } = cc._decorator;
@@ -21,7 +21,7 @@ export default class MegaComponent extends BaseComponent {
 
     /** 初始化各種註冊流程（後期根據不同遊戲複寫） */
     protected init(): void {
-        this.data = MegaDataManager.getInstance();
+        this.data = MegaManager.getInstance();
     }
 
     /** 通用的狀態還原事件 */

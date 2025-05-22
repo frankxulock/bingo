@@ -1,4 +1,5 @@
 import MegaComponent from "../../../Common/Base/gameMega/MegaComponent";
+import EventManager, { GameStateUpdate } from "../../../Common/Tools/Base/EventManager";
 import { CommonTool } from "../../../Common/Tools/CommonTool";
 import { PopupName } from "../../../Common/Tools/PopupSystem/PopupConfig";
 import PopupManager from "../../../Common/Tools/PopupSystem/PopupManager";
@@ -19,6 +20,16 @@ export default class BottomBar extends MegaComponent {
     @property({ type: cc.Label, visible: true })
     private Label_betCoin: cc.Label = null;
 
+    protected addEventListener(): void {
+        super.addEventListener();
+        EventManager.getInstance().on(GameStateUpdate.StaticUpdate_Coin, this.updateUserData, this);
+    }
+
+    protected removeEventListener(): void {
+        super.removeEventListener();
+        EventManager.getInstance().off(GameStateUpdate.StaticUpdate_Coin, this.updateUserData, this);
+    }
+
     /** 初始化元件（由 MegaComponent 呼叫） */
     protected init(): void {
         super.init();
@@ -31,7 +42,7 @@ export default class BottomBar extends MegaComponent {
 
     /** 開啟聊天彈窗 */
     public OpenChatPage(): void {
-        const chatData = this.data.getChatPage();
+        const chatData = this.data.getChatPageData();
         PopupManager.showPopup(PopupName.ChatPage, chatData);
     }
 

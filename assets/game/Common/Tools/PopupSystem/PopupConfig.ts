@@ -12,6 +12,7 @@ export enum PopupName {
     LeaderboardPage=        "LeaderboardPage",
     ChatPage=               "ChatPage",
     PersonalCenterPage=     "PersonalCenterPage",
+    GameRecordPage=         "GameRecordPage",
 }
 
 export const PopupPrefabPath: Record<PopupName, string> = {
@@ -26,6 +27,7 @@ export const PopupPrefabPath: Record<PopupName, string> = {
     [PopupName.LeaderboardPage]:            "prefab/LeaderboardPage",
     [PopupName.ChatPage]:                   "prefab/ChatPage",
     [PopupName.PersonalCenterPage]:         "prefab/PersonalCenterPage",
+    [PopupName.GameRecordPage]:             "prefab/GameRecordPage",
 };
 
 // 動畫配置
@@ -41,6 +43,7 @@ export const ShowPopupAnimationConfig: Record<PopupName, PopupAnimationType> = {
     [PopupName.LeaderboardPage]:        PopupAnimationType.SlideFromBottom,
     [PopupName.ChatPage]:               PopupAnimationType.SlideFromBottom,
     [PopupName.PersonalCenterPage]:     PopupAnimationType.SlideFromLeft,
+    [PopupName.GameRecordPage]:         PopupAnimationType.SlideFromLeft,
 };
 
 export const ClosePopupAnimationConfig: Record<PopupName, PopupAnimationType> = {
@@ -55,4 +58,5 @@ export const ClosePopupAnimationConfig: Record<PopupName, PopupAnimationType> = 
     [PopupName.LeaderboardPage]:        PopupAnimationType.SlideFromBottom,
     [PopupName.ChatPage]:               PopupAnimationType.SlideFromBottom,
     [PopupName.PersonalCenterPage]:     PopupAnimationType.SlideFromLeft,
+    [PopupName.GameRecordPage]:         PopupAnimationType.SlideFromLeft,
 }

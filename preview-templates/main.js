@@ -24,7 +24,6 @@
     /** 請求快照資料 */
     function fetchSnapshots() {
       window.serverData = {};
-
       window.DataFetcher.fetchAll({
         endpoints: window.snapshotEndpoints,
         target: window.serverData,

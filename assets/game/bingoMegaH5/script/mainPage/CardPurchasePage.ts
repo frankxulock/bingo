@@ -111,7 +111,7 @@ export default class CardPurchasePage extends MegaComponent {
 
     /** 開啟DIY選購頁面 */
     private OpenDIYCardSelectionPage() {
-        PopupManager.showPopup(PopupName.DIYCardSelectionPage, this.data.getDIYCardSelectionData());
+        PopupManager.showPopup(PopupName.DIYCardSelectionPage, this.data.getDIYCardSelectionPageData());
     }
 
     /** 增加購卡數量 */
@@ -163,6 +163,11 @@ export default class CardPurchasePage extends MegaComponent {
 
     /** 開啟確認買卡片頁面 */
     protected OpenConfirmPurchasePage(): boolean {
+        if(this.data.getCardsToBuy() == 0){
+            ToastManager.showToast("卡片數量不能為空");
+            return false;
+        }
+
         if ((this.data.getCoin() - this.data.getBuyTotalCard()) < 0) {
             ToastManager.showToast("余额不足");
             return false;
@@ -170,11 +175,6 @@ export default class CardPurchasePage extends MegaComponent {
 
         if (this.data.CheckOpenDIYCardSelectionPage() && this.Toggle_CardState.toggleItems[1].isChecked) {
             this.OpenDIYCardSelectionPage();
-            return false;
-        }
-
-        if (this.data.getBuyCardButtonAvailability() === false) {
-            ToastManager.showToast("已經發送事件給Server.尚未收到回包請等待");
             return false;
         }
 
@@ -213,12 +213,17 @@ export default class CardPurchasePage extends MegaComponent {
         // 設定籌碼列表內容與選中狀態
         if (data.chipList) {
             this.Toggle_BettingChipList.toggleItems.forEach((toggle, index) => {
-                const chipItem = toggle.getComponent(ChipItem);
-                // 設定籌碼金額
-                chipItem.setChipAmount(data.chipList[index]);
-                // 設定當前選中的籌碼
-                toggle.isChecked = (index === data.curChipIndex);
-                toggle.interactable = (data.multiples == 0) ? true : false;
+                if(data.chipList.length > index) {
+                    toggle.node.active = true;
+                    const chipItem = toggle.getComponent(ChipItem);
+                    // 設定籌碼金額
+                    chipItem.setChipAmount(data.chipList[index]);
+                    // 設定當前選中的籌碼
+                    toggle.isChecked = (index === data.curChipIndex);
+                    toggle.interactable = (data.multiples == 0) ? true : false;
+                }else {
+                    toggle.node.active = false;
+                }
             });
         }
 
@@ -232,7 +237,7 @@ export default class CardPurchasePage extends MegaComponent {
     public changeCardInfo() {
         let readyBuy = this.data.getCardsToBuy();
         this.EditBox_Card.string = readyBuy.toString();
-        CommonTool.setLabel(this.Label_TotalAmount, this.data.getBuyTotalCard());
+        CommonTool.setLabel(this.Label_TotalAmount, CommonTool.formatNumber(this.data.getBuyTotalCard()));
 
         let buyDIYCard = this.data.buyDIYCard();
         this.Btn_Increase.active = this.Btn_Decrease.active = !buyDIYCard;
@@ -247,7 +252,7 @@ export default class CardPurchasePage extends MegaComponent {
 
     /** 檢查要展示的按鈕類型 */
     public CheckShowBtn() {
-        let buyCardThisRound = this.data.buyCardThisRound();
+        let buyCardThisRound = this.data.GameState_BUY();
         this.Btn_BuyCard.active = buyCardThisRound;
         this.Btn_PreBuyCard.active = !buyCardThisRound;
     }

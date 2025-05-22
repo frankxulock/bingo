@@ -1,3 +1,4 @@
+import { CARD_STATUS } from "../../../../Common/Base/CommonData";
 import { CommonTool } from "../../../../Common/Tools/CommonTool";
 import CardIcon from "./CardIcon";
 
@@ -36,17 +37,24 @@ export default class Card extends cc.Component {
     @property({ type: cc.Label, visible: true })
     private Label_WinAmount: cc.Label = null;
 
+    public data;
+
     /**
      * 設定卡片資料與畫面顯示
      * @param cardData - 傳入的卡片資料
      * @param index - 可選的索引（目前未使用）
      */
-    setData(cardData: any, index?: number) {
+    setData(cardData: any) {
         // 取得要顯示的卡片資訊
         let data = cardData.getCardViewData();
-
+        this.data = cardData;
         // 設定卡片標題
         CommonTool.setLabel(this.Label_titel, data.title);
+        this.Label_titel.node.parent.active = (data.cardState == CARD_STATUS.PREORDER) ? true : false;
+        if(data.title == "PRE-BUY"){
+        }else {
+            this.Label_titel.node.parent.active = false;
+        }
 
         // 設定 Bingo Jackpot 與額外獎勵的顯示
         this.Node_BingoJackpot.active = data.haveBingoJackpo;
@@ -83,7 +91,7 @@ export default class Card extends cc.Component {
             this.Node_WinGroup.active = hasWin;
 
             if (hasWin) {
-                CommonTool.setLabel(this.Label_WinAmount, CommonTool.formatMoney2(data.totalWin));
+                CommonTool.setLabel(this.Label_WinAmount, CommonTool.formatMoney2(data.totalWin, ""));
             }
         }
     }

@@ -70,7 +70,6 @@ export class CardMega extends BaseCardData {
         0b1111111011101011101111111,
     ]
     private extralPrice = [5.5,10,27.5,57.5,150,1000,1800,20000];  // 獎金金額
-    public cardIconBGs: cc.SpriteFrame[] = [];
 
     // 卡片初始化
     constructor (data) {
@@ -80,7 +79,6 @@ export class CardMega extends BaseCardData {
         this.cardContent = data.cardContent;  
         this.playState = data.playState;  
         this.cardInfo = data.numbers;
-        this.cardIconBGs = BingoMegaUI.getInstance().getAllCardIconBG();
     }
 
     /** 取得卡片類型 */
@@ -314,6 +312,7 @@ export class CardMega extends BaseCardData {
             rewardLine: this.rewardLine,
             preData: this.preData,
             totalWin: this.totalWin,
+            cardState: this.cardState
         }
         return data;
     }
@@ -329,8 +328,8 @@ export class CardMega extends BaseCardData {
     }
 
     /** 取得所有圖片的背景顯示內容 */
-    getNumberItemBGs(): cc.SpriteFrame[] {
-        const cardBGs: cc.SpriteFrame[] = new Array(this.cardInfo.length);
+    getNumberItemBGs(): number[] {
+        const cardBGs: number[] = new Array(this.cardInfo.length);
         const hitIndexes: number[] = [];
 
         // 取出中獎位置
@@ -344,11 +343,11 @@ export class CardMega extends BaseCardData {
         // 設定背景：優先順序 中獎 > 預中獎 > 預設
         for (let i = 0; i < this.cardInfo.length; i++) {
             if (hitIndexes.includes(i)) {
-                cardBGs[i] = this.cardIconBGs[CardBG.selected]; // 中獎背景
+                cardBGs[i] = CardBG.selected; // 中獎背景
             } else if (this.preData.find(data => data.id === i)) {
-                cardBGs[i] = this.cardIconBGs[CardBG.pre];      // 預中獎背景
+                cardBGs[i] = CardBG.pre;      // 預中獎背景
             } else {
-                cardBGs[i] = this.cardIconBGs[CardBG.unselected]; // 預設背景
+                cardBGs[i] = CardBG.unselected; // 預設背景
             }
         }
         return cardBGs;

@@ -1,7 +1,7 @@
 const url = {
     // 協議與伺服器主機設定（可改成 https 或其他主機）
-    HTTP: "http://",
-    SERVERHOST: "localhost:3000/proxy/",
+    HTTP: "https://",
+    SERVERHOST: "devpc.okbingos.com/",
   
     // 目前遊戲代碼（可切換成不同遊戲）
     MEGA: "BGM",
@@ -96,16 +96,40 @@ const url = {
     getCreateCard() {
       return this.buildUrl(this.PATHS.CREATECARD);
     },
-  
+
     /** 共用 token 與驗證 Header 參數 */
-    _commonHeaders: {
-      Authorization:"Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImNhbGVyIiwibm0iOiJjYWxlciIsIm1kIjoib2tfand0X21lcl9hcGlfY29kZV9ib2Jib2IiLCJybSI6MTc0NzczMjM3OTgzM30.pFmoI7L3ln7MelDSpBSVMoo4TrhXJSh_9tp39A9MgWw",
-      Current_Time: "1747735104849",
-      Signature_Nonce: "irUCsNnKVOJtljq2HdHBA",
-      Signature: "f2c7ca0e45ca93d13e36fc5246371beb",
-      Merchant_Code: "mer_api_code_bobbob",
+    generateAuthHeaders() {
+      const token = window.decryptedTokenData.token;
+      const merchantCode = window.decryptedTokenData.code;
+
+      let currentTime = new Date().getTime();; // 留下給 Current_Time 與 Signature 用
+      let nanoid2 = (e = 21) =>
+      crypto.getRandomValues(new Uint8Array(e)).reduce((acc, t) => {
+        t &= 63;
+        return acc += t < 36
+          ? t.toString(36)
+          : t < 62
+          ? (t - 26).toString(36).toUpperCase()
+          : t > 62
+          ? "-"
+          : "_";
+      }, "");
+      let signatureNonce = nanoid2();
+      let signatureRaw = `${window.decryptedTokenData.code}${signatureNonce}mer-api-test${currentTime}`;
+      let signature = md5(signatureRaw);
+
+      // console.log('token => ', token);
+      // console.log('Signature_Nonce => ', signatureNonce);
+      // console.log("Signature => ", signature)
+      return {
+        Authorization: `Bearer ${token}`,
+        Current_Time: currentTime,
+        Signature_Nonce: signatureNonce,
+        Signature: signature,
+        Merchant_Code: merchantCode,
+      };
     },
-  
+
     /**
      * 取得自訂的 fetch 請求 headers（GET）
      * @returns {object} fetch 的設定物件
@@ -113,7 +137,7 @@ const url = {
     getHeaders() {
       return {
         method: "GET",
-        headers: { ...this._commonHeaders },
+        headers: { ...this.generateAuthHeaders() },
       };
     },
   
@@ -126,7 +150,7 @@ const url = {
       return {
         method: "POST",
         headers: {
-          ...this._commonHeaders,
+          ...this.generateAuthHeaders(),
           "Content-Type": "application/json",
         },
         body: JSON.stringify(body),
@@ -147,7 +171,7 @@ const DataFetcher = (() => {
       const json = await response.json();
       // 檢查回應是否成功 (code === 0 或 code === 10000)
       if (json.code !== 0 && json.code !== 10000) {
-        throw new Error(`API error on ${key}: ${json.code}`);
+        throw new Error(`API error on ${key}: ${json.code}  data ${json.data} message : ${json.message}`);
       }
       const result = { 
         key, 
@@ -173,15 +197,12 @@ const DataFetcher = (() => {
       Promise.all(endpoints.map(fetchSingle))
         .then(results => {
           results.forEach(({ key, data, code }) => {
-            let targetData = validateData(data);
-            if (targetData === null) {
-              targetData = {};
+            target[key] = validateData(data);
+            if (target[key] === null) {
+              target[key] = {};
             }
-            // 將 code 添加到數據中
-            target[key] = {
-              ...targetData,
-              code: code
-            };
+            // 直接添加 code 屬性到現有對象
+            target[key].code = code;
           });
           onComplete();
         })
@@ -231,4 +252,44 @@ const DataFetcher = (() => {
   ];
   
   window.snapshotEndpoints = snapshotEndpoints;
+  
+  /** 請求快照資料 */
+  function fetchSnapshots() {
+    window.serverData = {};
+
+    window.DataFetcher.fetchAll({
+      endpoints: window.snapshotEndpoints,
+      target: window.serverData,
+      onComplete: () => {
+        const requiredKeys = window.snapshotEndpoints.map(item => item.key);
+        const invalidKeys = [];
+        const ready = requiredKeys.every(k => {
+          const data = window.serverData[k];
+          // 檢查是否有 code 屬性且值為 10000
+          if (data.hasOwnProperty('code') && (data.code === 10000)) { return true; }
+          // 檢查資料是否存在
+          if (!data) { 
+            invalidKeys.push(`${k}: missing data`);
+            return false; 
+          }
+          // 如果沒有 code 屬性但有 data 屬性，也視為有效
+          if (!data.hasOwnProperty('data')) {
+            invalidKeys.push(`${k}: missing 'data' property`);
+            return false;
+          }
+          return true;
+        });
+        if (ready) {
+          snapshotReady = true;
+          tryStartGame();
+        } else {
+          throw new Error(`Invalid snapshot data: ${invalidKeys.join(', ')}`);
+        }
+      },
+      onError: (err) => {
+        window.showReloadDialog("載入錯誤，請檢查網路或伺服器狀態。");
+      },
+      maxRetries: 3
+    });
+  }
   

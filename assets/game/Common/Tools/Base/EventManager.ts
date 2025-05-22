@@ -46,10 +46,12 @@ export class GameStateEvent {
 
 /** 遊戲內部狀態更新 */
 export class GameStateUpdate {
+    // 更新遊戲金額
+    public static StaticUpdate_Coin = "StaticUpdate_Coin";
+    // 更新倒計時
+    public static StaticUpdate_Countdown = "StaticUpdate_Countdown";
     // 講池更新事件
     public static StateUpdate_BingoJackpot = "StateUpdate_BingoJackpot";
-    // 重置卡片內容回包
-    public static StateUpdate_CardResetResponse = "StateUpdate_CardResetResponse";
     // 下注回包事件
     public static StateUpdate_BetResponseEvent = "StateUpdate_BetResponseEvent";
     // 開啟已購卡頁面

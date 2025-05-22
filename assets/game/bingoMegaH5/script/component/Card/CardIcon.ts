@@ -1,4 +1,6 @@
+import { CardBG } from "../../../../Common/Base/card/CardMega";
 import { CommonTool } from "../../../../Common/Tools/CommonTool";
+import BingoMegaUI from "../../BingoMegaUI";
 
 const {ccclass, property} = cc._decorator;
 
@@ -14,10 +16,13 @@ export default class CardIcon extends cc.Component {
 
     /**
      * 設定卡片圖示的圖片
-     * @param spr 要設定的 SpriteFrame 圖片
+     * @param num 要設定的 SpriteFrame 圖片
      */
-    public setSprite(spr: cc.SpriteFrame) {
-        CommonTool.setSprite(this.Sprite_CardIcon, spr);
+    public setSprite(num: number) {
+        let IconBG = BingoMegaUI.getInstance().getAllCardIconBG();
+        let colorTxt = BingoMegaUI.getInstance().getAllCardText();
+        CommonTool.setSprite(this.Sprite_CardIcon, IconBG[num]);
+        this.Label_Number.node.color = colorTxt[num];
     }
 
     /**

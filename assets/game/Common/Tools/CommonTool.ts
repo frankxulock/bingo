@@ -1,4 +1,4 @@
-import MegaDataManager from "../Base/gameMega/MegaDataManager";
+import MegaManager from "../Base/gameMega/MegaManager";
 
 /** 通用工具 */
 export class CommonTool {
@@ -130,9 +130,9 @@ export class CommonTool {
     }
 
     /** 金額轉換函式 顯示貨幣 */
-    public static formatMoney2(value: number, specialSymbols? : string): string {
-        let currency = MegaDataManager.getInstance().getCurrency();
-        return specialSymbols + currency + (value).toString();
+    public static formatMoney2(value: number, specialSymbols : string = ""): string {
+        let currency = MegaManager.getInstance().getCurrency();
+        return specialSymbols + currency + CommonTool.formatNumber(value);
     }
 
     /** 圖片轉換 */
@@ -144,6 +144,14 @@ export class CommonTool {
             }
             const spriteFrame = new cc.SpriteFrame(texture);
             sprite.spriteFrame = spriteFrame;
+        });
+    }
+
+    /** 數字轉貨幣單位 */
+    public static formatNumber(num: number): string {
+        return num.toLocaleString(undefined, {
+            minimumFractionDigits: 0,
+            maximumFractionDigits: 2
         });
     }
 }

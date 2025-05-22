@@ -1,5 +1,6 @@
-import MegaDataManager from "../../../Common/Base/gameMega/MegaDataManager";
+import MegaManager from "../../../Common/Base/gameMega/MegaManager";
 import { audioManager } from "../../../Common/Tools/AudioMgr";
+import EventManager, { GameStateUpdate } from "../../../Common/Tools/Base/EventManager";
 import { CommonTool } from "../../../Common/Tools/CommonTool";
 import { IWindow } from "../../../Common/Tools/PopupSystem/IWindow";
 import { PopupName } from "../../../Common/Tools/PopupSystem/PopupConfig";
@@ -22,14 +23,12 @@ export default class PersonalCenterPage extends cc.Component implements IWindow 
     private ToggleContainer_Language : cc.ToggleContainer = null;
 
     private data : any = null;
-    private dataManager : MegaDataManager = null;
+    private dataManager : MegaManager = null;
 
     open(): void {
-        this.dataManager = MegaDataManager.getInstance();
-        this.data = this.dataManager.getPersonalCenterPageData();
-        CommonTool.setLabel(this.Label_nickName, this.data.nickName);
-        CommonTool.setLabel(this.Label_id, this.data.id);
-        CommonTool.setLabel(this.Label_coin, this.data.coin);
+        EventManager.getInstance().on(GameStateUpdate.StaticUpdate_Coin, this.setPageState, this);
+        this.dataManager = MegaManager.getInstance();
+        this.setPageState();
 
         this.ToggleContainer_Language.toggleItems.forEach((item, index) => {
             item.node.off("toggle", this.OnChangeLanguage, this);
@@ -37,7 +36,15 @@ export default class PersonalCenterPage extends cc.Component implements IWindow 
         })
     }
     close(): void {
+        EventManager.getInstance().off(GameStateUpdate.StaticUpdate_Coin, this.setPageState, this);
         PopupManager.closePopup(PopupName.PersonalCenterPage);
+    }
+
+    public setPageState(){
+        this.data = this.dataManager.getPersonalCenterPageData();
+        CommonTool.setLabel(this.Label_nickName, this.data.nickName);
+        CommonTool.setLabel(this.Label_id, this.data.id);
+        CommonTool.setLabel(this.Label_coin, this.data.coin);
     }
 
     /** 玩家充值 */
@@ -47,13 +54,13 @@ export default class PersonalCenterPage extends cc.Component implements IWindow 
 
     /** 開啟DIY選擇頁面 */
     OnDIY() {
-        PopupManager.showPopup(PopupName.DIYCardSelectionPage, this.dataManager.getDIYCardSelectionData());
+        PopupManager.showPopup(PopupName.DIYCardSelectionPage, this.dataManager.getDIYCardSelectionPageData());
     }
 
     /** 開啟歷史紀錄 */
     OnGameRecird() {
         console.log("開啟歷史紀錄");
-        // PopupManager.showPopup(PopupName.DIYCardSelectionPage, this.dataManager.getDIYCardSelectionData());
+        PopupManager.showPopup(PopupName.GameRecordPage, this.dataManager.getGameRecordPageData());
     }
 
     /** 開啟遊戲規則 */

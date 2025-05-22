@@ -12,7 +12,7 @@ import PageManager from "./PageManager";
 const { ccclass } = cc._decorator;
 
 @ccclass
-export default class MegaDataManager extends BaseDataManager {
+export default class MegaManager extends BaseDataManager {
 
     private dataStore: MegaDataStore;
     private pageManager: PageManager;
@@ -63,14 +63,17 @@ export default class MegaDataManager extends BaseDataManager {
         return (this.dataStore.online).toLocaleString();
     }
 
+    /** 目前玩家金額 */
     public getCoin() {
         return this.dataStore.coin;
     }
 
+    /** 當前貨幣 */
     public getCurrency() {
         return this.dataStore.currency;
     }
 
+    /** 卡片倍率 */
     public getMultiples() {
         return this.dataStore.multiples;
     }
@@ -80,8 +83,8 @@ export default class MegaDataManager extends BaseDataManager {
         return (this.dataStore.maxCardCount - this.dataStore.ownedCards.length)
     }
 
-    /** 判斷目前是否是購買當局卡片 */
-    public buyCardThisRound () {
+    /** 是否下注時間 */
+    public GameState_BUY () {
         return (this.dataStore.gameState == GAME_STATUS.BUY);
     }
 
@@ -119,41 +122,15 @@ export default class MegaDataManager extends BaseDataManager {
     public getPrizeDataList() {
         let showprizeList = [];
         this.dataStore.prizeList.forEach(item => {
-            showprizeList.push(item * this.dataStore.multiples);
+            let multiples = (this.dataStore.multiples == 0) ? 5 : this.dataStore.multiples;
+            showprizeList.push(item * multiples);
         })
         return showprizeList;
-    }
-
-    /** 取得購卡頁面的購買按鈕是否可用 */
-    public getBuyCardButtonAvailability() {
-        return this.dataStore.isBuyButtonEnabled;
     }
 
     /** 取得確認購卡頁面的卡片資訊 */
     public getConfirmedCardPurchaseList() {
         return this.dataStore.confirmedPurchaseCards;
-    }
-
-    /** 取得已購卡頁面的卡片資訊 (根據中獎金額>預中獎金額排序>原生排序) */
-    public getPurchasedCardList() {
-        const withIndex = this.dataStore.ownedCards.map((card, index) => ({
-            card,
-            index,
-            totalWin: card.getTotalWin(),
-            preWin: card.getPreTotalWin(),
-        }));
-    
-        withIndex.sort((a, b) => {
-            if (b.totalWin !== a.totalWin) {
-                return b.totalWin - a.totalWin; // 中獎金額高的排前面
-            }
-            if (b.preWin !== a.preWin) {
-                return b.preWin - a.preWin;     // 預中獎金額高的排前面
-            }
-            return a.index - b.index;           // 保留原本順序
-        });
-    
-        return withIndex.map(entry => entry.card);
     }
 
     /** 檢查是否要開啟DIY選擇頁面 */
@@ -172,6 +149,12 @@ export default class MegaDataManager extends BaseDataManager {
 
     //#region 參數設定
 
+    /** 設定玩家金額 */
+    public setCoin(coin) {
+        this.dataStore.coin = coin;
+        EventManager.getInstance().emit(GameStateUpdate.StaticUpdate_Coin);
+    }
+
     /** 設定目前卡片購買類型 */
     public setCardState(state : CARD_STATUS){
         this.dataStore.selectedCardType = state;
@@ -188,10 +171,7 @@ export default class MegaDataManager extends BaseDataManager {
         
         /** 設定預設籌碼編號 */
         if(this.dataStore.multiples == 0) {
-            if(this.dataStore.selectedPlayMode == CARD_GAMEPLAY.COMDO)
-                this.dataStore.selectedChipIndex = 0;
-            else if(this.dataStore.selectedPlayMode == CARD_GAMEPLAY.EXTRA)
-                this.dataStore.selectedChipIndex = 1;
+            this.dataStore.selectedChipIndex = 1;
         }
     }
 
@@ -203,12 +183,13 @@ export default class MegaDataManager extends BaseDataManager {
     /** 變更購卡數量 */
     public ChangeReadyBuyValue(value : number) {
         this.dataStore.cardsToBuy += value;
-        this.dataStore.cardsToBuy = Math.max(1, Math.min(this.getMaxCardCount(), this.dataStore.getCardsToBuy()));
+        this.dataStore.cardsToBuy = Math.max(0, Math.min(this.getMaxCardCount(), this.dataStore.getCardsToBuy()));
     }
 
+    /** 設置目前要購買的卡片數量 */
     public setReadyBuy(value : number) {
         this.dataStore.cardsToBuy = value;
-        this.dataStore.cardsToBuy = Math.max(1, Math.min(this.getMaxCardCount(), this.dataStore.getCardsToBuy()));
+        this.dataStore.cardsToBuy = Math.max(0, Math.min(this.getMaxCardCount(), this.dataStore.getCardsToBuy()));
     }
 
     /** 設定需要編輯的DIY卡片資訊 */
@@ -223,8 +204,7 @@ export default class MegaDataManager extends BaseDataManager {
         
     //#endregion
 
-    //#region 不同頁面的業務邏輯
-     
+    //#region 不同頁面的業務邏輯   
     /** 顯示購卡頁面 */
     public showCardPurchasePage = () => this.pageManager.showCardPurchasePage();
     /** 取得下注頁面相關資訊 */
@@ -239,23 +219,25 @@ export default class MegaDataManager extends BaseDataManager {
     public getResultPageData = () => this.pageManager.getResultPageData();
     /** 取得用戶資訊 */
     public getUserPageData = () => this.pageManager.getUserPageData();
-    /** DIY購卡頁面參數 */
-    public getDIYEditPageData =() => this.pageManager.getDIYEditPageData();
     /** 取得個人中心相關資訊 */
     public getPersonalCenterPageData = () => this.pageManager.getPersonalCenterPageData();
+    /** 取得下注歷史紀錄相關資訊 */
+    public getGameRecordPageData = ()=> this.pageManager.getGameRecordPageData();
+    /** 取得總球數頁面資訊 */
+    public getAllBallNumbersPageData = ()=> this.pageManager.getAllBallNumbersPageData();
+    /** 取得主播頁面資訊 */
+    public getAvatarPageData = ()=> this.pageManager.getAvatarPageData();
+    /** DIY旋擇頁面資訊 */
+    public getDIYCardSelectionPageData = ()=> this.pageManager.getDIYCardSelectionPageData();
+    /** DIY編輯頁面資訊 */
+    public getDIYEditPageData = () => this.pageManager.getDIYEditPageData();
+    /** 排行榜資訊頁面 */
+    public getLeaderboardPageData = () => this.pageManager.getLeaderboardPageData();
+    /** 聊天與送禮頁面資訊 */
+    public getChatPageData = () => this.pageManager.getChatPageData();
     //#endregion
-
-    //#region 與Server交互訊息
-
-    /** 取得目前擁有的卡片號碼 */
-    public gethaveCardNumberList() {
-        let number = [];
-        this.dataStore.ownedCards.forEach((item)=>{
-            number.push(item.getCardInfo());
-        })
-        return number;
-    }
-
+ 
+    //#region 遊戲內部交互
     /** 發送確認購卡請求（亂數卡片 + DIY卡片統一處理） */
     public SendConfirmPurchase() {
         const isNormalCard = this.dataStore.selectedCardContent === CARD_CONTENT.NORMAL;
@@ -285,8 +267,6 @@ export default class MegaDataManager extends BaseDataManager {
             let card = new CardMega(cardInfo);
             this.dataStore.confirmedPurchaseCards.push(card);
         }
-        // 購卡頁面按鈕恢復成可使用狀態
-        this.dataStore.isBuyButtonEnabled = true;
         // 開啟確認夠卡介面
         PopupManager.showPopup(PopupName.ConfirmPurchasePage);
     }
@@ -307,7 +287,15 @@ export default class MegaDataManager extends BaseDataManager {
 
             data.push(cardData);
         }
-        CardNumberManager.getInstance().SnedChangeCardData(data);
+        let newdata = CardNumberManager.getInstance().SnedChangeCardData(data);
+        this.dataStore.confirmedPurchaseCards = [];
+        // 獲得新版本的卡片內容
+        for(let i = 0; i < newdata.length; i++){
+            let cardInfo = newdata[i];
+            let card = new CardMega(cardInfo);
+            this.dataStore.confirmedPurchaseCards.push(card);
+        }
+        return this.dataStore.confirmedPurchaseCards;
     }
 
     /** 發送玩家確定購卡(將進入已購卡頁面)  */
@@ -341,7 +329,7 @@ export default class MegaDataManager extends BaseDataManager {
 
             this.dataStore.confirmedPurchaseCards = [];
             this.dataStore.selectedDIYCards = [];          // 清除玩家選擇的DIY卡片
-            this.dataStore.cardsToBuy = 1;    
+            this.dataStore.cardsToBuy = 0;    
             this.dataStore.selectedCardContent = 0;         
 
             // 文字提示
@@ -349,28 +337,12 @@ export default class MegaDataManager extends BaseDataManager {
             ToastManager.showToast(ToastStr);
             // 開啟已購卡介面
             EventManager.getInstance().emit(GameStateUpdate.StateUpdate_OpenPurchasedTicketPage);
+            EventManager.getInstance().emit(GameStateUpdate.StaticUpdate_Coin);
         });
-    }
-
-    /** 發球事件 */
-    public ServerToBallEvent(num) {
-        if (this.dataStore.currentBallSequence.includes(num)) {
-            console.error("球號重複 Server資訊 Data => ", num);
-            return;
-        }
-
-        this.dataStore.ownedCards.forEach((cardItem, index)=>{
-            cardItem.updateCard(num);
-        })
-
-        this.dataStore.currentBall = num;
-        this.dataStore.currentBallSequence.push(num);
-        EventManager.getInstance().emit(GameStateUpdate.StateUpdate_SendBall);
     }
 
     /** 遊戲結束重置所有參數 */
     public GameOver(buyTime? : number) {
-        this.dataStore.bettingTime = (buyTime) ? buyTime : 60;
         this.dataStore.currentBall = null;
         this.dataStore.currentBallSequence = [];
         CardNumberManager.getInstance().clearOwnedCards();
@@ -389,41 +361,19 @@ export default class MegaDataManager extends BaseDataManager {
 
         this.dataStore.ownedCards = nextRoundCards;
         if(this.dataStore.ownedCards.length > 0){
+            this.dataStore.currentBetAmount = 0;
+            this.dataStore.multiples = 0;
             this.dataStore.selectedCardType = CARD_STATUS.NORMAL;
         }
         else{
             // 玩家當局有買卡才做購卡頁面數據重置行為
             if(HasTheCurrentPlayerPurchasedCard){
-                this.dataStore.cardsToBuy = 1;
+                this.dataStore.cardsToBuy = 0;
                 this.dataStore.selectedPlayMode = 0;
             }
         }
         EventManager.getInstance().emit(GameStateEvent.GAME_OVER);
-    }
-
-    /** DIY購卡頁面參數 */
-    public getDIYCardSelectionData() {
-        // 取得目前已經購買的 DIY 卡片
-        const DIYCard = this.dataStore.ownedCards.filter(card => {
-            return (card.getCardContent() === CARD_CONTENT.DIY);
-        });
-        // 建立卡片資料並加上是否已選擇（給 UI 用），並把已購買的卡片排後面
-        const listData = this.dataStore.savedDIYCards
-            .map(card => {
-                const isPurchased = DIYCard.some(c => c.getID() === card.getID());
-                return {
-                    ...card,
-                    isPurchased,
-                    isSelected: false,
-                };
-            })
-            .sort((a, b) => Number(a.isPurchased) - Number(b.isPurchased));
-
-        let data = {
-            DIYmaxCard: this.dataStore.maxDIYCardCount,      // 同時收藏最多DIY卡片數量
-            listData: listData,               // UI使用卡片
-        };
-        return data;
+        this.setGameState(GAME_STATUS.BUY);
     }
 
     /** DIY編輯更新 */
@@ -479,30 +429,6 @@ export default class MegaDataManager extends BaseDataManager {
         this.dataStore.selectedDIYCards = data;
     }
 
-    /** 測試用 新增收藏DIY卡片 */
-    public setDIYCardList(data) {
-        this.dataStore.savedDIYCards = data;
-    }
-
-    /** 測試用 新增收藏DIY卡片 */
-    public setballNumberWinMap(data) {
-        this.dataStore.ballHitCountMap = data;
-    }
-
-    /** 取得主播頁面資訊 */
-    public getAvatarData() {
-        return this.dataStore.hostAvatarData;
-    }
-
-    /** 取得總球數頁面資訊 */
-    public getAllBallNumbersData() {
-        let data = {
-            ballList : this.dataStore.currentBallSequence,
-            // tableId : this.dataStore.gameID,
-        }
-        return data;
-    }
-
     /** Jackpot中獎金額資訊 */
     public getJackpotAndBingoWinData() {
         let data = {
@@ -514,49 +440,56 @@ export default class MegaDataManager extends BaseDataManager {
         return data;
     }
 
-    /** 儲存排行本頁面資訊 */
-    public setLeaderboardData(data) {
-        this.dataStore.currentJPRanking = data.JPRanking;
-        this.dataStore.historicalJPRanking = data.JPHistory;
-        this.dataStore.historicalEPRanking = data.EPHistory;
-        this.dataStore.currentEPRanking = data.EPRanking;
-    }
-    /** 排行榜資訊頁面 */
-    public getLeaderboardData() {
-        let data = {
-            JPRanking : this.dataStore.currentJPRanking,   // 當局Jackpot榜單
-            JPHistory : this.dataStore.historicalJPRanking,   // 歷史中獎Jackpot榜單
-            EPRanking : this.dataStore.currentEPRanking,   // 當局額外球榜單
-            EPHistory : this.dataStore.historicalEPRanking,   // 歷史中獎額外球榜單
-        }
-        return data;
-    }
-
-    /** 請求目前有的聊天記錄 */
-    public getChatPage() {
-        let data = [
-            {name : "Caler", content : "test"},
-            {name : "Caler1", content : "test1"},
-            {name : "Caler2", content : "test2"},
-            {name : "Caler3", content : "test3"},
-        ];
-        return data;
-    }
-
     /** 發送聊天訊息 */
     public SendChat(message) {
         return {name : this.dataStore.nickname, content : message};
     }
 
-    /** 取得個人中心頁面資訊 */
-    public getPersonalCenterPage() {
-        let data = {
-            nickName : this.dataStore.nickname,
-            id : "1151512323",
-            coin : this.dataStore.coin,   
+    //#endregion
+
+    //#region Server發送事件
+    /** 獎號進行中 */
+    public PrizeOnGoingEvent(data) {
+        // 驗證遊戲局號
+        if(this.dataStore.GameRoundID != data.game_round_id) {
+            console.log("新遊戲局號開始");
+            this.dataStore.GameRoundID = data.game_round_id;
+            this.dataStore.NextGameRound = data.next_game_round;
+            this.GameOver();
+            return;
         }
-        return data;
+
+        // 最新開出球號列表
+        const prizeNumbers: number[] = this.parsePrizeNumber(data.prize_number);
+        // 已儲存的球號列表
+        let currentBallSequence = this.dataStore.currentBallSequence;  
+        const newBallCount = prizeNumbers.length - currentBallSequence.length;
+        if (newBallCount <= 0) return;
+        // 抓出尾端新增球
+        const newBalls = prizeNumbers.slice(-newBallCount);
+        // 更新遊戲內容
+        newBalls.forEach((ball) => {
+            this.dataStore.currentBall = ball;
+            this.dataStore.currentBallSequence.push(ball);
+            this.dataStore.ownedCards.forEach((cardItem, index)=>{
+                cardItem.updateCard(ball);
+            })
+            EventManager.getInstance().emit(GameStateUpdate.StateUpdate_SendBall);
+        })
     }
 
+    /** 將 prize_number（string）轉為 number[] 陣列 */
+    private parsePrizeNumber(input: string | null | undefined): number[] {
+        if (Array.isArray(input)) return input;
+
+        if (typeof input === "string" && input.trim() !== "") {
+            return input
+                .split(",")
+                .map(str => parseInt(str.trim(), 10))
+                .filter(n => !isNaN(n));
+        }
+
+        return []; // 空字串或 null 回傳空陣列
+    }
     //#endregion
 }
