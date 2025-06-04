@@ -1,10 +1,10 @@
 import BallComponent from "../../../Common/Base/component/BallCompoent";
-import { CardMega } from "../../../Common/Base/card/CardMega";
 import { CARD_CONTENT, CARD_GAMEPLAY, CARD_STATUS } from "../../../Common/Base/CommonData";
 import MegaManager from "../../../Common/Base/gameMega/MegaManager";
 import { CommonTool } from "../../../Common/Tools/CommonTool";
 import ScrollLazyLoader from "../../../Common/Tools/Scroll/ScrollLazyLoader";
 import BingoMegaUI from "../BingoMegaUI";
+import { CardMega } from "../../../Common/Base/card/CardMega";
 
 const {ccclass, property} = cc._decorator;
 

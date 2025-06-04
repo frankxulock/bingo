@@ -1,8 +1,5 @@
-import { HttpServer } from "../../../bingoMegaH5/script/HttpServer";
 import { CURRENCY_SYMBOL } from "../../Tools/Base/BaseDataManager";
 import { CommonTool } from "../../Tools/CommonTool";
-import { PopupName } from "../../Tools/PopupSystem/PopupConfig";
-import PopupManager from "../../Tools/PopupSystem/PopupManager";
 import { CardMega } from "../card/CardMega";
 import { CARD_CONTENT, CARD_GAMEPLAY, CARD_STATUS, GAME_STATUS } from "../CommonData";
 import CardNumberManager from "./CardNumberManager";
