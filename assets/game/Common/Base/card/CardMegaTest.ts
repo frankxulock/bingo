@@ -3,7 +3,7 @@ import { CARD_CONTENT, CARD_GAMEPLAY, CARD_STATUS } from "../CommonData";
 import BaseCardData from "./BaseCardData";
 
 /** 基礎遊戲卡片資料 */
-export class CardMega extends BaseCardData {
+export class CardMegaTest extends BaseCardData {
 
     protected bingoSpot: number = 0b0000000000001000000000000;  // 默認中獎卡片位置 由上至下左至右排序
     private cardState : CARD_STATUS = null;                     // 卡片類型

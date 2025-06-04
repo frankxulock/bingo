@@ -1,5 +1,5 @@
 import { CommonTool } from "../../../../Common/Tools/CommonTool";
-import { CardMega } from "../../../../Common/Base/card/CardMega";
+import { CardMegaTest } from "../../../../Common/Base/card/CardMegaTest";
 import CardIcon from "./CardIcon";
 
 const {ccclass, property} = cc._decorator;
@@ -46,13 +46,13 @@ export default class GameRecordCard extends cc.Component {
         "#fe582a", // 特殊状态 - 橙色
     ];
 
-    private cardMega: CardMega = null;
+    private cardMega: CardMegaTest = null;
 
     /**
      * 设置卡片数据
      * @param cardMega CardMega 对象
      */
-    public setData(cardMega: CardMega) {
+    public setData(cardMega: CardMegaTest) {
         this.cardMega = cardMega;
         
         // 初始化组件

@@ -2,7 +2,7 @@ import { HttpServer } from "../../../bingoMegaH5/script/HttpServer";
 import { CommonTool } from "../../Tools/CommonTool";
 import { PopupName } from "../../Tools/PopupSystem/PopupConfig";
 import PopupManager from "../../Tools/PopupSystem/PopupManager";
-import { CardMega } from "../card/CardMega";
+import { CardMegaTest } from "../card/CardMegaTest";
 import { CARD_GAMEPLAY, CARD_STATUS, GAME_STATUS, CARD_CONTENT } from "../CommonData";
 import { MegaDataStore } from "./MegaDataStore";
 

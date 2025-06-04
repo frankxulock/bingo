@@ -1,6 +1,6 @@
 import { CURRENCY_SYMBOL } from "../../Tools/Base/BaseDataManager";
 import { CommonTool } from "../../Tools/CommonTool";
-import { CardMega } from "../card/CardMega";
+import { CardMegaTest } from "../card/CardMegaTest";
 import { CARD_CONTENT, CARD_GAMEPLAY, CARD_STATUS, GAME_STATUS } from "../CommonData";
 import CardNumberManager from "./CardNumberManager";
 /**
@@ -38,11 +38,11 @@ export class MegaDataStore {
     public readonly maxDIYCardCount: number = 60;
 
     // 卡片集合
-    public editableDIYCard: CardMega | null = null;
-    public savedDIYCards: CardMega[] = [];
-    public selectedDIYCards: CardMega[] = [];
-    public confirmedPurchaseCards: CardMega[] = [];
-    public ownedCards: CardMega[] = [];
+    public editableDIYCard: CardMegaTest | null = null;
+    public savedDIYCards: CardMegaTest[] = [];
+    public selectedDIYCards: CardMegaTest[] = [];
+    public confirmedPurchaseCards: CardMegaTest[] = [];
+    public ownedCards: CardMegaTest[] = [];
 
     // 球號相關
     public ballHitCountMap: Map<number, number> = new Map();
@@ -281,7 +281,7 @@ export class MegaDataStore {
                     playState: order.cardplay,
                     numbers: sortedNumbers
                 };
-                const megaCard = new CardMega(data);
+                const megaCard = new CardMegaTest(data);
                 this.ownedCards.push(megaCard);
             });
         });

@@ -4,7 +4,7 @@ import MegaManager from "../../../Common/Base/gameMega/MegaManager";
 import { CommonTool } from "../../../Common/Tools/CommonTool";
 import ScrollLazyLoader from "../../../Common/Tools/Scroll/ScrollLazyLoader";
 import BingoMegaUI from "../BingoMegaUI";
-import { CardMega } from "../../../Common/Base/card/CardMega";
+import { CardMegaTest } from "../../../Common/Base/card/CardMegaTest";
 
 const {ccclass, property} = cc._decorator;
 
@@ -273,7 +273,7 @@ export default class matchDetails extends cc.Component {
     /**
      * 从 bet_content 创建 CardMega 对象
      */
-    private createCardMegaFromBetContent(betCard: any, lotteryNumbers: number[], cardIndex: number): CardMega {
+    private createCardMegaFromBetContent(betCard: any, lotteryNumbers: number[], cardIndex: number): CardMegaTest {
         // 解析卡片号码
         const cardNumbers = CommonTool.TransformCardInfo(betCard.numbers);
         
@@ -304,7 +304,7 @@ export default class matchDetails extends cc.Component {
         };
         
         // 创建 CardMega 实例（只传入一个参数）
-        const cardMega = new CardMega(cardData);
+        const cardMega = new CardMegaTest(cardData);
         
         // 模拟开奖过程，更新中奖状态
         this.simulateDrawing(cardMega, lotteryNumbers);
@@ -345,7 +345,7 @@ export default class matchDetails extends cc.Component {
     /**
      * 模拟开奖过程，更新卡片中奖状态
      */
-    private simulateDrawing(cardMega: CardMega, lotteryNumbers: number[]) {
+    private simulateDrawing(cardMega: CardMegaTest, lotteryNumbers: number[]) {
         // 按顺序模拟每个开奖球号
         lotteryNumbers.forEach(ballNumber => {
             cardMega.updateCard(ballNumber);
