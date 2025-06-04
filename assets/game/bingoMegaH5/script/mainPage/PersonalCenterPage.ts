@@ -5,6 +5,7 @@ import { CommonTool } from "../../../Common/Tools/CommonTool";
 import { IWindow } from "../../../Common/Tools/PopupSystem/IWindow";
 import { PopupName } from "../../../Common/Tools/PopupSystem/PopupConfig";
 import PopupManager from "../../../Common/Tools/PopupSystem/PopupManager";
+import { HttpServer } from "../HttpServer";
 
 const {ccclass, property} = cc._decorator;
 
@@ -54,18 +55,17 @@ export default class PersonalCenterPage extends cc.Component implements IWindow 
 
     /** 開啟DIY選擇頁面 */
     OnDIY() {
-        PopupManager.showPopup(PopupName.DIYCardSelectionPage, this.dataManager.getDIYCardSelectionPageData());
+        this.dataManager.SendDIYCardSelectionPage(true);
     }
 
     /** 開啟歷史紀錄 */
     OnGameRecird() {
-        console.log("開啟歷史紀錄");
-        PopupManager.showPopup(PopupName.GameRecordPage, this.dataManager.getGameRecordPageData());
+        this.dataManager.OpenGameRecord();
     }
 
     /** 開啟遊戲規則 */
     OnHelpCenter() {
-        console.log("開啟遊戲規則");
+        PopupManager.showPopup(PopupName.HelpCenterPage);
     }
 
     /** 開啟遊戲音效 */

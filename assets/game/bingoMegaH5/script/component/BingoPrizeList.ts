@@ -1,5 +1,6 @@
 import PrizeIcon from "../../../Common/Base/component/PrizeIcon";
 import MegaComponent from "../../../Common/Base/gameMega/MegaComponent";
+import EventManager, { GameStateUpdate } from "../../../Common/Tools/Base/EventManager";
 
 const { ccclass, property } = cc._decorator;
 
@@ -18,6 +19,16 @@ export default class BingoPrizeList extends MegaComponent {
         this.prizeList = this.node.getComponentsInChildren(PrizeIcon);
     }
 
+    protected addEventListener(): void {
+        super.addEventListener();
+        EventManager.getInstance().on(GameStateUpdate.StateUpdate_Canvas, this.onUpdateCanvas, this);
+    }
+
+    protected removeEventListener(): void {
+        super.removeEventListener();
+        EventManager.getInstance().on(GameStateUpdate.StateUpdate_Canvas, this.onUpdateCanvas, this);
+    }
+
     /**
      * 快照更新時呼叫，重新設定獎勵金額
      */
@@ -25,10 +36,35 @@ export default class BingoPrizeList extends MegaComponent {
         this.updatePrizeAmounts();
     }
 
+    protected onUpdateCanvas(): void {
+        // 計算分配邏輯
+        const containerWidth = this.node.width;
+        const iconCount = this.prizeList.length;
+        
+        // 設定邊距（可根據需要調整）
+        const margin = 12; // 左右邊距
+        const availableWidth = containerWidth - (margin * 2);
+        
+        // 多個圖標平均分配
+        const spacing = availableWidth / (iconCount - 1);
+        const startX = -availableWidth / 2;
+        
+        this.prizeList.forEach((icon, index) => {
+            icon.node.x = startX + (spacing * index);
+            // Y軸保持原位置不變
+        });
+
+        // console.log(`📍 重新排列${iconCount}個PrizeIcon`, {
+        //     containerWidth,
+        //     availableWidth,
+        //     positions: this.prizeList.map(icon => ({name: icon.name, x: icon.node.x, y: icon.node.y}))
+        // });
+    }
+
     /**
      * 根據 data 中的獎勵資料設定每個 PrizeIcon 的金額
      */
-    private updatePrizeAmounts(): void {
+    public updatePrizeAmounts(): void {
         const prizeData = this.data.getPrizeDataList();
 
         // 根據取得的資料更新每個 PrizeIcon 的金額

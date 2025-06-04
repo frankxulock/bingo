@@ -1,0 +1,34 @@
+{
+  "name": "auto-obfuscate",
+  "version": "3.0.0",
+  "main": "main.js",
+  "description": "Smart code protection for Cocos Creator with simplified settings",
+  "author": "calerTest",
+  "engines": {
+    "cocos": "^2.4.0"
+  },
+  "dependencies": {
+    "javascript-obfuscator": "2.19.1"
+  },
+  "overrides": {
+    "libphonenumber-js": "1.9.0"
+  },
+  "panels": {
+    "settings": {
+      "title": "代码保护设置",
+      "type": "dockable",
+      "main": "panel/index.js",
+      "size": {
+        "min-width": 350,
+        "min-height": 250,
+        "width": 400,
+        "height": 350
+      }
+    }
+  },
+  "main-menu": {
+    "Tools/代码保护": {
+      "message": "auto-obfuscate:open-settings"
+    }
+  }
+} 

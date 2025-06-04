@@ -6,6 +6,7 @@
     /** 快照與遊戲素材加載狀態 */
     let snapshotReady = false;
     let assetsReady = false;
+    let test = false;
   
     /** 嘗試啟動遊戲（快照與素材都載入後才執行） */
     function tryStartGame() {
@@ -65,7 +66,12 @@
     };
   
     async function onload() {
-      fetchSnapshots(); // 開始獲取快照資料
+      if(test == false) {
+        fetchSnapshots(); // 開始獲取快照資料
+      }
+      else {
+        snapshotReady = true;
+      }
   
       // 接收編輯器通知（開發用）
       const socket = window.io();
@@ -77,10 +83,12 @@
       // 初始化引擎配置
       cc.macro.ENABLE_TRANSPARENT_CANVAS = true;
       cc.macro.ENABLE_WEBGL_ANTIALIAS = true;
+      cc.dynamicAtlasManager.enabled = true;  // 啟動動態合批
   
       const onStart = function () {
         cc.view.enableRetina(true);
         cc.view.resizeWithBrowserSize(true);
+        cc.debug.setDisplayStats(true)    // 合批調試工具調用
   
         const splash = document.getElementById('splash');
         const progressBar = splash.querySelector('.progress-bar span');

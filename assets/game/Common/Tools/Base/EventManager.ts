@@ -73,5 +73,13 @@ export class GameStateUpdate {
     // 發送聊天訊息
     public static StateUpdate_SendChatMessage = "StateUpdate_SendChatMessage";
     // 發送聊天訊息回包
-    public static StateUpdate_ReceiveChatMessage = "StateUpdate_ReceiveChatMessage";
+    public static StateUpdate_ReceiveChatMessage = "StateUpdate_ReceiveChatMessage";    
+    // 更新當前線上人數
+    public static StateUpdate_Online = "StateUpdate_Online";
+    // ExtralTime
+    public static StateUpdate_ExtralTime = "StateUpdate_ExtralTime";
+    // BingoTime
+    public static StateUpdate_BingoTime = "StateUpdate_BingoTime"; 
+    // 解析度更新
+    public static StateUpdate_Canvas = "StateUpdate_Canvas";
 }

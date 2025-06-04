@@ -317,7 +317,7 @@
     "_srcBlendFactor": 770,
     "_dstBlendFactor": 771,
     "_spriteFrame": {
-      "__uuid__": "ab3be7a3-a600-4af1-8f32-8685e2194766"
+      "__uuid__": "07af0ef1-03cb-41e8-b51d-ef0678febfcc"
     },
     "_type": 0,
     "_sizeMode": 0,
@@ -330,7 +330,9 @@
     "_fillStart": 0,
     "_fillRange": 0,
     "_isTrimmedMode": true,
-    "_atlas": null,
+    "_atlas": {
+      "__uuid__": "dbd367c7-8ddc-406b-a275-4a2027526339"
+    },
     "_id": ""
   },
   {
@@ -391,7 +393,7 @@
     "_srcBlendFactor": 770,
     "_dstBlendFactor": 771,
     "_spriteFrame": {
-      "__uuid__": "041d4b42-f0a6-420c-a5cd-e15c96e0ff33"
+      "__uuid__": "b0fe4ec2-2600-4331-9721-c8d134a80e92"
     },
     "_type": 0,
     "_sizeMode": 0,
@@ -404,7 +406,9 @@
     "_fillStart": 0,
     "_fillRange": 0,
     "_isTrimmedMode": true,
-    "_atlas": null,
+    "_atlas": {
+      "__uuid__": "dbd367c7-8ddc-406b-a275-4a2027526339"
+    },
     "_id": ""
   },
   {
@@ -531,7 +535,7 @@
     },
     "_contentSize": {
       "__type__": "cc.Size",
-      "width": 58.96,
+      "width": 61.98,
       "height": 0
     },
     "_anchorPoint": {
@@ -801,10 +805,10 @@
         "__uuid__": "eca5d2f2-8ef6-41c2-bbe6-f9c79d09c432"
       }
     ],
-    "_srcBlendFactor": 770,
+    "_srcBlendFactor": 1,
     "_dstBlendFactor": 771,
     "_spriteFrame": {
-      "__uuid__": "4066a003-b8ab-4755-9f69-dfb828aa637f"
+      "__uuid__": "6af4124e-8eae-4d6d-a046-3270dc9ff01d"
     },
     "_type": 0,
     "_sizeMode": 0,
@@ -817,7 +821,9 @@
     "_fillStart": 0,
     "_fillRange": 0,
     "_isTrimmedMode": true,
-    "_atlas": null,
+    "_atlas": {
+      "__uuid__": "dbd367c7-8ddc-406b-a275-4a2027526339"
+    },
     "_id": ""
   },
   {
@@ -1064,10 +1070,10 @@
         "__uuid__": "eca5d2f2-8ef6-41c2-bbe6-f9c79d09c432"
       }
     ],
-    "_srcBlendFactor": 770,
+    "_srcBlendFactor": 1,
     "_dstBlendFactor": 771,
     "_spriteFrame": {
-      "__uuid__": "a9c3c05e-3866-4ee5-b523-0ae9fa589817"
+      "__uuid__": "d45dd467-7b59-4168-8fdd-19c3640848b6"
     },
     "_type": 1,
     "_sizeMode": 0,
@@ -1080,7 +1086,9 @@
     "_fillStart": 0,
     "_fillRange": 0,
     "_isTrimmedMode": true,
-    "_atlas": null,
+    "_atlas": {
+      "__uuid__": "dbd367c7-8ddc-406b-a275-4a2027526339"
+    },
     "_id": ""
   },
   {

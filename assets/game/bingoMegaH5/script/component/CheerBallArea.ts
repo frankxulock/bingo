@@ -41,13 +41,11 @@ export default class CheerBallArea extends MegaComponent {
      */
     protected addEventListener(): void {
         super.addEventListener();
-
-        // 購買時關閉球號區
-        EventManager.getInstance().on(GameStateEvent.GAME_OVER, this.Close, this);
         // 抽號碼時開啟球號區
         EventManager.getInstance().on(GameStateEvent.GAME_DRAWTHENUMBERS, this.Open, this);
         // 發球時播放球號動畫
         EventManager.getInstance().on(GameStateUpdate.StateUpdate_SendBall, this.SendBall, this);
+        document.addEventListener("visibilitychange", this.onSnapshot.bind(this));
     }
 
     /**
@@ -55,10 +53,9 @@ export default class CheerBallArea extends MegaComponent {
      */
     protected removeEventListener(): void {
         super.removeEventListener();
-
-        EventManager.getInstance().off(GameStateEvent.GAME_OVER, this.Close, this);
         EventManager.getInstance().off(GameStateEvent.GAME_DRAWTHENUMBERS, this.Open, this);
         EventManager.getInstance().off(GameStateUpdate.StateUpdate_SendBall, this.SendBall, this);
+        document.removeEventListener("visibilitychange", this.onSnapshot.bind(this));
     }
 
     /**
@@ -86,7 +83,7 @@ export default class CheerBallArea extends MegaComponent {
      * 用於重播或切換場景時還原球號狀態與位置
      */
     protected onSnapshot(): void {
-        this.node.active = !this.data.GameState_BUY();
+        this.node.active = !this.data.GameStateBUY();
         this.UpdateLabel();
 
         const ballList = this.data.getBallList(); // 所有已開球號碼
@@ -123,7 +120,7 @@ export default class CheerBallArea extends MegaComponent {
             }
         }
         this.userIndex = nextIndex;
-
+        this.isAnimating = false;
         // // 🔍 Debug：列印快照結果
         // cc.log(`=== 快照復原 Debug Info ===`);
         // cc.log(`userIndex（下一顆應插入位置）: ${this.userIndex}`);
@@ -138,9 +135,10 @@ export default class CheerBallArea extends MegaComponent {
     /**
      * 遊戲結束時還原狀態，重置顯示與動畫
      */
-    protected onGameOver(): void {
+    protected onNewGame(): void {
         this.UpdateLabel();
         this.ResetAllBalls();
+        this.Close();
     }
 
     /**

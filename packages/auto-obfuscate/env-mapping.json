@@ -1,0 +1,15 @@
+{
+  "buildPathPatterns": {
+    "prod": ["prod", "production", "release"],
+    "staging": ["staging", "stage"],
+    "dev": ["dev", "development", "debug"],
+    "test": ["test", "testing"]
+  },
+  "defaultEnv": "test",
+  "envConfigs": {
+    "test": "test.json",
+    "dev": "dev.json", 
+    "staging": "staging.json",
+    "prod": "prod.json"
+  }
+} 

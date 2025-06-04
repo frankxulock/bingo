@@ -1,4 +1,8 @@
+import { HttpServer } from "../../../bingoMegaH5/script/HttpServer";
 import { CURRENCY_SYMBOL } from "../../Tools/Base/BaseDataManager";
+import { CommonTool } from "../../Tools/CommonTool";
+import { PopupName } from "../../Tools/PopupSystem/PopupConfig";
+import PopupManager from "../../Tools/PopupSystem/PopupManager";
 import { CardMega } from "../card/CardMega";
 import { CARD_CONTENT, CARD_GAMEPLAY, CARD_STATUS, GAME_STATUS } from "../CommonData";
 import CardNumberManager from "./CardNumberManager";
@@ -11,6 +15,7 @@ export class MegaDataStore {
     public nickname: string = "";
     public coin: number = 0;
     public currency: string = "";
+    public user_id: string = "";
 
     // 遊戲狀態
     public gameState: GAME_STATUS = GAME_STATUS.LOADING;
@@ -68,7 +73,7 @@ export class MegaDataStore {
 
     // 其他
     public hostAvatarData: any = null;
-
+    public videoUrls : string[] = [];
     /**
      * 從服務器數據初始化存儲
      */
@@ -87,6 +92,7 @@ export class MegaDataStore {
         if(info) {
             this.coin = Number(info.balance ?? "0");
             this.nickname = info.nickname ?? "";
+            this.user_id = info.merchant_user_id ?? "";
         }
         const currency = serverData["currency"];
         if(currency) {
@@ -129,6 +135,13 @@ export class MegaDataStore {
         // 在線人數
         this.online = serverData["online"];
 
+        // 解析Video視頻地址
+        const video = serverData["video"];
+        if(video) {
+            this.videoUrls.push(video.flv_pull_front_view);
+            this.videoUrls.push(video.flv_pull_ball_view);
+        }
+
         // 解析卡片訂單清單，分類與處理投注金額
         const cardList = serverData["cardList"];
         if(cardList && cardList.list) {
@@ -162,7 +175,7 @@ export class MegaDataStore {
     public createCardServer(data: any): void {
         // 解析伺服器回傳的訂單資料
         const orders = this.classifyOrders(data.data);
-        console.warn("成功 orders => ", orders);
+        // console.warn("成功 orders => ", orders);
         // 處理訂單內容
         this.processOrders(orders);
 
@@ -247,25 +260,7 @@ export class MegaDataStore {
 
         orders.forEach((order) => {
             order.bet_content.forEach((card) => {
-                // 處理號碼字串 -> 轉為數字陣列，無法轉換則為 null
-                const rawNumbers = card.numbers.split(',').map(n => {
-                    const num = Number(n);
-                    return isNaN(num) ? null : num;
-                });
-
-                // 分離有效數字與 null，並對有效數字排序
-                const numericPart = rawNumbers.filter(n => typeof n === 'number') as number[];
-                const nullCount = rawNumbers.filter(n => n === null).length;
-                numericPart.sort((a, b) => a - b);
-
-                // 將 null 插入中間（維持原邏輯）
-                const mid = Math.floor(numericPart.length / 2);
-                const sortedNumbers = [
-                    ...numericPart.slice(0, mid),
-                    ...Array(nullCount).fill(null),
-                    ...numericPart.slice(mid)
-                ];
-
+                const sortedNumbers = CommonTool.TransformCardInfo(card.numbers);
                 // 加入號碼至號碼管理器（用於統一顯示等）
                 CardNumberManager.getInstance().addCard(sortedNumbers);
 

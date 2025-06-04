@@ -1,0 +1,9 @@
+{
+  "useObfuscation": true,
+  "usePreviewTemplates": true,
+  "mode": "config",
+  "updateHtml": true,
+  "processGameConfig": true,
+  "targetSpecificFiles": true,
+  "enableDeadCodeInjection": true
+}

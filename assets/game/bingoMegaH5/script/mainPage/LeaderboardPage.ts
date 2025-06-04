@@ -2,6 +2,7 @@ import { IWindow } from "../../../Common/Tools/PopupSystem/IWindow";
 import { PopupName } from "../../../Common/Tools/PopupSystem/PopupConfig";
 import PopupManager from "../../../Common/Tools/PopupSystem/PopupManager";
 import ScrollLazyLoader from "../../../Common/Tools/Scroll/ScrollLazyLoader";
+import BingoPrizeList from "../component/BingoPrizeList";
 
 const {ccclass, property} = cc._decorator;
 
@@ -20,6 +21,8 @@ export default class LeaderboardPage extends cc.Component implements IWindow {
     private ScrollView_Leaderboard: ScrollLazyLoader = null;
     @property({ type: ScrollLazyLoader, visible: true })
     private ScrollView_History: ScrollLazyLoader = null;
+    @property({ type: BingoPrizeList, visible: true })
+    private BingoPrizeList: BingoPrizeList = null;
 
     private data : any = null;
     private LeaderboardIndex = 0;
@@ -35,6 +38,7 @@ export default class LeaderboardPage extends cc.Component implements IWindow {
         this.bindToggleContainer(this.Toggle_Leaderboard, (index: number) => {
             this.LeaderboardIndex = index;
             this.setPageState();
+
         });
 
         this.bindToggleContainer(this.Toggle_PlayState, (index: number) => {
@@ -60,6 +64,7 @@ export default class LeaderboardPage extends cc.Component implements IWindow {
         this.Node_ExtraGroup.active = isLeaderboard && !isJackpot;
         this.ScrollView_Leaderboard.node.active = isLeaderboard;
         this.ScrollView_History.node.active = !isLeaderboard;
+        this.BingoPrizeList.updatePrizeAmounts();
 
         // 根據當前頁面顯示對應資料
         const dataToRefresh = isLeaderboard ? rankingData : historyData;
@@ -68,6 +73,11 @@ export default class LeaderboardPage extends cc.Component implements IWindow {
         if (dataToRefresh) {
             scrollView.refreshData(dataToRefresh);
         }
+        // 更新標籤
+        this.Toggle_Leaderboard.toggleItems.forEach((toggle, index) => {
+            // 第一個子節點為選中標記或樣式切換節點
+            toggle.node.children[0].active = !toggle.isChecked;
+        });
     }
 
     private bindToggleContainer(container: cc.ToggleContainer, callback: (index: number) => void): void {

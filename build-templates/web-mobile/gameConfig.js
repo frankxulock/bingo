@@ -1,8 +1,7 @@
 const url = {
     // 協議與伺服器主機設定（可改成 https 或其他主機）
-    HTTP: "https://",
-    SERVERHOST: "devpc.okbingos.com/",
-  
+    HTTP: "",
+    SERVERHOST: "",
     // 目前遊戲代碼（可切換成不同遊戲）
     MEGA: "BGM",
     RUSH: "BGR",
@@ -22,6 +21,12 @@ const url = {
       VIDEO: "gameApi/api/front/game/video/list",
       CARDLIST: "orderApi/api/order/list/current",
       CREATECARD: "orderApi/api/order/create",
+      DIYCARD: "gameApi/api/front/game/card/list",
+      DIYCOUNT: "gameApi/api/front/game/card/count",
+      DIYCREATE: "gameApi/api/front/game/card/create",
+      DIYUPDATE: "gameApi/api/front/game/card/update",
+      DIYDELETE: "gameApi/api/front/game/card/delete",
+      INFOHISTORY: "orderApi/api/order/list/history",
     },
   
     /** 商戶ID字串，getter 拆成 key/value */
@@ -95,6 +100,24 @@ const url = {
     },
     getCreateCard() {
       return this.buildUrl(this.PATHS.CREATECARD);
+    },
+    getDIYCard() {
+      return this.buildUrl(this.PATHS.DIYCARD);
+    },
+    getDIYCount() {
+      return this.buildUrl(this.PATHS.DIYCOUNT);
+    },
+    getDIYCreate() {
+      return this.buildUrl(this.PATHS.DIYCREATE);
+    },
+    getDIYUpdate(card_detail, card_id) {
+      return this.buildUrl(this.PATHS.DIYUPDATE, {card_detail: card_detail, card_id: card_id});
+    },
+    getDIYDelete(card_id) {
+      return this.buildUrl(this.PATHS.DIYDELETE, {card_id: card_id});
+    },
+    getInfoHistory() {
+      return this.buildUrl(this.PATHS.INFOHISTORY);
     },
 
     /** 共用 token 與驗證 Header 參數 */
@@ -192,7 +215,6 @@ const DataFetcher = (() => {
     maxRetries = DEFAULT_MAX_RETRIES
   }) {
     let retryAttempts = 0;
-
     const executeFetch = () => {
       Promise.all(endpoints.map(fetchSingle))
         .then(results => {

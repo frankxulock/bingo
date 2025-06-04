@@ -3,7 +3,7 @@ import { CommonTool } from "../../../Common/Tools/CommonTool";
 const { ccclass, property } = cc._decorator;
 
 @ccclass
-export default class AnalyzeDataItem extends cc.Component {
+export default class NalyzeDataItem extends cc.Component {
 
     // 顯示號碼的 Label 節點
     @property(cc.Label)

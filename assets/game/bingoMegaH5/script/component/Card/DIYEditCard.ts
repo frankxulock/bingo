@@ -1,5 +1,6 @@
 import EventManager, { GameStateUpdate } from "../../../../Common/Tools/Base/EventManager";
 import ToastManager from "../../../../Common/Tools/Toast/ToastManager";
+import { HttpServer } from "../../HttpServer";
 import CardIcon from "./CardIcon";
 
 const { ccclass, property } = cc._decorator;
@@ -13,8 +14,17 @@ export default class DIYEditCard extends cc.Component {
     // 顯示數字的節點群組（每個數字由 CardIcon 呈現）
     @property({ type: cc.Node, visible: true })
     private Node_NumberGroup: cc.Node = null;
+    // 數字
+    @property({ type: cc.Node, visible: true })
+    private Node_NumberTxtGroup: cc.Node = null;
 
     private cardItems: CardIcon[] = []; // 存放每個顯示的 CardIcon 實例
+    private cardTxt: cc.RichText[] = [];
+    private cardText: string[] = [
+        "#1d1d1d", // new cc.Color(29, 29, 29)
+        "#ffffff", // new cc.Color(255, 255, 255)
+        "#fe582a", // new cc.Color(254, 88, 42)
+    ];
     private data: any = null; // 當前卡片的資料
 
     /** 設定此卡片的資料與顯示狀態 */
@@ -26,11 +36,16 @@ export default class DIYEditCard extends cc.Component {
         if (!this.cardItems.length) {
             this.cardItems = this.Node_NumberGroup.getComponentsInChildren(CardIcon);
         }
+        if(this.cardTxt.length == 0) {
+            this.cardTxt = this.Node_NumberTxtGroup.getComponentsInChildren(cc.RichText);     
+        }
 
         // 將每個 CardIcon 顯示對應的數字，若無則顯示 DIY
         this.cardItems.forEach((item, index) => {
-            const number = viewData[index] ?? "DIY";
-            item.setLabel(number);
+            let haveData = (viewData[index] != null) ? true : false;
+            const number = haveData ? viewData[index] : "DIY";
+            const color = haveData ? 0 : 1;
+            this.setLabel(this.cardTxt[index], number, color);
         });
 
         // 根據是否已購買設定是否可互動
@@ -72,10 +87,27 @@ export default class DIYEditCard extends cc.Component {
     /** 刪除按鈕事件 */
     public onDelete(): void {
         if (this.DIYEditCard.interactable) {
-            EventManager.getInstance().emit(
-                GameStateUpdate.StateUpdate_DeleteDIYCard,
-                this.data
-            );
+            console.log(this.data.id);
+            HttpServer.DIYDelete(this.data.id)
+            .then(results => {
+                EventManager.getInstance().emit(
+                    GameStateUpdate.StateUpdate_DeleteDIYCard,
+                    this.data
+                );
+                HttpServer.DIYCardList()
+                .then(results => {
+                    console.error("results : ", results);
+                });
+            });
         }
+    }
+
+    /**
+     * 設定顯示的文字內容
+     * @param txt 要設定的文字內容
+     */
+    public setLabel(text : cc.RichText , txt: string, numberItem : number) {
+        let color = `<color=${this.cardText[numberItem]}>${txt}</color>`;
+        text.string = color;
     }
 }

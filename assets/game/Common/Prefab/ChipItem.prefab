@@ -13,7 +13,7 @@
   },
   {
     "__type__": "cc.Node",
-    "_name": "ChipItem",
+    "_name": "ChipItem copy",
     "_objFlags": 0,
     "_parent": null,
     "_children": [
@@ -58,7 +58,7 @@
       "__type__": "TypedArray",
       "ctor": "Float64Array",
       "array": [
-        0,
+        146.25,
         3,
         0,
         0,
@@ -277,7 +277,7 @@
     "_srcBlendFactor": 1,
     "_dstBlendFactor": 771,
     "_spriteFrame": {
-      "__uuid__": "95331108-1806-4145-a354-6c2323701d68"
+      "__uuid__": "05117dab-09d8-4409-907b-193fc4e0dec6"
     },
     "_type": 0,
     "_sizeMode": 1,
@@ -289,8 +289,10 @@
     },
     "_fillStart": 0,
     "_fillRange": 0,
-    "_isTrimmedMode": true,
-    "_atlas": null,
+    "_isTrimmedMode": false,
+    "_atlas": {
+      "__uuid__": "dbd367c7-8ddc-406b-a275-4a2027526339"
+    },
     "_id": ""
   },
   {
@@ -316,7 +318,7 @@
         "__id__": 9
       }
     ],
-    "_active": true,
+    "_active": false,
     "_components": [
       {
         "__id__": 12
@@ -498,7 +500,7 @@
     "_srcBlendFactor": 1,
     "_dstBlendFactor": 771,
     "_spriteFrame": {
-      "__uuid__": "95331108-1806-4145-a354-6c2323701d68"
+      "__uuid__": "05117dab-09d8-4409-907b-193fc4e0dec6"
     },
     "_type": 0,
     "_sizeMode": 1,
@@ -510,8 +512,10 @@
     },
     "_fillStart": 0,
     "_fillRange": 0,
-    "_isTrimmedMode": true,
-    "_atlas": null,
+    "_isTrimmedMode": false,
+    "_atlas": {
+      "__uuid__": "dbd367c7-8ddc-406b-a275-4a2027526339"
+    },
     "_id": ""
   },
   {
@@ -593,7 +597,7 @@
     "_N$target": {
       "__id__": 1
     },
-    "_N$isChecked": true,
+    "_N$isChecked": false,
     "toggleGroup": null,
     "checkMark": {
       "__id__": 12

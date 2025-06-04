@@ -1,5 +1,6 @@
 import AvatarComponent from "../../../Common/Base/component/AvatarComponent";
 import MegaComponent from "../../../Common/Base/gameMega/MegaComponent";
+import EventManager, { GameStateUpdate } from "../../../Common/Tools/Base/EventManager";
 import { CommonTool } from "../../../Common/Tools/CommonTool";
 import { PopupName } from "../../../Common/Tools/PopupSystem/PopupConfig";
 import PopupManager from "../../../Common/Tools/PopupSystem/PopupManager";
@@ -18,6 +19,16 @@ export default class UserStatsPanel extends MegaComponent {
 
     // 存放所有 AvatarComponent 的陣列
     private Avatars: AvatarComponent[] = [];
+    
+    protected addEventListener(): void {
+        super.addEventListener();
+        EventManager.getInstance().on(GameStateUpdate.StateUpdate_Online, this.onSnapshot, this);
+    }
+
+    protected removeEventListener(): void {
+        super.removeEventListener();
+        EventManager.getInstance().off(GameStateUpdate.StateUpdate_Online, this.onSnapshot, this);
+    }
 
     /**
      * 初始化元件

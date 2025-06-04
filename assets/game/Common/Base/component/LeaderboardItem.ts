@@ -71,26 +71,32 @@ export default class LeaderboardItem extends cc.Component {
         }
 
         // 設定玩家名稱
-        CommonTool.setLabel(this.Label_name, data.name);
+        CommonTool.setLabel(this.Label_name, data.nickname);
 
         // 設定球號，最多顯示 3 顆球
-        if (Array.isArray(data.ball)) {
+        if(data.numbers) {
+            if (Array.isArray(data.numbers)) {
+                this.Node_Balls.forEach((ballNode, i) => {
+                    const num = data.numbers[i];
+                    if (num != null) {
+                        ballNode.setAction(true);   // 顯示並啟用動畫
+                        ballNode.setBallNumber(num);
+                    } else {
+                        ballNode.setAction(false);  // 隱藏或停用動畫
+                    }
+                });
+            }
+
+            // Blackout 數字顯示規則：當球數 >= 3 時，顯示 "+num"
+            const blackoutText = (data.numbers.length >= 3) ? ("+" + data.numbers.length) : "";
+            CommonTool.setLabel(this.Label_blackout, blackoutText);
+        }else {
             this.Node_Balls.forEach((ballNode, i) => {
-                const num = data.ball[i];
-                if (num != null) {
-                    ballNode.setAction(true);   // 顯示並啟用動畫
-                    ballNode.setBallNumber(num);
-                } else {
-                    ballNode.setAction(false);  // 隱藏或停用動畫
-                }
+                ballNode.setAction(false);  // 隱藏或停用動畫
             });
         }
 
-        // Blackout 數字顯示規則：當球數 >= 3 時，顯示 "+num"
-        const blackoutText = (data.ball.length >= 3) ? ("+" + data.num) : "";
-        CommonTool.setLabel(this.Label_blackout, blackoutText);
-
         // 購買卡數顯示，前面加 "+"
-        CommonTool.setLabel(this.Label_BuyCardNum, "+" + data.BuyCard);
+        CommonTool.setLabel(this.Label_BuyCardNum, "+" + data.card_total);
     }
 }

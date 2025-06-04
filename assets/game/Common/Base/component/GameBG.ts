@@ -1,3 +1,6 @@
+import EventManager, { GameStateUpdate } from "../../Tools/Base/EventManager";
+import { CommonTool } from "../../Tools/CommonTool";
+
 const { ccclass, property } = cc._decorator;
 
 @ccclass
@@ -20,35 +23,34 @@ export default class gameBG extends cc.Component {
         this.resizeBG();
 
         // 監聽瀏覽器視窗大小改變事件，動態調整背景寬度
-        window.addEventListener('resize', this.resizeHandler);
+        EventManager.getInstance().on(GameStateUpdate.StateUpdate_Canvas, this.resizeHandler, this);
     }
 
     /**
      * 調整背景圖片寬度，保持設計高度比例
      */
     private resizeBG(): void {
-        if (!this.imgElement || !this.gameBG) return;
+        if (!this.imgElement || !this.gameBG) 
+            return;
+        // 手機模式不顯示
+        this.gameBG.active = !CommonTool.shouldUseMobileMode();        
+        if(!this.gameBG.isValid)
+            return;
 
         // 取得當前視窗尺寸
         const frameSize = cc.view.getFrameSize();
-
         // 設計參考高度，依據設計稿設定
-        const targetDesignHeight = 844;
-
+        const targetDesignHeight = 800;
         // 計算縮放比例 (設計高度 / 實際視窗高度)
         const scaleY = targetDesignHeight / frameSize.height;
-
         // 計算背景新寬度，維持比例
         const newWidth = frameSize.width * scaleY;
-
         // 設定背景節點寬度，達成背景圖片等比縮放
         this.gameBG.width = newWidth;
     }
 
     protected onDestroy(): void {
         // 移除 resize 事件監聽，避免記憶體洩漏
-        if (this.resizeHandler) {
-            window.removeEventListener('resize', this.resizeHandler);
-        }
+        EventManager.getInstance().off(GameStateUpdate.StateUpdate_Canvas, this.resizeHandler, this);
     }
 }

@@ -7,6 +7,7 @@ import ToastManager from "../../../Common/Tools/Toast/ToastManager";
 import CardIcon from "../component/Card/CardIcon";
 import ScrollLazyLoader from "../../../Common/Tools/Scroll/ScrollLazyLoader";
 import NumberToggle from "../../../Common/Base/component/NumberToggle";
+import { HttpServer } from "../HttpServer";
 
 const { ccclass, property } = cc._decorator;
 
@@ -28,8 +29,13 @@ export default class DIYEditPage extends cc.Component implements IWindow {
 
     // 卡片 UI 顯示節點（對應選號顯示）
     @property({ type: cc.Node, visible: true })
-    private Node_NumberGroup: cc.Node = null;
-    private CardIcons: CardIcon[] = [];
+    private Node_NumberTxtGroup: cc.Node = null;
+    private CardTxts: cc.RichText[] = [];
+    private cardText: string[] = [
+        "#1d1d1d", // new cc.Color(29, 29, 29)
+        "#ffffff", // new cc.Color(255, 255, 255)
+        "#fe582a", // new cc.Color(254, 88, 42)
+    ];
 
     // 選號按鈕 UI 節點
     @property({ type: cc.Node, visible: true })
@@ -56,8 +62,8 @@ export default class DIYEditPage extends cc.Component implements IWindow {
         this.normalBalls = data.normalBalls;
 
         // 取得 CardIcon 元件
-        if (this.CardIcons.length === 0) {
-            this.CardIcons = this.Node_NumberGroup.getComponentsInChildren(CardIcon);
+        if (this.CardTxts.length === 0) {
+            this.CardTxts = this.Node_NumberTxtGroup.getComponentsInChildren(cc.RichText);
         }
 
         // 初始化選號按鈕及分組
@@ -175,8 +181,10 @@ export default class DIYEditPage extends cc.Component implements IWindow {
         }
 
         // 更新卡片 UI 顯示文字
-        this.CardIcons.forEach((card, index) => {
-            card.setLabel(flattened[index] ?? "DIY");
+        this.CardTxts.forEach((card, index) => {
+            let txt = flattened[index] ?? "DIY";
+            let color = (flattened[index] == null) ? 1 : 0;
+            this.setLabel(card, txt, color);
         });
     }
 
@@ -240,32 +248,53 @@ export default class DIYEditPage extends cc.Component implements IWindow {
         this.updateCardIconsBySelected();
     }
 
-    /**
-     * 儲存卡片資料
-     */
+    /*** 儲存卡片資料 */
     public OnSave(): void {
         // 將選中的數字排序
         const sorted = Array.from(this.selectedNumbers).sort((a, b) => a - b);
 
         // 檢查是否已選滿 24 個數字
         if (sorted.length === ALLCARD) {
-            // 插入 null 在數字的中間
-            const middleIndex = Math.floor((ALLCARD / 2));
-            sorted.splice(middleIndex, 0, null); // 在中間插入 null
+            const middleIndex = Math.floor(ALLCARD / 2);
 
-            // 更新 editCard 
-            if (this.editCard) {
-                this.editCard.cardInfo = sorted;
+            // 插入 "DIY" 在中間（轉為 (number|string)[]）
+            const withDIY: (number | string)[] = [...sorted];
+            withDIY.splice(middleIndex, 0, "DIY");
+
+            // 轉為字串並送出
+            const resultString = withDIY.join(",");
+            console.log(resultString);
+
+            sorted.splice(middleIndex, 0, null);
+            if(this.editCard) {
+                HttpServer.DIYUpdate(resultString, this.editCard.id)
+                .then(results => {
+                    // 更新 editCard（保留原始數字陣列）
+                    if (this.editCard) {
+                        this.editCard.cardInfo = sorted;
+                    }
+                    // 發送事件
+                    EventManager.getInstance().emit(GameStateUpdate.StateUpdate_SaveDIYCards, this.editCard || sorted);
+                    // 關閉頁面並清除狀態
+                    this.close();
+                    this.editCard = null;
+                })
+            }else {
+                HttpServer.DIYCreate(resultString, window.url.getGame())
+                .then(results => {
+                    
+                    // 更新 editCard（保留原始數字陣列）
+                    if (this.editCard) {
+                        this.editCard.cardInfo = sorted;
+                    }
+                    // 發送事件
+                    EventManager.getInstance().emit(GameStateUpdate.StateUpdate_SaveDIYCards, this.editCard || sorted);
+                    // 關閉頁面並清除狀態
+                    this.close();
+                    this.editCard = null;
+                });
             }
-
-            // 發送更新事件
-            EventManager.getInstance().emit(GameStateUpdate.StateUpdate_SaveDIYCards, this.editCard || sorted);
-
-            // 關閉頁面並清除 editCard
-            this.close();
-            this.editCard = null;
         } else {
-            // 提示未選滿 24 個數字
             ToastManager.showToast("卡片未選滿24個數字");
         }
     }
@@ -276,6 +305,20 @@ export default class DIYEditPage extends cc.Component implements IWindow {
     public OnReset(): void {
         this.selectedNumbers.clear();
         this.NumberToggles.forEach(toggle => toggle.setChecked(false));
-        this.CardIcons.forEach((card, index) => card.setLabel((index == (ALLCARD / 2)) ? "DIY" : ""));
+        this.CardTxts.forEach( (card, index)=> {
+            let showDIY = (index == (ALLCARD / 2));
+            let txt = (showDIY ? "DIY" : "");
+            let color = showDIY ? 1 : 0;
+            this.setLabel(card, txt, color);
+        });
+    }
+
+    /**
+     * 設定顯示的文字內容
+     * @param txt 要設定的文字內容
+     */
+    public setLabel(text : cc.RichText , txt: string, numberItem : number) {
+        let color = `<color=${this.cardText[numberItem]}>${txt}</color>`;
+        text.string = color;
     }
 }

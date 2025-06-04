@@ -16,19 +16,19 @@ export default class Countdown extends MegaComponent {
     protected addEventListener(): void {
         super.addEventListener();
         EventManager.getInstance().on(GameStateUpdate.StaticUpdate_Countdown, this.UpdateTiming, this);
-        EventManager.getInstance().on(GameStateEvent.GAME_REWARD, this.onSnapshot, this);
+        EventManager.getInstance().on(GameStateEvent.GAME_DRAWTHENUMBERS, this.onSnapshot, this);
     }
 
     /** 移除事件監聽器，避免內存洩漏 */
     protected removeEventListener(): void {
         super.removeEventListener();
         EventManager.getInstance().off(GameStateUpdate.StaticUpdate_Countdown, this.UpdateTiming, this);
-        EventManager.getInstance().off(GameStateEvent.GAME_REWARD, this.onSnapshot, this);
+        EventManager.getInstance().off(GameStateEvent.GAME_DRAWTHENUMBERS, this.onSnapshot, this);
     }
 
     /** 遊戲快照事件，恢復時如果遊戲狀態是購買階段則繼續倒計時 */
     protected onSnapshot(): void {
-        const buyTime = this.data.GameState_BUY();
+        const buyTime = this.data.GameStateBUY();
         this.node.active = (buyTime) ? true : false;
     }
 

@@ -26,14 +26,12 @@ export default class PurchasedTicketPage extends MegaComponent {
 
     protected addEventListener(): void {
         super.addEventListener();
-        EventManager.getInstance().on(GameStateEvent.GAME_BUY, this.onSnapshot, this);
         EventManager.getInstance().on(GameStateUpdate.StateUpdate_SendBall, this.setPageState, this);
         EventManager.getInstance().on(GameStateUpdate.StateUpdate_OpenPurchasedTicketPage, this.showAction, this);
     }
 
     protected removeEventListener(): void {
         super.removeEventListener();
-        EventManager.getInstance().off(GameStateEvent.GAME_BUY, this.onSnapshot, this);
         EventManager.getInstance().off(GameStateUpdate.StateUpdate_SendBall, this.setPageState, this);
         EventManager.getInstance().off(GameStateUpdate.StateUpdate_OpenPurchasedTicketPage, this.showAction, this);
     }
@@ -67,7 +65,7 @@ export default class PurchasedTicketPage extends MegaComponent {
     }
 
     /** 遊戲結束事件 重置目前內容 */
-    protected onGameOver(): void {
+    protected onNewGame(): void {
         this.onSnapshot();
         let PrizeContent = this.ScrollView_PrizeOverview.content;
         let NoHavePrizeItem = (PrizeContent.children.length == 0);
@@ -88,5 +86,8 @@ export default class PurchasedTicketPage extends MegaComponent {
         this.Btn_PreBuyCard.active = (BottomBtnState == 1) ? true : false;
         this.Node_TotaiWin.active = (BottomBtnState == 2) ? true : false;
         CommonTool.setLabel(this.Label_totaiWin, CommonTool.formatMoney2(d.totalWin, "+"));
+ 
+        let action = (this.ScrollView_PrizeOverview.content.children.length == 0);
+        this.ScrollView_PrizeOverview.node.active = action;
     }
 }

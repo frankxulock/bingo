@@ -7,8 +7,8 @@ const { ccclass, property } = cc._decorator;
 @ccclass
 export default class Card extends cc.Component {
     // 卡片標題 Label
-    @property({ type: cc.Label, visible: true })
-    private Label_titel: cc.Label = null;
+    @property({ type: cc.Node, visible: true })
+    private Node_titel: cc.Node = null;
 
     // Bingo Jackpot 顯示節點
     @property({ type: cc.Node, visible: true })
@@ -18,12 +18,23 @@ export default class Card extends cc.Component {
     @property({ type: cc.Node, visible: true })
     private Node_E: cc.Node = null;
 
-    // 數字項目群組容器
+    // 圖片
     @property({ type: cc.Node, visible: true })
     private Node_NumberGroup: cc.Node = null;
 
+    // 數字
+    @property({ type: cc.Node, visible: true })
+    private Node_NumberTxtGroup: cc.Node = null;
+
     // 卡片上的數字項目（CardIcon 組件）
     private cardItems: CardIcon[] = [];
+
+    private cardTxt: cc.RichText[] = [];
+    private cardText: string[] = [
+        "#1d1d1d", // new cc.Color(29, 29, 29)
+        "#ffffff", // new cc.Color(255, 255, 255)
+        "#fe582a", // new cc.Color(254, 88, 42)
+    ];
 
     // 中獎線顯示節點群組
     @property({ type: cc.Node, visible: true })
@@ -49,12 +60,7 @@ export default class Card extends cc.Component {
         let data = cardData.getCardViewData();
         this.data = cardData;
         // 設定卡片標題
-        CommonTool.setLabel(this.Label_titel, data.title);
-        this.Label_titel.node.parent.active = (data.cardState == CARD_STATUS.PREORDER) ? true : false;
-        if(data.title == "PRE-BUY"){
-        }else {
-            this.Label_titel.node.parent.active = false;
-        }
+        this.Node_titel.active = (data.cardState == CARD_STATUS.PREORDER) ? true : false;
 
         // 設定 Bingo Jackpot 與額外獎勵的顯示
         this.Node_BingoJackpot.active = data.haveBingoJackpo;
@@ -63,6 +69,9 @@ export default class Card extends cc.Component {
         // 初始化 cardItems（一次性抓取 CardIcon 組件）
         if (this.cardItems.length == 0) {
             this.cardItems = this.Node_NumberGroup.getComponentsInChildren(CardIcon);
+        }
+        if(this.cardTxt.length == 0) {
+            this.cardTxt = this.Node_NumberTxtGroup.getComponentsInChildren(cc.RichText);
         }
 
         // 設定每個數字格的背景與數字/文字內容
@@ -73,9 +82,9 @@ export default class Card extends cc.Component {
             item.setSprite(numberItemBG);
 
             if (numbers != null)
-                item.setLabel(numbers);
+                this.setLabel(this.cardTxt[index], numbers, numberItemBG);
             else
-                item.setLabel((data.DIYCard) ? "DIY" : "Free");
+                this.setLabel(this.cardTxt[index], ((data.DIYCard) ? "DIY" : "Free"), numberItemBG);
         });
 
         // 顯示中獎線（如果有）
@@ -94,5 +103,14 @@ export default class Card extends cc.Component {
                 CommonTool.setLabel(this.Label_WinAmount, CommonTool.formatMoney2(data.totalWin, ""));
             }
         }
+    }
+
+    /**
+     * 設定顯示的文字內容
+     * @param txt 要設定的文字內容
+     */
+    public setLabel(text : cc.RichText , txt: string, numberItem : number) {
+        let color = `<color=${this.cardText[numberItem]}>${txt}</color>`;
+        text.string = color;
     }
 }

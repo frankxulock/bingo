@@ -5,6 +5,7 @@ import PopupManager from "../../../Common/Tools/PopupSystem/PopupManager";
 import { PopupName } from "../../../Common/Tools/PopupSystem/PopupConfig";
 import ScrollLazyLoader from "../../../Common/Tools/Scroll/ScrollLazyLoader";
 import Card from "../component/Card/Card";
+import EventManager, { GameStateEvent, GameStateUpdate } from "../../../Common/Tools/Base/EventManager";
 
 const {ccclass, property} = cc._decorator;
 
@@ -35,10 +36,12 @@ export default class ConfirmPurchasePage extends MegaComponent implements IWindo
 
     protected addEventListener(): void {
         super.addEventListener();
+        EventManager.getInstance().on(GameStateEvent.GAME_DRAWTHENUMBERS, this.ChangeGameType, this);
     }
 
     protected removeEventListener(): void {
-        super.removeEventListener();   
+        super.removeEventListener();
+        EventManager.getInstance().off(GameStateEvent.GAME_DRAWTHENUMBERS, this.ChangeGameType, this);   
     }
 
     protected init(): void {
@@ -59,6 +62,18 @@ export default class ConfirmPurchasePage extends MegaComponent implements IWindo
     close(): void {
         this.node.active = false;
         PopupManager.closePopup(PopupName.ConfirmPurchasePage);
+    }
+
+    /** 變更遊戲類型通知 
+     * 用於玩家在下注狀態購買正常卡的時候通知將換成預購卡
+    */
+    private ChangeGameType() {
+        PopupManager.showPopup(PopupName.PurchaseUpdatePage);
+       this.setPageState();
+    }
+
+    protected onNewGame(){
+        this.setPageState();
     }
 
     /** 發送重置目前卡片內容，並播放卡片翻轉動畫更新資料 */
@@ -96,12 +111,11 @@ export default class ConfirmPurchasePage extends MegaComponent implements IWindo
 
             // 5. 建立卡片翻轉動畫流程
             const tween = cc.tween(cardNode)
-                .to(0.2, { scaleX: 0.1 }, { easing: "quadIn" })  // 快速縮小至 0.1，模擬翻面一半
+                .to(0.2, {scaleX: 0})
                 .call(() => {
                     cardComp.setData(newCardData); // 在卡片正面時替換資料
                 })
-                .to(0.25, { scaleX: 0.7 }, { easing: "backOut" }) // 彈性放大回來
-                .to(0.05, { scaleX: 0.675 }); // 微調至預設縮放比例
+                .to(0.2, { scaleX: 0.675 });
 
             // 6. 如果是最後一張卡片，加入動畫結束回調
             if (index === content.children.length - 1) {

@@ -10,6 +10,7 @@ window.boot = function () {
     // Set additional settings
     cc.macro.ENABLE_TRANSPARENT_CANVAS = true;  // Enable transparent canvas
     cc.macro.ENABLE_WEBGL_ANTIALIAS = true;     // Enable WebGL antialiasing
+    cc.dynamicAtlasManager.enabled = true;  // 啟動動態合批
 
     /** 快照與遊戲素材加載狀態 */
     var snapshotReady = false;
@@ -22,9 +23,9 @@ window.boot = function () {
             // 廣播遊戲資料給主場景
             const scene = cc.director.getScene();
             if (scene && scene.isValid) {
-            scene.emit("Game:InitData", window.snapshotData); // 可以附帶資料
+                scene.emit("Game:InitData", window.snapshotData); // 可以附帶資料
             } else {
-            console.warn("主場景尚未就緒，無法廣播 Game:InitData");
+                console.warn("主場景尚未就緒，無法廣播 Game:InitData");
             }
         }
     }
@@ -93,6 +94,8 @@ window.boot = function () {
                             div.style.backgroundImage = '';
                         }
                         console.log('Success to load scene: ' + launchScene);
+                        assetsReady = true;
+                        tryStartGame();  // 等待快照與素材都完成後才啟動遊戲
                     }
                 }
             }
@@ -124,8 +127,6 @@ window.boot = function () {
         if (count === bundleRoot.length + 1) {
             cc.assetManager.loadBundle(MAIN, function (err) {
                 if (!err) {
-                    assetsReady = true;
-                    tryStartGame();  // 等待快照與素材都完成後才啟動遊戲
                     cc.game.run(option, onStart);  // 遊戲初始化
                 }
             });
@@ -178,7 +179,7 @@ window.boot = function () {
 if (window.jsb) {
     var isRuntime = (typeof loadRuntime === 'function');
     if (isRuntime) {
-        require('src/settings.c13e2.js');
+        require('src/settings.js');
         require('src/cocos2d-runtime.js');
         if (CC_PHYSICS_BUILTIN || CC_PHYSICS_CANNON) {
             require('src/physics.js');
@@ -186,7 +187,7 @@ if (window.jsb) {
         require('jsb-adapter/engine/index.js');
     }
     else {
-        require('src/settings.c13e2.js');
+        require('src/settings.js');
         require('src/cocos2d-jsb.js');
         if (CC_PHYSICS_BUILTIN || CC_PHYSICS_CANNON) {
             require('src/physics.js');

@@ -154,4 +154,109 @@ export class CommonTool {
             maximumFractionDigits: 2
         });
     }
+
+    public static TransformCardInfo(num : string): number[] {
+        // 處理號碼字串 -> 轉為數字陣列，無法轉換則為 null
+        const rawNumbers = num.split(',').map(n => {
+            const num = Number(n);
+            return isNaN(num) ? null : num;
+        });
+
+        // 分離有效數字與 null，並對有效數字排序
+        const numericPart = rawNumbers.filter(n => typeof n === 'number') as number[];
+        const nullCount = rawNumbers.filter(n => n === null).length;
+        numericPart.sort((a, b) => a - b);
+
+        // 將 null 插入中間（維持原邏輯）
+        const mid = Math.floor(numericPart.length / 2);
+        const sortedNumbers = [
+            ...numericPart.slice(0, mid),
+            ...Array(nullCount).fill(null),
+            ...numericPart.slice(mid)
+        ];
+
+        return sortedNumbers;
+    }
+
+    /**
+     * 将日期格式化为 MM/dd/yyyy 格式
+     * @param date 要格式化的日期
+     * @returns 格式化后的日期字符串，例如 "03/12/2025"
+     */
+    public static formatDateToMMDDYYYY(date: Date): string {
+        const month = CommonTool.padZero(date.getMonth() + 1);    // 月份从0开始，需要+1
+        const day = CommonTool.padZero(date.getDate());
+        const year = date.getFullYear();
+        
+        return `${month}/${day}/${year}`;
+    }
+
+    /**
+     * 数字补零（小于10的数字前面加0）
+     * @param num 数字
+     * @returns 补零后的字符串
+     */
+    public static padZero(num: number): string {
+        return num < 10 ? `0${num}` : num.toString();
+    }
+
+    /**
+     * 節流函數
+     * 限制函數執行頻率，提升性能
+     * @param func 要節流的函數
+     * @param delay 延遲時間（毫秒）
+     * @returns 節流後的函數
+     */
+    public static throttle<T extends (...args: any[]) => any>(func: T, delay: number): T {
+        let lastCall = 0;
+        let timeoutId: any = null;
+        
+        return ((...args: any[]) => {
+            const now = Date.now();
+            
+            if (now - lastCall >= delay) {
+                // 立即執行
+                lastCall = now;
+                func.apply(this, args);
+            } else {
+                // 清除之前的延遲執行
+                if (timeoutId) {
+                    clearTimeout(timeoutId);
+                }
+                
+                // 設置延遲執行
+                timeoutId = setTimeout(() => {
+                    lastCall = Date.now();
+                    func.apply(this, args);
+                    timeoutId = null;
+                }, delay - (now - lastCall));
+            }
+        }) as T;
+    }
+
+    /**
+     * 智能設備模式判斷 (模擬器算作手機)
+     * 用於判斷當前環境是否應該使用手機模式配置
+     * @returns true: 手機模式, false: 電腦模式
+     */
+    public static shouldUseMobileMode(): boolean {
+        const ua = navigator.userAgent || navigator.vendor || (window as any).opera;
+        const width = window.innerWidth;
+        const height = window.innerHeight;
+        const ratio = height / width;
+
+        // 基本條件判斷
+        const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+        const isPortrait = ratio > 1;
+        const isSmallScreen = Math.min(width, height) <= 768;
+        const isMobileUA = /android|iphone|ipad|ipod|windows phone/i.test(ua);
+
+        // 擴展條件：包含模擬器的判斷
+        const hasPhoneLikeRatio = ratio > 1.2 && ratio < 2.5;
+        const hasReasonableSize = width >= 320 && width <= 450 && height >= 550 && height <= 950;
+
+        // 組合判斷：原始判斷 OR 類似手機的模擬器
+        return (isMobileUA || isTouchDevice) && isSmallScreen && isPortrait ||
+               (isTouchDevice && hasPhoneLikeRatio && hasReasonableSize);
+    }
 }

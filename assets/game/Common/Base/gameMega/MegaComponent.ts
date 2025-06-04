@@ -10,13 +10,13 @@ export default class MegaComponent extends BaseComponent {
     /** 監聽事件（後期根據不同遊戲複寫） */
     protected addEventListener() {
         EventManager.getInstance().on(GameStateEvent.GAME_SNAPSHOT, this.onSnapshot, this);
-        EventManager.getInstance().on(GameStateEvent.GAME_OVER, this.onGameOver, this);
+        EventManager.getInstance().on(GameStateEvent.GAME_BUY, this.onNewGame, this);
     }
 
     /** 監聽事件註銷（後期根據不同遊戲複寫） */
     protected removeEventListener() {
         EventManager.getInstance().off(GameStateEvent.GAME_SNAPSHOT, this.onSnapshot, this);
-        EventManager.getInstance().off(GameStateEvent.GAME_OVER, this.onGameOver, this);
+        EventManager.getInstance().off(GameStateEvent.GAME_BUY, this.onNewGame, this);
     }
 
     /** 初始化各種註冊流程（後期根據不同遊戲複寫） */
@@ -27,5 +27,5 @@ export default class MegaComponent extends BaseComponent {
     /** 通用的狀態還原事件 */
     protected onSnapshot() { };
     /** 通用的狀態遊戲結束事件(內容重置) */
-    protected onGameOver() { };
+    protected onNewGame() { };
 }

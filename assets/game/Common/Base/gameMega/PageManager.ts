@@ -1,4 +1,8 @@
+import { HttpServer } from "../../../bingoMegaH5/script/HttpServer";
 import { CommonTool } from "../../Tools/CommonTool";
+import { PopupName } from "../../Tools/PopupSystem/PopupConfig";
+import PopupManager from "../../Tools/PopupSystem/PopupManager";
+import { CardMega } from "../card/CardMega";
 import { CARD_GAMEPLAY, CARD_STATUS, GAME_STATUS, CARD_CONTENT } from "../CommonData";
 import { MegaDataStore } from "./MegaDataStore";
 
@@ -138,17 +142,6 @@ export default class PageManager {
         return data;
     }
 
-    /** 取得結算頁面相關資訊 */
-    public getResultPageData() {
-        let data = {
-            cost : this.dataStore.currentBetAmount, // 總下注金額
-            extral : 1,                   // extral玩法贏分
-            jackpot : 1,                  // Jackpot玩法贏分
-            total : 0,                    // 總贏分
-        }
-        return data;
-    }
-
     /** 取得用戶資訊 */
     public getUserPageData() {
         let data = {
@@ -164,8 +157,8 @@ export default class PageManager {
     public getPersonalCenterPageData() {
         let data = {
             nickName: this.dataStore.nickname,
-            id: "123",
-            coin: this.dataStore.coin,
+            id: this.dataStore.user_id,
+            coin: CommonTool.formatNumber(this.dataStore.coin),
         }
         return data;
     }
@@ -230,14 +223,6 @@ export default class PageManager {
         }
     }
 
-    /** 歷史紀錄頁面 */
-    public getGameRecordPageData() {
-        let data = {
-
-        }
-        return data;
-    }
-
     /** 取得主播頁面資訊 */
     public getAvatarPageData() {
         return this.dataStore.hostAvatarData;
@@ -261,7 +246,8 @@ export default class PageManager {
         // 建立卡片資料並加上是否已選擇（給 UI 用），並把已購買的卡片排後面
         const listData = this.dataStore.savedDIYCards
             .map(card => {
-                const isPurchased = DIYCard.some(c => c.getID() === card.getID());
+                const cardInfo = card.getCardInfo();
+                const isPurchased = DIYCard.some(c => this.isSameCard(c.getCardInfo(), cardInfo));
                 return {
                     ...card,
                     isPurchased,
@@ -275,6 +261,11 @@ export default class PageManager {
             listData: listData,               // UI使用卡片
         };
         return data;
+    }
+
+    public isSameCard(a: number[], b: number[]): boolean {
+        if (a.length !== b.length) return false;
+        return a.every((val, index) => val === b[index]);
     }
 
     /** 排行榜資訊頁面 */

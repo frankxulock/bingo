@@ -54,10 +54,16 @@ export const ERROR_CODE = cc.Enum({
     UNKNOWN_ERROR: "20000",
 })
 
+declare interface Window {
+    loginData: any
+}
+
+// TcPlayer 全局類型聲明
 declare global {
     interface Window {
         serverData: any;
         url: any;
         DataFetcher: any;
+        TcPlayer: any;
     }
 }

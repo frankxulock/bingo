@@ -4,11 +4,36 @@
 <head>
   <meta charset="utf-8" />
   <title>MegaBingo</title>
-  <link rel="icon" href="app/editor/static/preview-templates/favicon.ico" />
+  
+  <!-- ✅ 手機與跨瀏覽器相容性設定 -->
+  <meta name="viewport" content="width=device-width,user-scalable=no,initial-scale=1, minimum-scale=1,maximum-scale=1,viewport-fit=cover" />
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="MegaBingo">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="format-detection" content="telephone=no">
+  <meta name="renderer" content="webkit" />
+  <meta name="force-rendering" content="webkit" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+  <meta name="msapplication-tap-highlight" content="no">
+  <meta name="full-screen" content="yes" />
+  <meta name="x5-fullscreen" content="true" />
+  <meta name="360-fullscreen" content="true" />
+  <meta name="screen-orientation" content="landscape" />
+  <meta name="x5-orientation" content="landscape">
+  <meta name="x5-page-mode" content="app">
+  
+  <!-- 🌐 PWA 支持 -->
+  <meta name="theme-color" content="#000000">
+  <meta name="msapplication-navbutton-color" content="#000000">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
   <link rel="stylesheet" type="text/css" href="style.css" />
 </head>
 
 <body>
+  <!-- 🎬 TcPlayer 視頻容器 -->
+  <div id="id_test_video" class="id-test-video"></div>
   <!-- 🎮 遊戲主畫布 -->
   <canvas id="GameCanvas" oncontextmenu="event.preventDefault()" tabindex="0"></canvas>
 
@@ -22,6 +47,7 @@
       </div>
     </div>
   </div>
+
 
   <!-- 🎬 預載 Logo 動畫腳本 -->
   <script>
@@ -52,52 +78,7 @@
     };
   </script>
 
-  <!-- 遊戲url解密 -->
-  <script src="https://cdn.jsdelivr.net/npm/crypto-js@4.1.1/crypto-js.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/blueimp-md5/2.3.0/js/md5.min.js"></script>
-  <script>
-    // 取得完整的 query string
-    const queryString = window.location.search.substring(1);
-    console.log("query string:", queryString);
-
-    // 原始密文（Base64 編碼）
-    const encryptedBase64 = queryString ? queryString : ``;
-
-    // 密鑰與 IV（相同）
-    const secretKey = "123456789mer-api";
-    const key = CryptoJS.enc.Utf8.parse(secretKey);
-    const iv = CryptoJS.enc.Utf8.parse(secretKey);
-
-    // 解密
-    const decrypted = CryptoJS.AES.decrypt(encryptedBase64, key, {
-      iv: iv,
-      mode: CryptoJS.mode.CBC,
-      padding: CryptoJS.pad.Pkcs7
-    });
-
-    const decryptedText = decrypted.toString(CryptoJS.enc.Utf8);
-    // 
-    function parseQueryString(str) {
-      return str
-        .split('&')
-        .map(kv => kv.split('='))
-        .reduce((acc, [k, v]) => {
-          acc[decodeURIComponent(k)] = decodeURIComponent(v || '');
-          return acc;
-        }, {});
-    }
-
-    // 若是 JSON，轉成物件（可選）
-    try {
-      window.decryptedTokenData = parseQueryString(decryptedText);
-      console.log("[Token 解密成功]", window.decryptedTokenData);
-    } catch (e) {
-      console.error("[解密成功但非 JSON 格式]", decryptedText);
-      window.decryptedTokenData = decryptedText;
-    }
-  </script>
-
-  <!-- 🚀 核心載入與容錯處理 -->
+  <!-- 🚀 核心载入与容错处理 -->
   <script>
     const failedResources = [];
 
@@ -179,36 +160,199 @@
     }
 
     /**
+     * 全屏处理函数
+     */
+    function attemptFullscreen() {
+      return new Promise((resolve) => {
+        // 🖥️ 桌面端全屏处理
+        function requestFullscreen() {
+          const element = document.documentElement;
+          if (element.requestFullscreen) {
+            return element.requestFullscreen();
+          } else if (element.webkitRequestFullscreen) {
+            return element.webkitRequestFullscreen();
+          } else if (element.mozRequestFullScreen) {
+            return element.mozRequestFullScreen();
+          } else if (element.msRequestFullscreen) {
+            return element.msRequestFullscreen();
+          }
+          return Promise.resolve();
+        }
+
+        // 📱 移动端全屏处理
+        function handleMobileFullscreen() {
+          // iOS Safari 全屏适配
+          if (/iPad|iPhone|iPod/.test(navigator.userAgent)) {
+            // 隐藏地址栏
+            setTimeout(() => {
+              window.scrollTo(0, 1);
+            }, 100);
+            
+            // 监听方向变化
+            window.addEventListener('orientationchange', () => {
+              setTimeout(() => {
+                window.scrollTo(0, 1);
+                adjustCanvasSize();
+              }, 500);
+            });
+          }
+          
+          // Android 全屏处理
+          if (/Android/.test(navigator.userAgent)) {
+            // 隐藏状态栏和导航栏
+            if (window.screen && window.screen.orientation) {
+              try {
+                window.screen.orientation.lock('landscape').catch(() => {});
+              } catch (e) {}
+            }
+          }
+          
+          // 微信浏览器特殊处理
+          if (/MicroMessenger/.test(navigator.userAgent)) {
+            document.addEventListener('WeixinJSBridgeReady', () => {
+              window.scrollTo(0, 1);
+            });
+          }
+        }
+
+        // 🖼️ 调整画布大小
+        function adjustCanvasSize() {
+          const canvas = document.getElementById('GameCanvas');
+          if (canvas) {
+            // 使用 CSS 确保画布填满屏幕
+            canvas.style.width = '100vw';
+            canvas.style.height = '100vh';
+            
+            // 对于 iOS Safari
+            if (/iPad|iPhone|iPod/.test(navigator.userAgent)) {
+              canvas.style.height = '-webkit-fill-available';
+            }
+          }
+        }
+
+        // 🎯 执行全屏逻辑
+        const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        
+        if (isMobile) {
+          handleMobileFullscreen();
+          adjustCanvasSize();
+          resolve();
+        } else {
+          // 桌面端尝试全屏
+          const userInteracted = localStorage.getItem('userInteracted');
+          if (userInteracted) {
+            requestFullscreen().then(resolve).catch(resolve);
+          } else {
+            // 等待用户交互后再全屏
+            const handleFirstClick = () => {
+              localStorage.setItem('userInteracted', 'true');
+              requestFullscreen().catch(() => {});
+              document.removeEventListener('click', handleFirstClick);
+              document.removeEventListener('touchstart', handleFirstClick);
+            };
+            
+            document.addEventListener('click', handleFirstClick);
+            document.addEventListener('touchstart', handleFirstClick);
+            resolve();
+          }
+        }
+      });
+    }
+
+    /**
      * 啟動遊戲流程 - 動態載入所有必要腳本
      */
     async function startGame() {
+      // 🖥️ 尝试自动全屏
+      await attemptFullscreen();
+      
       let currentScript = ''; // 用於錯誤提示
       try {
-        currentScript = 'gameConfig.js';
-        await loadScriptWithRetry(currentScript);
+        // 🔐 加载解密相关依赖
+        const cryptoLibs = [
+          'https://cdn.jsdelivr.net/npm/crypto-js@4.1.1/crypto-js.min.js',
+          'https://cdnjs.cloudflare.com/ajax/libs/blueimp-md5/2.3.0/js/md5.min.js',
+          'url-decrypt.js'
+        ];
+        
+        for (const lib of cryptoLibs) {
+          currentScript = lib;
+          await loadScriptWithRetry(currentScript);
+        }
 
-        currentScript = 'settings.js';
-        await loadScriptWithRetry(currentScript);
+        // 🔐 等待URL解密完成
+        if (typeof window.waitForUrlDecryption === 'function') {
+          await window.waitForUrlDecryption(5000);
+        } else {
+          showReloadDialog(`遊戲載入失敗，請檢查網路連線後重新整理頁面。`);
+        }
 
-        currentScript = 'main.js';
-        await loadScriptWithRetry(currentScript);
+        // 🎮 加载游戏模块
+        const gameModules = [
+          'gameConfig.js',
+          'settings.js', 
+          'main.js',
+          '/socket.io/socket.io.js',
+          'app/engine/bin/<%=cocos2d%>',
+          'preview-scripts/__quick_compile__.js'
+        ];
+        
+        for (const module of gameModules) {
+          currentScript = module;
+          await loadScriptWithRetry(currentScript);
+        }
 
-        currentScript = '/socket.io/socket.io.js';
-        await loadScriptWithRetry(currentScript);
+        console.log('🎉 游戏启动成功！');
 
-        currentScript = 'app/engine/bin/<%=cocos2d%>';
-        await loadScriptWithRetry(currentScript);
-
-        currentScript = 'preview-scripts/__quick_compile__.js';
-        await loadScriptWithRetry(currentScript);
       } catch (err) {
-        showReloadDialog(`⚠️ 加載 ${currentScript} 失敗，請確認網路連線。\n\n錯誤：${err.message}`);
+        showReloadDialog(`遊戲載入失敗，請檢查網路連線後重新整理頁面。`);
         console.error('[Game Start Error]', err);
       }
     }
 
     // DOM 結構完成後啟動遊戲
     window.addEventListener('DOMContentLoaded', startGame);
+
+    // 🖥️ 全屏和方向变化处理
+    window.addEventListener('resize', () => {
+      const canvas = document.getElementById('GameCanvas');
+      if (canvas) {
+        canvas.style.width = '100vw';
+        canvas.style.height = '100vh';
+        if (/iPad|iPhone|iPod/.test(navigator.userAgent)) {
+          canvas.style.height = '-webkit-fill-available';
+        }
+      }
+    });
+
+    window.addEventListener('orientationchange', () => {
+      setTimeout(() => {
+        window.scrollTo(0, 1);
+        const canvas = document.getElementById('GameCanvas');
+        if (canvas) {
+          canvas.style.width = '100vw';
+          canvas.style.height = '100vh';
+          if (/iPad|iPhone|iPod/.test(navigator.userAgent)) {
+            canvas.style.height = '-webkit-fill-available';
+          }
+        }
+      }, 500);
+    });
+
+    // 防止页面被意外退出全屏
+    document.addEventListener('fullscreenchange', () => {
+      if (!document.fullscreenElement) {
+        // 如果不在全屏状态，尝试重新全屏（桌面端）
+        const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        if (!isMobile && localStorage.getItem('userInteracted')) {
+          setTimeout(() => {
+            if (document.documentElement.requestFullscreen) {
+              document.documentElement.requestFullscreen().catch(() => {});
+            }
+          }, 1000);
+        }
+      }
+    });
 
     // 清理動畫資源與影片，避免 unload 時殘留
     window.addEventListener('beforeunload', () => {
@@ -221,6 +365,11 @@
     });
     // 掛載到全域 window 物件，讓其他腳本能使用
     window.showReloadDialog = showReloadDialog; 
+
+    // 啟用 vConsole（若有引入）
+    if (typeof VConsole !== 'undefined') {
+      window.vConsole = new VConsole();
+    }
   </script>
 </body>
 

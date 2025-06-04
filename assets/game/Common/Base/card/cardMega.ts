@@ -24,7 +24,7 @@ export class CardMega extends BaseCardData {
     private twoTG : boolean = false;            // 剩餘2顆球  
 
     /** ExtraPatterns玩法特定參數 */
-    private rewardLine : number[] = [];         // 中獎線段
+    private rewardLine : number[] = [];   // 中獎線段
     private preData = [];                       // 預中獎位置與中獎金額
     // 中獎線類型
     protected extraline = [
@@ -148,14 +148,14 @@ export class CardMega extends BaseCardData {
         let allcard = this.cardInfo.length - 1;
 
         // 檢查剩餘幾球
-        // this.oneTG = false;
-        // this.twoTG = false;
-        // let unclaimedBalls = allcard - count;
-        // if(unclaimedBalls == 1){
-        //     this.oneTG = true;
-        // }else if(unclaimedBalls == 2){
-        //     this.twoTG = true;
-        // }
+        this.oneTG = false;
+        this.twoTG = false;
+        let unclaimedBalls = allcard - count;
+        if(unclaimedBalls == 1){
+            this.oneTG = true;
+        }else if(unclaimedBalls == 2){
+            this.twoTG = true;
+        }
 
         // 卡片是否全部中獎
         if(count == allcard){
@@ -184,7 +184,7 @@ export class CardMega extends BaseCardData {
             // 右移一位，檢查下一個位
             bingoSpot >>= 1;
         }
-        return count;
+        return count - 1;
     }
     //#endregion
 
@@ -301,6 +301,19 @@ export class CardMega extends BaseCardData {
             title = "PRE-BUY";
         let haveBingoJackpo = (this.playState == CARD_GAMEPLAY.EXTRA) ? false : true;
         let haveExtra = (this.playState == CARD_GAMEPLAY.JACKPOT) ? false : true;
+
+        if(this.twoTG){
+            this.rewardLine.push(32); 
+        }
+        if(this.oneTG){
+            this.rewardLine.push(33);
+        }
+        if(this.bingoWin){
+            this.rewardLine.push(34); 
+        }
+        if(this.jackpotWin){
+            this.rewardLine.push(35); 
+        }
 
         let data = {
             title: title,

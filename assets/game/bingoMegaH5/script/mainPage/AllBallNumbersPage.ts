@@ -20,7 +20,7 @@ export default class AllBallNumbersPage extends cc.Component implements IWindow 
     private Label_TableID: cc.Label = null;
 
     protected onLoad(): void {
-        EventManager.getInstance().on(GameStateEvent.GAME_OVER, this.gameOver, this);
+        EventManager.getInstance().on(GameStateEvent.GAME_BUY, this.newGame, this);
         EventManager.getInstance().on(GameStateUpdate.StateUpdate_SendBall, this.setPageState, this);
     }
 
@@ -34,22 +34,25 @@ export default class AllBallNumbersPage extends cc.Component implements IWindow 
         this.setPageState();
     }
     close(): void {
-        EventManager.getInstance().off(GameStateEvent.GAME_OVER, this.gameOver, this);
+        EventManager.getInstance().off(GameStateEvent.GAME_BUY, this.newGame, this);
         EventManager.getInstance().off(GameStateUpdate.StateUpdate_SendBall, this.setPageState, this);
         PopupManager.closePopup(PopupName.AllBallNumbersPage);
     }
 
-    gameOver() {
+    newGame() {
         this.balls.forEach((ball) => {
             ball.setAction(false);
             cc.Tween.stopAllByTarget(ball.node); // 停止所有動畫
             ball.node.opacity = 255; // 還原透明度
         });
+        PopupManager.closePopup(PopupName.AllBallNumbersPage);
     }
 
     /** 更新頁面內容 */
     setPageState() {
         const data = MegaManager.getInstance().getAllBallNumbersPageData();
+        if(!data)
+            return;
         const latestBall = data.ballList?.[data.ballList.length - 1];  // 最新球號
 
         if (!data.ballList) {

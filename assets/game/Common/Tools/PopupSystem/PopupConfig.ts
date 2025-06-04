@@ -13,6 +13,9 @@ export enum PopupName {
     ChatPage=               "ChatPage",
     PersonalCenterPage=     "PersonalCenterPage",
     GameRecordPage=         "GameRecordPage",
+    BalanceTooLowPage=      "BalanceTooLowPage",
+    PurchaseUpdatePage=     "PurchaseUpdatePage",
+    HelpCenterPage=         "HelpCenterPage",
 }
 
 export const PopupPrefabPath: Record<PopupName, string> = {
@@ -28,6 +31,9 @@ export const PopupPrefabPath: Record<PopupName, string> = {
     [PopupName.ChatPage]:                   "prefab/ChatPage",
     [PopupName.PersonalCenterPage]:         "prefab/PersonalCenterPage",
     [PopupName.GameRecordPage]:             "prefab/GameRecordPage",
+    [PopupName.BalanceTooLowPage]:          "prefab/BalanceTooLowPage",
+    [PopupName.PurchaseUpdatePage]:         "prefab/PurchaseUpdatePage",
+    [PopupName.HelpCenterPage]:             "prefab/HelpCenterPage",
 };
 
 // 動畫配置
@@ -44,6 +50,9 @@ export const ShowPopupAnimationConfig: Record<PopupName, PopupAnimationType> = {
     [PopupName.ChatPage]:               PopupAnimationType.SlideFromBottom,
     [PopupName.PersonalCenterPage]:     PopupAnimationType.SlideFromLeft,
     [PopupName.GameRecordPage]:         PopupAnimationType.SlideFromLeft,
+    [PopupName.BalanceTooLowPage]:      PopupAnimationType.ScaleIn,
+    [PopupName.PurchaseUpdatePage]:     PopupAnimationType.ScaleIn,
+    [PopupName.HelpCenterPage]:         PopupAnimationType.SlideFromLeft,
 };
 
 export const ClosePopupAnimationConfig: Record<PopupName, PopupAnimationType> = {
@@ -59,4 +68,7 @@ export const ClosePopupAnimationConfig: Record<PopupName, PopupAnimationType> = 
     [PopupName.ChatPage]:               PopupAnimationType.SlideFromBottom,
     [PopupName.PersonalCenterPage]:     PopupAnimationType.SlideFromLeft,
     [PopupName.GameRecordPage]:         PopupAnimationType.SlideFromLeft,
+    [PopupName.BalanceTooLowPage]:      PopupAnimationType.ScaleIn,
+    [PopupName.PurchaseUpdatePage]:     PopupAnimationType.ScaleIn,
+    [PopupName.HelpCenterPage]:         PopupAnimationType.SlideFromLeft,
 }

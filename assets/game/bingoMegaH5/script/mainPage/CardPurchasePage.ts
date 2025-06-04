@@ -49,14 +49,12 @@ export default class CardPurchasePage extends MegaComponent {
 
     protected addEventListener(): void {
         super.addEventListener();
-        EventManager.getInstance().on(GameStateEvent.GAME_BUY, this.onSnapshot, this);
         EventManager.getInstance().on(GameStateEvent.GAME_DRAWTHENUMBERS, this.onSnapshot, this);
         EventManager.getInstance().on(GameStateUpdate.StateUpdate_CardPurchasePage, this.setPageState, this);
     }
 
     protected removeEventListener(): void {
         super.removeEventListener();
-        EventManager.getInstance().off(GameStateEvent.GAME_BUY, this.onSnapshot, this);
         EventManager.getInstance().off(GameStateEvent.GAME_DRAWTHENUMBERS, this.onSnapshot, this);
         EventManager.getInstance().off(GameStateUpdate.StateUpdate_CardPurchasePage, this.setPageState, this);
     }
@@ -111,7 +109,7 @@ export default class CardPurchasePage extends MegaComponent {
 
     /** 開啟DIY選購頁面 */
     private OpenDIYCardSelectionPage() {
-        PopupManager.showPopup(PopupName.DIYCardSelectionPage, this.data.getDIYCardSelectionPageData());
+        this.data.SendDIYCardSelectionPage(true);
     }
 
     /** 增加購卡數量 */
@@ -162,24 +160,8 @@ export default class CardPurchasePage extends MegaComponent {
     }
 
     /** 開啟確認買卡片頁面 */
-    protected OpenConfirmPurchasePage(): boolean {
-        if(this.data.getCardsToBuy() == 0){
-            ToastManager.showToast("卡片數量不能為空");
-            return false;
-        }
-
-        if ((this.data.getCoin() - this.data.getBuyTotalCard()) < 0) {
-            ToastManager.showToast("余额不足");
-            return false;
-        }
-
-        if (this.data.CheckOpenDIYCardSelectionPage() && this.Toggle_CardState.toggleItems[1].isChecked) {
-            this.OpenDIYCardSelectionPage();
-            return false;
-        }
-
-        this.data.SendConfirmPurchase();
-        return true; // 表示成功執行，可以進一步動作
+    protected OpenConfirmPurchasePage(): void {
+        this.data.BetCheck(this.Toggle_CardState.toggleItems[1].isChecked);
     }
 
     /** 快照恢復 */
@@ -189,7 +171,7 @@ export default class CardPurchasePage extends MegaComponent {
     }
 
     /** 遊戲結束事件 重置目前內容 */
-    protected onGameOver(): void {
+    protected onNewGame(): void {
         this.onSnapshot();
     }
 
@@ -252,7 +234,7 @@ export default class CardPurchasePage extends MegaComponent {
 
     /** 檢查要展示的按鈕類型 */
     public CheckShowBtn() {
-        let buyCardThisRound = this.data.GameState_BUY();
+        let buyCardThisRound = this.data.GameStateBUY();
         this.Btn_BuyCard.active = buyCardThisRound;
         this.Btn_PreBuyCard.active = !buyCardThisRound;
     }

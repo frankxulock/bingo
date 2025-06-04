@@ -36,6 +36,7 @@ export default class NumberToggle extends cc.Component {
      * @param index （選填）項目索引
      */
     public setData(data: any, index?: number): void {
+        this.data = data;
         // 初始化 toggle 狀態與 UI 表現
         this.toggle.isChecked = data.isSelected;
         this.backgroundNode.active = data.isSelected;

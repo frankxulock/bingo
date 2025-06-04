@@ -4,12 +4,59 @@ import { GAME_STATUS } from "./CommonData";
 import MegaManager from "./gameMega/MegaManager";
 
 /**
- * Mega 遊戲伺服器事件類型定義
+ * WebSocket 主題類型枚舉
  */
-enum MegaEventType {
-    CountdownStart = 1,    // 遊戲倒數階段開始
-    PrizeOnGoing   = 3,    // 獎號開獎進行中
-    GameFinished   = 5     // 遊戲結束，等待下一輪
+enum WsTopicType {
+    MBan = 'MBan',
+    Online = 'online',
+    PrizePotRecord = 'prizepot.record',
+    PlayerLock = 'player.lock',
+    OrderCurrent = 'order.current',
+    UserInfo = 'user.info',
+    ExtraMega = 'extra.mega',
+    RankMega = 'rank.mega',
+    WinNoticeMega = 'win.notice.mega',
+    PrizePotBGM = 'prize.pot.BGM',
+    MegaEvent = 'mega.event',
+    MegaCountdown = 'mega.countdown'
+}
+
+/**
+ * WebSocket 事件類型枚舉
+ */
+enum WsEventType {
+    UserInfoUpdate = 26,
+    BanStatusChange = 1,
+    OnlineStatusChange = 2,
+    PrizePotUpdate = 3,
+    OrderStatusChange = 4,
+    RankUpdate = 5,
+    WinNotice = 6
+}
+
+/**
+ * WebSocket 錯誤類型枚舉
+ */
+enum WsErrorType {
+    ParseError = 'PARSE_ERROR',
+    ConnectionError = 'CONNECTION_ERROR',
+    UnknownTopic = 'UNKNOWN_TOPIC',
+    UnknownEventType = 'UNKNOWN_EVENT_TYPE',
+    InvalidData = 'INVALID_DATA'
+}
+
+/**
+ * WebSocket 錯誤類
+ */
+class WsError extends Error {
+    constructor(
+        public type: WsErrorType,
+        public details: any,
+        message: string
+    ) {
+        super(message);
+        this.name = 'WsError';
+    }
 }
 
 export class SocketManager extends Singleton {
@@ -163,37 +210,225 @@ export class SocketManager extends Singleton {
      * 根據伺服器主題 (subject) 路由不同事件處理邏輯
      */
     private processServerEvent(subject: string, json: any) {
-        const type = json.type;       // 事件類型代號
-        const data = json.data;       // 事件資料主體
-        const timestamp = json.time;  // 傳送時間戳（可選）
-        if (subject.startsWith("WsUser.mega.")) {
-            // 所有屬於 Mega 模組的事件都統一交給這裡處理
-            this.handleMegaEvent(subject, type, data, timestamp);
-        } else if(subject.endsWith("user.info")) {
-            this.userInfo(subject, type, data, timestamp);
-        } else if(subject.endsWith("order.current")) {
-            // console.warn("📭 未處理的主題:", subject, "  type : ", type + "   data: ", data);
-        }else {
-            console.warn("📭 未處理的主題:", subject, "  type : ", type + "   data: ", data);
+        try {
+            const type = json.type;       // 事件類型代號
+            const data = json.data;       // 事件資料主體
+            const timestamp = json.time;  // 傳送時間戳
+
+            // 只對特定事件進行日誌輸出
+            // if (!subject.includes(WsTopicType.Online) && 
+            //     !subject.includes(WsTopicType.RankMega) &&
+            //     !(subject.includes(WsTopicType.UserInfo) && type === 26) &&
+            //     !subject.includes(WsTopicType.MegaCountdown) &&
+            //     !(subject.includes(WsTopicType.OrderCurrent) && type === 25)
+            // ) {
+                console.log(`📨 收到消息 - 主題: ${subject}, 類型: ${type}, 資料: `, data);
+            // }
+
+            // 根據主題類型分發到對應的處理方法
+            if (subject.includes(WsTopicType.MegaEvent) || subject.includes(WsTopicType.MegaCountdown)) {
+                this.handleMegaEvent(subject, type, data, timestamp);
+            } else if (subject.includes(WsTopicType.UserInfo)) {
+                this.handleUserInfo(type, data);
+            } else if (subject.includes(WsTopicType.MBan)) {
+                this.handleBanStatus(type, data);
+            } else if (subject.includes(WsTopicType.Online)) {
+                this.handleOnlineStatus(type, data);
+            } else if (subject.includes(WsTopicType.PrizePotRecord)) {
+                this.handlePrizePotRecord(type, data);
+            } else if (subject.includes(WsTopicType.OrderCurrent)) {
+                this.handleOrderCurrent(type, data);
+            } else if (subject.includes(WsTopicType.RankMega)) {
+                this.handleRankMega(type, data);
+            } else if (subject.includes(WsTopicType.WinNoticeMega)) {
+                this.handleWinNotice(type, data);
+            } else if (subject.includes(WsTopicType.PrizePotBGM)) {
+                this.handlePrizePotBGM(type, data);
+            } else if (subject.endsWith('extra.mega')) {
+                this.handleExtraMega(type, data);
+            } else {
+                throw new WsError(
+                    WsErrorType.UnknownTopic,
+                    { subject, type },
+                    `未知的主題: ${subject}`
+                );
+            }
+        } catch (error) {
+            if (error instanceof WsError) {
+                console.error(`🚨 WebSocket錯誤: ${error.message}`, error);
+            } else {
+                console.error(`🚨 處理消息時發生未知錯誤:`, error);
+            }
+            // 可以在這裡添加錯誤報告或重試邏輯
         }
     }
 
     /**
-     * 處理 玩家資訊 模組相關的事件資料
-     * @param subject - 主題名稱 
-     * @param type - 事件類型 ID（定義事件性質）
-     * @param data - 資料主體
-     * @param timestamp - 訊息時間戳
+     * 處理用戶信息相關事件
      */
-    private userInfo(subject: string, type: number, data: any, timestamp: number) {
-        switch(type){
-            case 26:
-                let coin = Number(data);
-                this.data.setCoin(coin);
-                break;
-            default:
-                console.warn("🔶 未知的 user Type:", type, data);
-                break;
+    private handleUserInfo(type: number, data: any) {
+        try {
+            switch(type) {
+                case WsEventType.UserInfoUpdate:
+                    const coin = Number(data);
+                    if (isNaN(coin)) {
+                        throw new WsError(
+                            WsErrorType.InvalidData,
+                            { data },
+                            '無效的金幣數據'
+                        );
+                    }
+                    this.data.setCoin(coin);
+                    //console.log(`💰 用戶金幣更新: ${coin}`);
+                    break;
+                default:
+                    throw new WsError(
+                        WsErrorType.UnknownEventType,
+                        { type },
+                        `未知的用戶信息事件類型: ${type}`
+                    );
+            }
+        } catch (error) {
+            console.error(`🚨 處理用戶信息時發生錯誤:`, error);
+            throw error;
+        }
+    }
+
+    /**
+     * 處理封禁狀態相關事件
+     */
+    private handleBanStatus(type: number, data: any) {
+        try {
+            console.log(`🚫 處理封禁狀態 - 類型: ${type}`, data);
+            // 實現封禁狀態處理邏輯
+        } catch (error) {
+            console.error(`🚨 處理封禁狀態時發生錯誤:`, error);
+            throw error;
+        }
+    }
+
+    /**
+     * 處理在線狀態相關事件
+     */
+    private handleOnlineStatus(type: number, data: any) {
+        try {
+            // console.log(`👥 處理在線狀態 - 類型: ${type}`, data);
+            // 實現在線狀態處理邏輯
+            this.data.setOnline(data);
+        } catch (error) {
+            console.error(`🚨 處理在線狀態時發生錯誤:`, error);
+            throw error;
+        }
+    }
+
+    /**
+     * 處理獎池記錄相關事件
+     */
+    private handlePrizePotRecord(type: number, data: any) {
+        try {
+            console.log(`🏆 處理獎池記錄 - 類型: ${type}`, data);
+            // 實現獎池記錄處理邏輯
+        } catch (error) {
+            console.error(`🚨 處理獎池記錄時發生錯誤:`, error);
+            throw error;
+        }
+    }
+
+    /**
+     * 處理當前訂單相關事件
+     */
+    private handleOrderCurrent(type: number, data: any) {
+        try {
+            // console.log(`📋 處理當前訂單 - 類型: ${type}`, data);
+            // 實現當前訂單處理邏輯
+        } catch (error) {
+            console.error(`🚨 處理當前訂單時發生錯誤:`, error);
+            throw error;
+        }
+    }
+
+    /**
+     * 處理排名相關事件
+     */
+    private handleRankMega(type: number, data: any) {
+        try {
+            switch(type) {
+                case 5:         // Jackpot實質玩法排行榜
+                    // 因為目前Jackpot遊戲排行至45球後就停止且內容跟bingo一樣所以先使用bingoq排行做更新
+                    break;
+                case 10:        // Bingo實質玩法排行榜
+                    this.data.updateCurrentJPRanking(data);
+                    break;
+                default:
+                    console.log(`🏅 未處理排名信息 - 類型: ${type}`, data);
+                    break;
+            }
+        } catch (error) {
+            console.error(`🚨 處理排名信息時發生錯誤:`, error);
+            throw error;
+        }
+    }
+
+    /**
+     * 處理中獎通知相關事件
+     */
+    private handleWinNotice(type: number, data: any) {
+        try {
+           switch(type) {
+                case 9:         // 總結算
+                    this.data.ResultComplete(data);
+                    break;
+                default:
+                    console.log(`🎉 未處理中獎通知 - 類型: ${type}`, data);
+                    break;
+            }
+        } catch (error) {
+            console.error(`🚨 處理中獎通知時發生錯誤:`, error);
+            throw error;
+        }
+    }
+
+    /**
+     * 處理 BGM 獎池相關事件
+     * @param type - 事件類型
+     * @param data - 獎池數據
+     */
+    private handlePrizePotBGM(type: number, data: any) {
+        try {
+            if (!data || typeof data !== 'object') {
+                throw new WsError(
+                    WsErrorType.InvalidData,
+                    { data },
+                    'BGM獎池數據格式無效'
+                );
+            }
+
+            // 更新獎池數據
+            this.data.updatePrizePot(data);
+            // console.log(`💰 BGM獎池更新 - 類型: ${type}`, data);
+        } catch (error) {
+            console.error(`🚨 處理BGM獎池數據時發生錯誤:`, error);
+            throw error;
+        }
+    }
+
+    /**
+     * 處理 Extra Mega 相關事件
+     */
+    private handleExtraMega(type: number, data: any) {
+        try {
+            switch(type) {
+                case 6:     // extra實質排行版數據
+                    this.data.updateCurrentEPRanking(data);
+                    break;
+                default:
+                    console.warn(`🚨 未處理 Extra Mega type:`, type + `   data : `, data);
+                    break;
+            }
+            // this.data.updateExtraMega(data);
+        } catch (error) {
+            console.error(`🚨 處理 Extra Mega 數據時發生錯誤:`, error);
+            throw error;
         }
     }
 
@@ -222,22 +457,25 @@ export class SocketManager extends Singleton {
      * 處理一般遊戲事件，如獎號開始、結算、遊戲結束等
      */
     private handleMegaEventType(type: number, data: any, timestamp: number) {
-        switch (type) {
-            case MegaEventType.CountdownStart:
-                console.log("⏳ 遊戲倒數階段開始", data);
+        // type 固定為 3，根據 game_event 判斷遊戲狀態
+        switch (data.game_event) {
+            case "begin":
+                // 新局開始
+                this.data.NewGame(data);
                 break;
 
-            case MegaEventType.PrizeOnGoing:
-                console.log("🎯 獎號進行中", data);
+            case "prize_on_going":
+                // 開獎中
                 this.data.PrizeOnGoingEvent(data);
                 break;
 
-            case MegaEventType.GameFinished:
-                console.log("🏁 遊戲結束，等待下一輪", data);
+            case "finish":
+                // 遊戲結束
+                this.data.GameOver();
                 break;
 
             default:
-                console.warn("🔶 未知的 MegaEvent Type:", type, data);
+                console.warn("🔶 未知的遊戲事件:", data.game_event, data);
                 break;
         }
     }
@@ -251,7 +489,7 @@ export class SocketManager extends Singleton {
         // console.log(`⏳ 倒數計時中：${seconds} 秒`);
         EventManager.getInstance().emit(GameStateUpdate.StaticUpdate_Countdown, seconds);
         if(seconds <= 0) {
-            this.data.setGameState(GAME_STATUS.REWARD);
+            this.data.ReawtheNumbers();
         }
     }
 
