@@ -5,7 +5,7 @@ import { CommonTool } from "../../Tools/CommonTool";
 import { PopupName } from "../../Tools/PopupSystem/PopupConfig";
 import PopupManager from "../../Tools/PopupSystem/PopupManager";
 import ToastManager from "../../Tools/Toast/ToastManager";
-import { CardMegaTest } from "../card/CardMegaTest";
+import { CardMega } from "../card/CardMega";
 import { CARD_CONTENT, CARD_GAMEPLAY, CARD_STATUS, GAME_STATUS } from "../CommonData";
 import CardNumberManager from "./CardNumberManager";
 import { MegaDataStore } from "./MegaDataStore";
@@ -300,7 +300,7 @@ export default class MegaManager extends BaseDataManager {
         // 獲取確認購卡頁面的卡片資訊
         for(let i = 0; i < data.length; i++){
             let cardInfo = data[i];
-            let card = new CardMegaTest(cardInfo);
+            let card = new CardMega(cardInfo);
             this.dataStore.confirmedPurchaseCards.push(card);
         }
         // 開啟確認夠卡介面
@@ -328,7 +328,7 @@ export default class MegaManager extends BaseDataManager {
         // 獲得新版本的卡片內容
         for(let i = 0; i < newdata.length; i++){
             let cardInfo = newdata[i];
-            let card = new CardMegaTest(cardInfo);
+            let card = new CardMega(cardInfo);
             this.dataStore.confirmedPurchaseCards.push(card);
         }
         return this.dataStore.confirmedPurchaseCards;
@@ -387,7 +387,7 @@ export default class MegaManager extends BaseDataManager {
                 cardId: id,
                 numbers: data.cardInfo,
             };
-            const newCard = new CardMegaTest(newCardData);
+            const newCard = new CardMega(newCardData);
 
             // 替換 DIYCardList 中的卡片
             const diyIndex = this.dataStore.savedDIYCards.findIndex(card => card.getID() === id);
@@ -399,7 +399,7 @@ export default class MegaManager extends BaseDataManager {
                 cardId: CardNumberManager.getInstance().generateCardID(),
                 numbers: data,
             }
-            let newCard = new CardMegaTest(newCardData);
+            let newCard = new CardMega(newCardData);
             this.dataStore.savedDIYCards.push(newCard);
         }
     }
@@ -570,7 +570,7 @@ export default class MegaManager extends BaseDataManager {
                     playState: null,  
                     numbers : sortedNumbers,
                 }
-                let megaCard = new CardMegaTest(data);
+                let megaCard = new CardMega(data);
                 this.dataStore.savedDIYCards.push(megaCard);
             });
 
