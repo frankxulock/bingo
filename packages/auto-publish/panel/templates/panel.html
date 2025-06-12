@@ -1,0 +1,131 @@
+<div class="header">
+  <div>🚀 自動發布套件</div>
+  <div class="header-version">v1.0.0</div>
+</div>
+
+<div class="scrollable-content">
+  <div class="content">
+    <!-- 代码混淆卡片 -->
+    <div class="feature-card">
+      <div class="feature-card-header">
+        <div class="feature-card-icon">🔒</div>
+        <div class="feature-card-title">代碼保護</div>
+      </div>
+      
+      <div class="switch-row" id="mainSwitch">
+        <div class="switch-info">
+          <div class="switch-title">啟用代碼混淆</div>
+          <div class="switch-description">
+            使用 JavaScript 代碼混淆來保護遊戲邏輯
+          </div>
+        </div>
+        <div class="toggle-switch" id="toggleSwitch">
+          <div class="toggle-slider"></div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- GameConfig卡片 -->
+    <div class="feature-card">
+      <div class="feature-card-header">
+        <div class="feature-card-icon">📋</div>
+        <div class="feature-card-title">配置管理</div>
+      </div>
+      
+      <div class="switch-row" id="gameConfigSwitch">
+        <div class="switch-info">
+          <div class="switch-title">使用開發版配置</div>
+          <div class="switch-description">
+            從 preview-templates 複製配置檔案
+          </div>
+        </div>
+        <div class="toggle-switch" id="gameConfigToggle">
+          <div class="toggle-slider"></div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Git发布卡片 -->
+    <div class="feature-card" id="gitSection">
+      <div class="feature-card-header">
+        <div class="feature-card-icon">🌿</div>
+        <div class="feature-card-title">Git 發布</div>
+      </div>
+      
+      <!-- Git错误提示 -->
+      <div class="git-error" id="gitError"></div>
+      
+      <div class="switch-row" id="gitAutoUpdateSwitch">
+        <div class="switch-info">
+          <div class="switch-title">自動發布</div>
+          <div class="switch-description">
+            構建完成後自動提交並創建標籤
+          </div>
+        </div>
+        <div class="toggle-switch" id="gitAutoUpdateToggle">
+          <div class="toggle-slider"></div>
+        </div>
+      </div>
+      
+      <!-- Git配置区域 -->
+      <div class="git-config" id="gitConfig">
+        <div class="config-section">
+          <div class="config-title">目標分支</div>
+          <select class="config-select" id="gitBranch">
+            <option value="mega_h5_dev">mega_h5_dev</option>
+            <option value="mega_h5_test">mega_h5_test</option>
+            <option value="main">main</option>
+          </select>
+        </div>
+        
+        <div class="config-section">
+          <div class="config-title">標籤前綴</div>
+          <input type="text" class="config-input" id="gitTagPrefix" placeholder="輸入標籤前綴">
+        </div>
+        
+        <div class="config-section">
+          <div class="config-title">提交訊息</div>
+          <input type="text" class="config-input" id="gitCommitMessage" placeholder="輸入提交訊息，留空則使用預設訊息">
+        </div>
+      </div>
+    </div>
+    
+    <!-- 功能列表卡片 -->
+    <div class="feature-card">
+      <div class="feature-card-header">
+        <div class="feature-card-icon">⚙️</div>
+        <div class="feature-card-title">預設功能</div>
+      </div>
+      
+      <div class="features">
+        <ul class="feature-list">
+          <li class="feature-item">
+            <span class="feature-icon">📋</span>
+            GameConfig 檔案複製和環境檢測
+          </li>
+          <li class="feature-item">
+            <span class="feature-icon">🔄</span>
+            HTML 引用檔案版本號自動更新
+          </li>
+          <li class="feature-item">
+            <span class="feature-icon">🗜️</span>
+            基礎代碼優化和清理
+          </li>
+          <li class="feature-item">
+            <span class="feature-icon">🔒</span>
+            代碼混淆（需在上方啟用）
+          </li>
+          <li class="feature-item">
+            <span class="feature-icon">🚀</span>
+            Git 自動發布並生成時間戳標籤
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 状态提示 -->
+<div class="status" id="statusDiv">
+  <span id="statusMessage"></span>
+</div> 

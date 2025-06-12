@@ -1,13 +1,15 @@
 {
   "useObfuscation": false,
-  "usePreviewTemplates": false,
+  "usePreviewTemplates": true,
   "mode": "config",
   "updateHtml": true,
   "processGameConfig": true,
   "gitAutoUpdate": true,
-  "gitBranch": "mega_h5_dev",
-  "gitTagPrefix": "mega_h5_dev",
-  "gitCommitMessage": "",
-  "targetSpecificFiles": true,
-  "enableDeadCodeInjection": true
+  "gitBranch": "mega_h5_test",
+  "gitTagPrefix": "mega_h5_test",
+  "gitCommitMessage": "更新測試",
+  "gitForceMode": "auto",
+  "toggleSwitch": true,
+  "gameConfigToggle": true,
+  "gitAutoUpdateToggle": true
 }

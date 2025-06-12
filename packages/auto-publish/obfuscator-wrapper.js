@@ -6,38 +6,8 @@
 
 'use strict';
 
-/**
- * 统一的日志系统
- * 兼容 Cocos Creator 编辑器和命令行环境
- */
-const logger = {
-  log: function(msg) {
-    const prefix = '[Code-Processor]';
-    if (typeof Editor !== 'undefined') {
-      Editor.log(prefix, msg);
-    } else {
-      console.log(prefix, msg);
-    }
-  },
-  
-  error: function(msg) {
-    const prefix = '[Code-Processor]';
-    if (typeof Editor !== 'undefined') {
-      Editor.error(prefix, msg);
-    } else {
-      console.error(prefix, msg);
-    }
-  },
-  
-  warn: function(msg) {
-    const prefix = '[Code-Processor]';
-    if (typeof Editor !== 'undefined') {
-      Editor.warn(prefix, msg);
-    } else {
-      console.warn(prefix, msg);
-    }
-  }
-};
+const path = require('path');
+const logger = require('./logger');  // 使用共享的 logger 模塊
 
 /**
  * 尝试加载 javascript-obfuscator
