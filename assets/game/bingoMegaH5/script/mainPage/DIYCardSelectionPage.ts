@@ -25,23 +25,26 @@ export default class DIYCardSelectionPage extends cc.Component implements IWindo
     @property({ type: cc.Label, visible: true })
     private Label_select: cc.Label = null;
 
+    @property({ type: cc.Node, visible: true })
+    private BottomBar: cc.Node = null;
+
     private selectedCount: number = 0;
     private dataList: any = null;
 
     protected onLoad(): void {
-        EventManager.getInstance().on(GameStateUpdate.StateUpdate_DIYCardSelectionPage, this.UpdatePage, this);
+        EventManager.getInstance().on(GameStateUpdate.StateUpdate_DIYCardSelectionPage, this.setPageState, this);
         this.ScrollView_DIYList.node.on("ScrollItemEvent", this.onItemChanged, this);
         this.Toggle_selectAll.node.on("toggle", this.onSelectAll, this);
     }
 
     protected onDestroy(): void {
-        EventManager.getInstance().off(GameStateUpdate.StateUpdate_DIYCardSelectionPage, this.UpdatePage, this);
+        EventManager.getInstance().off(GameStateUpdate.StateUpdate_DIYCardSelectionPage, this.setPageState, this);
         this.ScrollView_DIYList?.node?.off("ScrollItemEvent", this.onItemChanged, this);
         this.Toggle_selectAll?.node?.off("toggle", this.onSelectAll, this);
     }
 
-    open(popupData: any): void {
-        this.UpdatePage(popupData);
+    open(data: any): void {
+        this.setPageState(data);
     }
 
     close(): void {
@@ -49,16 +52,18 @@ export default class DIYCardSelectionPage extends cc.Component implements IWindo
     }
 
     /** 更新頁面資訊 */
-    private UpdatePage(popupData: any) {
-        if (!popupData || !popupData.listData) return;
+    private setPageState(Data: any) {
+        if (!Data || !Data.listData) return;
 
         this.selectedCount = 0;
-        const listData = popupData.listData;
+        const listData = Data.listData;
         this.dataList = listData;
+        this.BottomBar.active = !Data.DIYCardPageinPersonalCenter;
+        this.ScrollView_DIYList.getComponent(cc.Widget).bottom = (!Data.DIYCardPageinPersonalCenter) ? 90 : 0;
 
         // 更新顯示
         CommonTool.setLabel(this.Label_select, `0`);
-        CommonTool.setLabel(this.Label_currentDIYCardCount, `(${listData.length}/${popupData.DIYmaxCard})`);
+        CommonTool.setLabel(this.Label_currentDIYCardCount, `(${listData.length}/${Data.DIYmaxCard})`);
         this.Toggle_selectAll.isChecked = false;
 
         this.ScrollView_DIYList.refreshData(listData);
@@ -97,7 +102,11 @@ export default class DIYCardSelectionPage extends cc.Component implements IWindo
 
     /** 開啟 DIY 編輯卡片頁面 */
     public OpenDIYEditPage(): void {
-        EventManager.getInstance().emit(GameStateUpdate.StateUpdate_OpenDIYEditPage);
+        let editData = {
+            data : null,
+            id: this.dataList.length + 1
+        }
+        EventManager.getInstance().emit(GameStateUpdate.StateUpdate_OpenDIYEditPage, editData);
     }
 
     /** 按下確認購買 */

@@ -1,4 +1,3 @@
-import BingoMegaUI from "../../../bingoMegaH5/script/BingoMegaUI";
 import { CARD_CONTENT, CARD_GAMEPLAY, CARD_STATUS } from "../CommonData";
 import BaseCardData from "./BaseCardData";
 
@@ -292,13 +291,7 @@ export class CardMega extends BaseCardData {
     //#endregion
 
     getCardViewData() {
-        let title;
-        if(this.cardContent == CARD_CONTENT.DIY)
-            title = "DIY";
-        else if(this.cardState == CARD_STATUS.NORMAL)
-            title = "BUY";
-        else if(this.cardState == CARD_STATUS.PREORDER)
-            title = "PRE-BUY";
+        let title = this.playState;
         let haveBingoJackpo = (this.playState == CARD_GAMEPLAY.EXTRA) ? false : true;
         let haveExtra = (this.playState == CARD_GAMEPLAY.JACKPOT) ? false : true;
 

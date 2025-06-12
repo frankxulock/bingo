@@ -81,7 +81,7 @@ export class CommonTool {
         return new Promise((resolve, reject) => {
             cc.resources.load(url, type, (error, data) => {
                 if (error) {
-                    console.error("Error loading resource", error);
+
                     reject(null);
                 }
                 resolve(data);
@@ -96,21 +96,21 @@ export class CommonTool {
     /** 設定圖片 */
     public static setSprite(obj, sp : cc.SpriteFrame) {
         if(obj == null){
-            console.error("無法找到對應的Obj 物件");
+
             return;
         }
         let sprite = obj.getComponent(cc.Sprite);
         if(sprite){
             sprite.spriteFrame = sp;
         }else {
-            console.error("目標沒有Sprite元件 對象 => ", obj);
+
         }
     }
 
     /** 設定文字 */
     public static setLabel(obj : cc.Label, text) {
         if(obj == null){
-            console.error("無法找到對應的Obj Label物件");
+
             return;
         }
         obj.string = (text != null) ? text.toString() : "";
@@ -235,28 +235,370 @@ export class CommonTool {
     }
 
     /**
+     * 防抖函數
+     * 在事件被觸發後延遲執行，如果在延遲期間再次觸發則重新計時
+     * @param func 要防抖的函數
+     * @param delay 延遲時間（毫秒）
+     * @param immediate 是否立即執行第一次調用，預設為false
+     * @returns 防抖後的函數
+     * @example
+     * // 搜索輸入防抖
+     * const debouncedSearch = CommonTool.debounce((keyword: string) => {
+     *     console.log('執行搜索:', keyword);
+     * }, 300);
+     * 
+     * // 按鈕點擊防抖
+     * const debouncedSubmit = CommonTool.debounce(() => {
+     *     console.log('提交表單');
+     * }, 1000, true); // 立即執行第一次
+     */
+    public static debounce<T extends (...args: any[]) => any>(func: T, delay: number, immediate: boolean = false): T {
+        let timeoutId: any = null;
+        let hasExecuted = false;
+        
+        return ((...args: any[]) => {
+            const executeNow = immediate && !hasExecuted;
+            
+            // 清除之前的延遲執行
+            if (timeoutId) {
+                clearTimeout(timeoutId);
+            }
+            
+            if (executeNow) {
+                // 立即執行（僅在immediate為true且是第一次調用時）
+                hasExecuted = true;
+                func.apply(this, args);
+            }
+            
+            // 設置延遲執行
+            timeoutId = setTimeout(() => {
+                if (!immediate || hasExecuted) {
+                    func.apply(this, args);
+                }
+                hasExecuted = false;
+                timeoutId = null;
+            }, delay);
+        }) as T;
+    }
+
+
+    /**
      * 智能設備模式判斷 (模擬器算作手機)
      * 用於判斷當前環境是否應該使用手機模式配置
      * @returns true: 手機模式, false: 電腦模式
      */
     public static shouldUseMobileMode(): boolean {
-        const ua = navigator.userAgent || navigator.vendor || (window as any).opera;
-        const width = window.innerWidth;
-        const height = window.innerHeight;
-        const ratio = height / width;
+        const isMobile = (window as any).isMobile;
+        
+        if (typeof isMobile === 'undefined') {
+            cc.error('[CommonTool.shouldUseMobileMode] window.isMobile 未定義，可能 index.html 的設備判斷邏輯尚未執行，預設返回 false (PC模式)');
+            return false;
+        }
+        
+        if (typeof isMobile !== 'boolean') {
+            cc.error('[CommonTool.shouldUseMobileMode] window.isMobile 類型錯誤，期望 boolean 但得到', typeof isMobile, '值:', isMobile, '，預設返回 false (PC模式)');
+            return false;
+        }
+        
+        return isMobile;
+    }
 
-        // 基本條件判斷
-        const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
-        const isPortrait = ratio > 1;
-        const isSmallScreen = Math.min(width, height) <= 768;
-        const isMobileUA = /android|iphone|ipad|ipod|windows phone/i.test(ua);
+    /**
+     * 設置文本混合模式
+     * 用於優化RichText在特定背景下的顯示效果
+     * @param richText RichText組件或包含RichText的節點
+     * @param srcBlendFactor 源混合因子，預設為1 (ONE)
+     * @param dstBlendFactor 目標混合因子，預設為771 (ONE_MINUS_SRC_ALPHA)
+     * @param delay 延遲執行時間（秒），預設為0，等待RichText初始化完成
+     * @example
+     * // 基本用法
+     * CommonTool.setTextBlendMode(this.richTextNode.getComponent(cc.RichText));
+     * 
+     * // 自定義混合參數
+     * CommonTool.setTextBlendMode(richText, 1, 770, 0.1);
+     */
+    public static setTextBlendMode(
+        target: cc.RichText | cc.Node, 
+        srcBlendFactor: number = 1, 
+        dstBlendFactor: number = 771,
+        delay: number = 0
+    ): void {
+        // 確定目標RichText組件
+        let richText: cc.RichText;
+        if (target instanceof cc.RichText) {
+            richText = target;
+        } else if (target instanceof cc.Node) {
+            richText = target.getComponent(cc.RichText);
+        } else {
+            cc.warn('[CommonTool.setTextBlendMode] 無效的目標參數');
+            return;
+        }
 
-        // 擴展條件：包含模擬器的判斷
-        const hasPhoneLikeRatio = ratio > 1.2 && ratio < 2.5;
-        const hasReasonableSize = width >= 320 && width <= 450 && height >= 550 && height <= 950;
+        if (!richText || !richText.isValid) {
+            cc.warn('[CommonTool.setTextBlendMode] 未找到有效的RichText組件');
+            return;
+        }
 
-        // 組合判斷：原始判斷 OR 類似手機的模擬器
-        return (isMobileUA || isTouchDevice) && isSmallScreen && isPortrait ||
-               (isTouchDevice && hasPhoneLikeRatio && hasReasonableSize);
+        // 延遲執行，確保RichText已完全初始化
+        const executeBlendSetting = () => {
+            if (!richText || !richText.isValid) return;
+            
+            try {
+                // 獲取RichText的所有Label子組件
+                const labels = richText.node.getComponentsInChildren(cc.Label);
+                
+                labels.forEach(label => {
+                    if (label && label.isValid) {
+                        // 設置Label組件的混合模式
+                        try {
+                            // 直接設置混合因子
+                            (label as any).srcBlendFactor = srcBlendFactor;
+                            (label as any).dstBlendFactor = dstBlendFactor;
+                            
+                            // 通過渲染組件設置（備用方法）
+                            const node = label.node;
+                            if (node && (node as any)._renderComponent) {
+                                const renderComp = (node as any)._renderComponent;
+                                if (renderComp && renderComp.setBlend) {
+                                    renderComp.setBlend(srcBlendFactor, dstBlendFactor);
+                                }
+                            }
+                            
+                            // 強制更新渲染狀態
+                            const material = label.getMaterial(0);
+                            if (material) {
+                                label.setMaterial(0, material);
+                            }
+                        } catch (error) {
+                            cc.warn('[CommonTool.setTextBlendMode] 設置Label混合模式失敗:', error);
+                        }
+                    }
+                });
+                
+                // cc.log(`[CommonTool.setTextBlendMode] 成功設置 ${labels.length} 個Label的混合模式`);
+            } catch (error) {
+                cc.error('[CommonTool.setTextBlendMode] 執行過程發生錯誤:', error);
+            }
+        };
+
+        // 根據延遲時間決定執行方式
+        if (delay > 0) {
+            // 使用Canvas組件的scheduleOnce來延遲執行
+            const scene = cc.director.getScene();
+            const canvas = scene ? scene.getChildByName("Canvas") : null;
+            if (canvas) {
+                const canvasComp = canvas.getComponent(cc.Canvas);
+                if (canvasComp && canvasComp.scheduleOnce) {
+                    canvasComp.scheduleOnce(executeBlendSetting, delay);
+                } else {
+                    // 備用方案：使用setTimeout
+                    setTimeout(executeBlendSetting, delay * 1000);
+                }
+            } else {
+                // 備用方案：使用setTimeout
+                setTimeout(executeBlendSetting, delay * 1000);
+            }
+        } else {
+            // 下一幀執行
+            richText.string = richText.string;
+            executeBlendSetting();
+            cc.director.once(cc.Director.EVENT_AFTER_UPDATE, executeBlendSetting);
+        }
+    }
+
+    // ======================== 按鈕鎖定機制 ========================
+
+    /** 全局按鈕鎖定狀態管理 */
+    private static buttonLockMap: Map<string, boolean> = new Map();
+
+    /**
+     * 🔒 共用按鈕執行方法 - 統一處理鎖定邏輯
+     * @param context 組件上下文（用於 scheduleOnce）
+     * @param action 要執行的方法
+     * @param lockDuration 鎖定持續時間（秒），預設 0.5 秒
+     * @param actionName 操作名稱（用於日誌），預設 "unknown"
+     * @param lockKey 鎖定鍵值，預設使用組件 uuid，可自定義實現不同粒度的鎖定
+     * @example
+     * // 基本用法
+     * CommonTool.executeWithLock(this, () => {
+     *     PopupManager.showPopup(PopupName.HelpCenterPage);
+     * }, 0.5, "OnHelpCenter");
+     * 
+     * // 自定義鎖定鍵值（實現全局鎖定）
+     * CommonTool.executeWithLock(this, () => {
+     *     // 執行全局操作
+     * }, 1.0, "GlobalAction", "global");
+     * 
+     * // 頁面級別鎖定
+     * CommonTool.executeWithLock(this, () => {
+     *     // 執行頁面操作
+     * }, 0.5, "PageAction", "PersonalCenterPage");
+     */
+    public static executeWithLock(
+        context: cc.Component,
+        action: () => void,
+        lockDuration: number = 0.5,
+        actionName: string = "unknown",
+        lockKey?: string
+    ): void {
+        // 生成鎖定鍵值
+        const key = lockKey || context.uuid || context.node.uuid || "default";
+        
+        // 🔒 檢查按鈕是否被鎖定
+        if (this.buttonLockMap.get(key)) {
+            console.warn(`[CommonTool.executeWithLock] 按鈕已鎖定，拒絕執行 ${actionName} (lockKey: ${key})`);
+            return;
+        }
+        
+        // 🔒 鎖定按鈕
+        this.buttonLockMap.set(key, true);
+        
+        try {
+            // 執行具體操作
+            action();
+        } catch (error) {
+            console.error(`[CommonTool.executeWithLock] 執行 ${actionName} 時發生錯誤:`, error);
+        }
+        
+        // 🔓 延遲解鎖按鈕
+        if (context && context.scheduleOnce) {
+            context.scheduleOnce(() => {
+                this.buttonLockMap.set(key, false);
+            }, lockDuration);
+        } else {
+            // 備用方案：使用 setTimeout
+            setTimeout(() => {
+                this.buttonLockMap.set(key, false);
+            }, lockDuration * 1000);
+        }
+    }
+
+    /**
+     * 🔓 手動解鎖按鈕
+     * @param context 組件上下文
+     * @param lockKey 鎖定鍵值，預設使用組件 uuid
+     */
+    public static unlockButton(context: cc.Component, lockKey?: string): void {
+        const key = lockKey || context.uuid || context.node.uuid || "default";
+        this.buttonLockMap.set(key, false);
+        console.log(`[CommonTool.unlockButton] 手動解鎖按鈕 (lockKey: ${key})`);
+    }
+
+    /**
+     * 🔍 檢查按鈕是否被鎖定
+     * @param context 組件上下文
+     * @param lockKey 鎖定鍵值，預設使用組件 uuid
+     * @returns true: 已鎖定, false: 未鎖定
+     */
+    public static isButtonLocked(context: cc.Component, lockKey?: string): boolean {
+        const key = lockKey || context.uuid || context.node.uuid || "default";
+        return this.buttonLockMap.get(key) || false;
+    }
+
+    /**
+     * 🧹 清理所有按鈕鎖定狀態（場景切換時使用）
+     */
+    public static clearAllButtonLocks(): void {
+        this.buttonLockMap.clear();
+        console.log("[CommonTool.clearAllButtonLocks] 已清理所有按鈕鎖定狀態");
+    }
+
+    /** 取得金額數字字串(根據幣值換算顯示) */
+    public static getCurrencyText(amount: number, currency: string): string {
+        let result: string = "0";
+        if(amount == undefined || amount == null) {
+            return result;
+        }
+        let value: number = amount;
+        switch(currency) {
+            case "IDR": value = amount / 100; break;
+            case "VND": value = amount / 100; break;
+            case "PHP": value = amount / 100; break;
+            case "THB": value = amount / 100; break;
+            case "BDT": value = amount / 100; break;
+            case "MMK": value = amount / 100; break;
+            case "KHR": value = amount / 10; break;
+            case "INR": value = amount / 100; break;
+            case "RUB": value = amount / 100; break;
+            case "TRY": value = amount / 100; break;
+            case "BRL": value = amount / 100; break;
+            case "MXN": value = amount / 100; break;
+            case "CLP": value = amount; break;
+            case "JPY": value = amount; break;
+            case "KRW": value = amount; break;
+            case "NGN": value = amount / 100; break;
+            case "PKR": value = amount / 100; break;
+            case "LKR": value = amount / 100; break;
+            case "NPR": value = amount / 100; break;
+            case "LAK": value = amount / 100; break;
+            case "MYR": value = amount / 100; break;
+        }
+        return this.numberWithCommas(value);
+    }
+
+    /** 判斷是否為開發環境 */
+    public static isDebugMode(): boolean {
+        if (typeof CC_DEBUG === 'undefined') return false;
+        return CC_DEBUG;
+    }
+
+    /** 將數字轉為有千分位的字串 */
+    public static numberWithCommas(number: number): string {
+        return number.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+    }
+
+    /** 將數字添加單位（K、M、B等） */
+    public static formatNumberWithUnit(number: number): string {
+        if (number >= 1000000000) return (number / 1000000000).toFixed(1) + "B";
+        if (number >= 1000000) return (number / 1000000).toFixed(1) + "M";
+        if (number >= 1000) return (number / 1000).toFixed(1) + "K";
+        return number.toString();
+    }
+
+    /** 取得當前的時間戳記 */
+    public static getCurrentTimestamp(): number {
+        return Math.floor(Date.now() / 1000);
+    }
+
+    /** 延遲執行 */
+    public static async delay(ms: number): Promise<void> {
+        return new Promise(resolve => setTimeout(resolve, ms));
+    }
+
+    /** 深拷貝對象 */
+    public static deepClone<T>(obj: T): T {
+        if (obj === null || typeof obj !== 'object') return obj;
+        if (obj instanceof Date) return new Date(obj.getTime()) as any;
+        if (obj instanceof Array) return obj.map(item => this.deepClone(item)) as any;
+        if (typeof obj === 'object') {
+            const cloned = {} as T;
+            for (const key in obj) {
+                if (obj.hasOwnProperty(key)) {
+                    cloned[key] = this.deepClone(obj[key]);
+                }
+            }
+            return cloned;
+        }
+        return obj;
+    }
+
+    /** 混洗陣列 */
+    public static shuffleArray<T>(array: T[]): T[] {
+        const shuffled = [...array];
+        for (let i = shuffled.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+        }
+        return shuffled;
+    }
+
+    /** 限制數值在指定範圍內 */
+    public static clamp(value: number, min: number, max: number): number {
+        return Math.min(Math.max(value, min), max);
+    }
+
+    /** 線性插值 */
+    public static lerp(start: number, end: number, t: number): number {
+        return start + (end - start) * this.clamp(t, 0, 1);
     }
 }

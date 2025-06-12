@@ -1,5 +1,5 @@
-import { CommonTool } from "../../../../Common/Tools/CommonTool";
 import { CardMega } from "../../../../Common/Base/card/CardMega";
+import { CommonTool } from "../../../../Common/Tools/CommonTool";
 import CardIcon from "./CardIcon";
 
 const {ccclass, property} = cc._decorator;
@@ -27,23 +27,19 @@ export default class GameRecordCard extends cc.Component {
     @property({ type: cc.Node, visible: true })
     private Node_WinLineGroup: cc.Node = null;
 
-    // 中奖信息显示容器
-    @property({ type: cc.Node, visible: true })
-    private Node_WinGroup: cc.Node = null;
-
     // 中奖金额 Label
     @property({ type: cc.Label, visible: true })
     private Label_WinAmount: cc.Label = null;
     
     // 卡片上的数字项目（CardIcon 组件）
     private cardItems: CardIcon[] = [];
-    private cardTxt: cc.RichText[] = [];
+    private cardTxt: cc.Label[] = [];
     
     // 文字颜色配置
-    private cardText: string[] = [
-        "#1d1d1d", // 未中奖 - 黑色
-        "#ffffff", // 中奖 - 白色
-        "#fe582a", // 特殊状态 - 橙色
+    private cardText: cc.Color[] = [
+        new cc.Color(29, 29, 29),
+        new cc.Color(255, 255, 255),
+        new cc.Color(254, 88, 42)
     ];
 
     private cardMega: CardMega = null;
@@ -73,7 +69,7 @@ export default class GameRecordCard extends cc.Component {
         
         // 初始化文字组件
         if (this.cardTxt.length === 0) {
-            this.cardTxt = this.Node_NumberTxtGroup.getComponentsInChildren(cc.RichText);
+            this.cardTxt = this.Node_NumberTxtGroup.getComponentsInChildren(cc.Label);
         }
     }
 
@@ -147,18 +143,16 @@ export default class GameRecordCard extends cc.Component {
      * 更新中奖信息显示
      */
     private updateWinInfo(viewData: any) {
-        if (this.Node_WinGroup) {
-            const hasWin = viewData.totalWin && viewData.totalWin > 0;
+        const hasWin = viewData.totalWin && viewData.totalWin > 0;
 
-            if (hasWin) {
-                // 设置中奖金额
-                if (this.Label_WinAmount) {
-                    const formattedAmount = CommonTool.formatMoney2(viewData.totalWin, "");
-                    this.Label_WinAmount.string = formattedAmount;
-                }
-            }else {
-                this.Label_WinAmount.string = "0";
+        if (hasWin) {
+            // 设置中奖金额
+            if (this.Label_WinAmount) {
+                const formattedAmount = CommonTool.formatMoney2(viewData.totalWin, "");
+                this.Label_WinAmount.string = formattedAmount;
             }
+        }else {
+            this.Label_WinAmount.string = "0";
         }
     }
 
@@ -168,8 +162,8 @@ export default class GameRecordCard extends cc.Component {
      * @param txt 文字内容
      * @param colorType 颜色类型索引
      */
-    private setLabel(text: cc.RichText, txt: string, colorType: number) {
-        const color = `<color=${this.cardText[colorType]}>${txt}</color>`;
-        text.string = color;
+    public setLabel(text : cc.Label , txt: string, numberItem : number) {
+        text.node.color = this.cardText[numberItem];
+        CommonTool.setLabel(text, txt);
     }
 }

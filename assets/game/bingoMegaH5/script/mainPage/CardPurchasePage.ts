@@ -1,11 +1,9 @@
 import { CARD_STATUS } from "../../../Common/Base/CommonData";
 import ChipItem from "../../../Common/Base/component/ChipItem";
+import CustomInputBox from "../../../Common/Base/component/CustomEditBox";
 import MegaComponent from "../../../Common/Base/gameMega/MegaComponent";
 import EventManager, { GameStateEvent, GameStateUpdate } from "../../../Common/Tools/Base/EventManager";
 import { CommonTool } from "../../../Common/Tools/CommonTool";
-import { PopupName } from "../../../Common/Tools/PopupSystem/PopupConfig";
-import PopupManager from "../../../Common/Tools/PopupSystem/PopupManager";
-import ToastManager from "../../../Common/Tools/Toast/ToastManager";
 
 const {ccclass, property} = cc._decorator;
 
@@ -32,8 +30,8 @@ export default class CardPurchasePage extends MegaComponent {
     private Btn_Increase : cc.Node = null;
     @property({ type: cc.Node, visible: true })
     private Btn_Decrease : cc.Node = null;
-    @property({ type: cc.EditBox, visible: true })
-    private EditBox_Card : cc.EditBox = null;
+    @property({ type: CustomInputBox, visible: true })
+    private EditBox_Card : CustomInputBox = null;
     @property({ type: cc.Label, visible: true })
     private Label_TotalAmount : cc.Label = null;
 
@@ -92,7 +90,10 @@ export default class CardPurchasePage extends MegaComponent {
             }, this);
         });
 
-        this.EditBox_Card.node.on('editing-did-ended', this.onTextChanged, this);
+        this.EditBox_Card.node.on(cc.Node.EventType.TOUCH_END, () => {
+            // 設置一個定時檢查，監聽輸入變化
+            this.startInputMonitoring();
+        }, this);
 
         // 增加 / 減少購買數量
         this.Btn_Increase.on('click', this.OnIncrease, this);
@@ -109,7 +110,9 @@ export default class CardPurchasePage extends MegaComponent {
 
     /** 開啟DIY選購頁面 */
     private OpenDIYCardSelectionPage() {
-        this.data.SendDIYCardSelectionPage(true);
+        CommonTool.executeWithLock(this, () => {  
+            this.data.SendDIYCardSelectionPage(true);
+        }, 0.5, "OpenDIYCardSelectionPage");
     }
 
     /** 增加購卡數量 */
@@ -121,29 +124,6 @@ export default class CardPurchasePage extends MegaComponent {
     /** 減少購卡數量 */
     private OnDecrease() {
         this.data.ChangeReadyBuyValue(-1);
-        this.changeCardInfo();
-    }
-
-    /** 編輯數量 */
-    onTextChanged(editBox: cc.EditBox) {
-        let str = editBox.string;
-        // 取得最大可輸入的卡數
-        let maxCard = this.data.getMaxCardCount();
-    
-        // 過濾非數字
-        let filtered = str.replace(/[^0-9]/g, '');
-    
-        // 限制最大值
-        let num = parseInt(filtered || '0', 10);
-    
-        // 避免超過最大數值，並確保最小值為 1
-        num = Math.max(1, Math.min(maxCard, num));
-    
-        // 更新 EditBox 顯示內容
-        if (editBox.string !== num.toString()) {
-            editBox.string = num.toString();
-        }
-        this.data.setReadyBuy(num);
         this.changeCardInfo();
     }
 
@@ -160,13 +140,13 @@ export default class CardPurchasePage extends MegaComponent {
     }
 
     /** 開啟確認買卡片頁面 */
-    protected OpenConfirmPurchasePage(): void {
-        this.data.BetCheck(this.Toggle_CardState.toggleItems[1].isChecked);
+    protected OpenConfirmPurchasePage(): boolean {
+        return this.data.BetCheck(this.Toggle_CardState.toggleItems[1].isChecked);
     }
 
     /** 快照恢復 */
     protected onSnapshot(): void {
-        this.node.active = this.data.showCardPurchasePage();
+        this.node.active = this.data.ActualNumberofCardsPurchased();
         this.setPageState();
     }
 
@@ -189,7 +169,7 @@ export default class CardPurchasePage extends MegaComponent {
         this.Label_CardPrice.node.active = data.playJackpot;   // 顯示卡片價格（Jackpot 模式）
         this.Label_Currency.node.active = !data.playJackpot;   // 顯示一般貨幣（非 Jackpot 模式）
         // 若為連線玩法，顯示使用說明
-        this.Label_UserManual.node.active = data.playCombo;
+        this.Label_UserManual.node.active = !data.playJackpot;
         // 若非 Jackpot 模式，顯示籌碼選項列表
         this.Toggle_BettingChipList.node.active = !data.playJackpot;
         // 設定籌碼列表內容與選中狀態
@@ -218,7 +198,7 @@ export default class CardPurchasePage extends MegaComponent {
     /** 局部資訊變更 如 : 更改籌碼 購卡數量等等 */
     public changeCardInfo() {
         let readyBuy = this.data.getCardsToBuy();
-        this.EditBox_Card.string = readyBuy.toString();
+        this.EditBox_Card.setText(readyBuy.toString());
         CommonTool.setLabel(this.Label_TotalAmount, CommonTool.formatNumber(this.data.getBuyTotalCard()));
 
         let buyDIYCard = this.data.buyDIYCard();
@@ -283,5 +263,52 @@ export default class CardPurchasePage extends MegaComponent {
         } else if (this.pressIndex == 2) {
             this.OnDecrease();
         }
+    }
+
+    private startInputMonitoring() {
+        // 開始監聽輸入變化
+        this.schedule(this.checkInputChange, 0.1);
+    }
+
+    private stopInputMonitoring() {
+        // 停止監聽輸入變化
+        this.unschedule(this.checkInputChange);
+    }
+
+    private lastInputValue: string = '';
+
+    private checkInputChange() {
+        const currentValue = this.EditBox_Card.getText();
+        if (currentValue !== this.lastInputValue) {
+            this.lastInputValue = currentValue;
+            this.onInputTextChanged(currentValue);
+        }
+        
+        // 如果沒有輸入框處於活動狀態，停止監聽
+        if (!document.activeElement || document.activeElement.tagName !== 'INPUT') {
+            this.stopInputMonitoring();
+        }
+    }
+
+    /** 處理輸入文字變化 */
+    private onInputTextChanged(inputText: string) {
+        // 取得最大可輸入的卡數
+        let maxCard = this.data.getMaxCardCount();
+    
+        // 過濾非數字
+        let filtered = inputText.replace(/[^0-9]/g, '');
+    
+        // 限制最大值
+        let num = parseInt(filtered || '0', 10);
+    
+        // 避免超過最大數值，並確保最小值為 1
+        num = Math.max(1, Math.min(maxCard, num));
+    
+        // 更新顯示內容並同步數據
+        if (inputText !== num.toString()) {
+            this.EditBox_Card.setText(num.toString());
+        }
+        this.data.setReadyBuy(num);
+        this.changeCardInfo();
     }
 }

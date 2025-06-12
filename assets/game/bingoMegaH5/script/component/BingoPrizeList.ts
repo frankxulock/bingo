@@ -15,18 +15,24 @@ export default class BingoPrizeList extends MegaComponent {
      */
     protected init(): void {
         super.init();
+        this.setPrizeList();
+    }
+
+    public setPrizeList() {
         // 取得所有子節點中的 PrizeIcon 元件
-        this.prizeList = this.node.getComponentsInChildren(PrizeIcon);
+        this.prizeList = this.node.getComponentsInChildren(PrizeIcon);      
     }
 
     protected addEventListener(): void {
         super.addEventListener();
         EventManager.getInstance().on(GameStateUpdate.StateUpdate_Canvas, this.onUpdateCanvas, this);
+        EventManager.getInstance().on(GameStateUpdate.StateUpdate_OpenPurchasedTicketPage, this.updatePrizeAmounts, this);
     }
 
     protected removeEventListener(): void {
         super.removeEventListener();
-        EventManager.getInstance().on(GameStateUpdate.StateUpdate_Canvas, this.onUpdateCanvas, this);
+        EventManager.getInstance().off(GameStateUpdate.StateUpdate_Canvas, this.onUpdateCanvas, this);
+        EventManager.getInstance().off(GameStateUpdate.StateUpdate_OpenPurchasedTicketPage, this.updatePrizeAmounts, this);
     }
 
     /**
@@ -36,7 +42,7 @@ export default class BingoPrizeList extends MegaComponent {
         this.updatePrizeAmounts();
     }
 
-    protected onUpdateCanvas(): void {
+    public onUpdateCanvas(): void {
         // 計算分配邏輯
         const containerWidth = this.node.width;
         const iconCount = this.prizeList.length;

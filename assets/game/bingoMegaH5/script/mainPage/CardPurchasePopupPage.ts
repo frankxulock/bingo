@@ -2,6 +2,7 @@ import { IWindow } from "../../../Common/Tools/PopupSystem/IWindow";
 import PopupManager from "../../../Common/Tools/PopupSystem/PopupManager";
 import { PopupName } from "../../../Common/Tools/PopupSystem/PopupConfig";
 import CardPurchasePage from "./CardPurchasePage";
+import EventManager, { GameStateEvent } from "../../../Common/Tools/Base/EventManager";
 
 const {ccclass, property} = cc._decorator;
 
@@ -18,10 +19,20 @@ export default class CardPurchasePopupPage extends CardPurchasePage implements I
         PopupManager.closePopup(PopupName.CardPurchasePopupPage);
     }
 
+    protected addEventListener(): void {
+        super.addEventListener();
+        EventManager.getInstance().on(GameStateEvent.GAME_DRAWTHENUMBERS, this.ChangeGameType, this);
+    }
+
+    protected removeEventListener(): void {
+        super.removeEventListener();
+        EventManager.getInstance().on(GameStateEvent.GAME_DRAWTHENUMBERS, this.ChangeGameType, this);
+    }
+
     /** 快照恢復 */
     protected onSnapshot(): void {
         this.setPageState();
-        if(!this.data.showCardPurchasePage()){
+        if(!this.data.ActualNumberofCardsPurchased()){
             this.close();
         }
     }
@@ -33,5 +44,12 @@ export default class CardPurchasePopupPage extends CardPurchasePage implements I
             this.close();
         }
         return shouldProceed;
+    }
+
+    private ChangeGameType() {
+        // 進入開球階段如果已經購買卡片強制關閉選卡介面
+        if(!this.data.ActualNumberofCardsPurchased()) {
+            this.close();
+        }
     }
 }

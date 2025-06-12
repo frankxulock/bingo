@@ -30,11 +30,11 @@ export default class DIYEditPage extends cc.Component implements IWindow {
     // 卡片 UI 顯示節點（對應選號顯示）
     @property({ type: cc.Node, visible: true })
     private Node_NumberTxtGroup: cc.Node = null;
-    private CardTxts: cc.RichText[] = [];
-    private cardText: string[] = [
-        "#1d1d1d", // new cc.Color(29, 29, 29)
-        "#ffffff", // new cc.Color(255, 255, 255)
-        "#fe582a", // new cc.Color(254, 88, 42)
+    private CardTxts: cc.Label[] = [];
+    private cardText: cc.Color[] = [
+        new cc.Color(29, 29, 29),
+        new cc.Color(255, 255, 255),
+        new cc.Color(254, 88, 42)
     ];
 
     // 選號按鈕 UI 節點
@@ -63,7 +63,7 @@ export default class DIYEditPage extends cc.Component implements IWindow {
 
         // 取得 CardIcon 元件
         if (this.CardTxts.length === 0) {
-            this.CardTxts = this.Node_NumberTxtGroup.getComponentsInChildren(cc.RichText);
+            this.CardTxts = this.Node_NumberTxtGroup.getComponentsInChildren(cc.Label);
         }
 
         // 初始化選號按鈕及分組
@@ -79,6 +79,7 @@ export default class DIYEditPage extends cc.Component implements IWindow {
         this.initializeToggleStates(data.editCard);
         this.ScrollView_nalyzeData.refreshData(data.ballDisplayInfo);
         this.updateCardIconsBySelected(); // 同步更新卡片內容
+        CommonTool.setLabel(this.Label_currentDIYCardCount, `#${data.id}`);
     }
 
     /**
@@ -104,11 +105,8 @@ export default class DIYEditPage extends cc.Component implements IWindow {
         this.editCard = editCard;
         this.selectedNumbers.clear();
         if (editCard != null) {
-            // CommonTool.setLabel(this.Label_currentDIYCardCount, "");
             const cardInfo: number[] = editCard.cardInfo;
             this.selectedNumbers = new Set<number>(cardInfo.filter(n => n != null));
-        } else {
-            CommonTool.setLabel(this.Label_currentDIYCardCount, "");
         }
 
         // 設定每個按鈕的資料與狀態
@@ -142,8 +140,7 @@ export default class DIYEditPage extends cc.Component implements IWindow {
         if (evt.isChecked && selectedCount > maxAllowed) {
             toggle.setChecked(false);
             let bingo = ["B", "I", "N", "G", "O"];
-            // cc.log(`第 ${bingo[groupIndex]} 組已達上限（最多選 ${maxAllowed} 個號碼），請先取消其他號碼`);
-            ToastManager.showToast(`第 ${bingo[groupIndex]} 組已達上限（最多選 ${maxAllowed} 個號碼），請先取消其他號碼`);
+            ToastManager.showToast(`Group ${bingo[groupIndex]} has reached the limit (you can select up to ${maxAllowed} numbers). Please deselect other numbers first.`);
             return;
         }
 
@@ -263,7 +260,6 @@ export default class DIYEditPage extends cc.Component implements IWindow {
 
             // 轉為字串並送出
             const resultString = withDIY.join(",");
-            console.log(resultString);
 
             sorted.splice(middleIndex, 0, null);
             if(this.editCard) {
@@ -295,7 +291,7 @@ export default class DIYEditPage extends cc.Component implements IWindow {
                 });
             }
         } else {
-            ToastManager.showToast("卡片未選滿24個數字");
+            ToastManager.showToast("The card does not have all 24 numbers selected.");
         }
     }
 
@@ -317,8 +313,8 @@ export default class DIYEditPage extends cc.Component implements IWindow {
      * 設定顯示的文字內容
      * @param txt 要設定的文字內容
      */
-    public setLabel(text : cc.RichText , txt: string, numberItem : number) {
-        let color = `<color=${this.cardText[numberItem]}>${txt}</color>`;
-        text.string = color;
+    public setLabel(text : cc.Label , txt: string, numberItem : number) {
+        text.node.color = this.cardText[numberItem];
+        CommonTool.setLabel(text, txt);
     }
 }

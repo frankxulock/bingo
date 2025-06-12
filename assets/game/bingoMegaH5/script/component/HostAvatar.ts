@@ -1,5 +1,6 @@
 import AvatarComponent from "../../../Common/Base/component/AvatarComponent";
 import MegaComponent from "../../../Common/Base/gameMega/MegaComponent";
+import { CommonTool } from "../../../Common/Tools/CommonTool";
 import { PopupName } from "../../../Common/Tools/PopupSystem/PopupConfig";
 import PopupManager from "../../../Common/Tools/PopupSystem/PopupManager";
 
@@ -35,8 +36,10 @@ export default class HostAvatar extends MegaComponent {
      * 開啟主播資訊頁面，並傳遞目前頭像相關的資料
      */
     public openHostAvatarWindow(): void {
-        const avatarData = this.data.getAvatarPageData();
-        PopupManager.showPopup(PopupName.StreamerInfoPage, avatarData);
+        CommonTool.executeWithLock(this, () => {  
+            const avatarData = this.data.getAvatarPageData();
+            PopupManager.showPopup(PopupName.StreamerInfoPage, avatarData);
+        }, 0.5, "openHostAvatarWindow");
     }
 
     /**
@@ -44,6 +47,6 @@ export default class HostAvatar extends MegaComponent {
      * 現階段為示意用，尚未實作
      */
     protected onSnapshot(): void {
-        console.log("未來新增監聽更新主播資訊功能設定頭像");
+
     }
 }

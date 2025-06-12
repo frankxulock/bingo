@@ -30,7 +30,7 @@ export default class LeaderboardPage extends cc.Component implements IWindow {
 
     open(data: any): void {
         if (!data) return;
-    
+        this.BingoPrizeList.setPrizeList();
         this.data = data;
         this.setPageState();
 
@@ -65,6 +65,9 @@ export default class LeaderboardPage extends cc.Component implements IWindow {
         this.ScrollView_Leaderboard.node.active = isLeaderboard;
         this.ScrollView_History.node.active = !isLeaderboard;
         this.BingoPrizeList.updatePrizeAmounts();
+        setTimeout(()=>{
+            this.BingoPrizeList.onUpdateCanvas();
+        }, 0);
 
         // 根據當前頁面顯示對應資料
         const dataToRefresh = isLeaderboard ? rankingData : historyData;

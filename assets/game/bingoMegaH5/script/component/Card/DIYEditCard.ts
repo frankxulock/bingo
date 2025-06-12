@@ -1,4 +1,7 @@
 import EventManager, { GameStateUpdate } from "../../../../Common/Tools/Base/EventManager";
+import { CommonTool } from "../../../../Common/Tools/CommonTool";
+import { PopupName } from "../../../../Common/Tools/PopupSystem/PopupConfig";
+import PopupManager from "../../../../Common/Tools/PopupSystem/PopupManager";
 import ToastManager from "../../../../Common/Tools/Toast/ToastManager";
 import { HttpServer } from "../../HttpServer";
 import CardIcon from "./CardIcon";
@@ -19,17 +22,19 @@ export default class DIYEditCard extends cc.Component {
     private Node_NumberTxtGroup: cc.Node = null;
 
     private cardItems: CardIcon[] = []; // 存放每個顯示的 CardIcon 實例
-    private cardTxt: cc.RichText[] = [];
-    private cardText: string[] = [
-        "#1d1d1d", // new cc.Color(29, 29, 29)
-        "#ffffff", // new cc.Color(255, 255, 255)
-        "#fe582a", // new cc.Color(254, 88, 42)
+    private cardTxt: cc.Label[] = [];
+    private cardText: cc.Color[] = [
+        new cc.Color(29, 29, 29),
+        new cc.Color(255, 255, 255),
+        new cc.Color(254, 88, 42)
     ];
     private data: any = null; // 當前卡片的資料
+    private index : number = 0;
 
     /** 設定此卡片的資料與顯示狀態 */
     setData(cardData: any, index?: number): void {
         this.data = cardData;
+        this.index = index;
         const viewData = cardData.cardInfo;
 
         // 若未初始化 cardItems，則從子節點抓取所有 CardIcon
@@ -37,7 +42,7 @@ export default class DIYEditCard extends cc.Component {
             this.cardItems = this.Node_NumberGroup.getComponentsInChildren(CardIcon);
         }
         if(this.cardTxt.length == 0) {
-            this.cardTxt = this.Node_NumberTxtGroup.getComponentsInChildren(cc.RichText);     
+            this.cardTxt = this.Node_NumberTxtGroup.getComponentsInChildren(cc.Label);     
         }
 
         // 將每個 CardIcon 顯示對應的數字，若無則顯示 DIY
@@ -63,7 +68,7 @@ export default class DIYEditCard extends cc.Component {
     private onToggleChanged(toggle: cc.Toggle): void {
         if (this.data.isPurchased) {
             this.DIYEditCard.isChecked = false;
-            ToastManager.showToast("此卡片已购买，不能重复购买。请更改数字或选择新的卡片。");
+            ToastManager.showToast("This card has already been purchased and cannot be purchased again. Please change the number or select a new card.");
             return;
         }
 
@@ -76,29 +81,23 @@ export default class DIYEditCard extends cc.Component {
 
     /** 編輯按鈕事件 */
     public onEdit(): void {
+        let EditData = {
+            data : this.data,
+            id : this.index - 1
+        }
         if (this.DIYEditCard.interactable) {
-            EventManager.getInstance().emit(
-                GameStateUpdate.StateUpdate_OpenDIYEditPage,
-                this.data
-            );
+            EventManager.getInstance().emit(GameStateUpdate.StateUpdate_OpenDIYEditPage, EditData);
         }
     }
 
     /** 刪除按鈕事件 */
     public onDelete(): void {
         if (this.DIYEditCard.interactable) {
-            console.log(this.data.id);
-            HttpServer.DIYDelete(this.data.id)
-            .then(results => {
-                EventManager.getInstance().emit(
-                    GameStateUpdate.StateUpdate_DeleteDIYCard,
-                    this.data
-                );
-                HttpServer.DIYCardList()
-                .then(results => {
-                    console.error("results : ", results);
-                });
-            });
+            let DeleteData = {
+                id: this.data.id,
+                data: this.data,
+            }
+            PopupManager.showPopup(PopupName.DIYCardDeletePage, DeleteData);
         }
     }
 
@@ -106,8 +105,8 @@ export default class DIYEditCard extends cc.Component {
      * 設定顯示的文字內容
      * @param txt 要設定的文字內容
      */
-    public setLabel(text : cc.RichText , txt: string, numberItem : number) {
-        let color = `<color=${this.cardText[numberItem]}>${txt}</color>`;
-        text.string = color;
+    public setLabel(text : cc.Label , txt: string, numberItem : number) {
+        text.node.color = this.cardText[numberItem];
+        CommonTool.setLabel(text, txt);
     }
 }

@@ -9,17 +9,21 @@
     "portrait": false,
     "upsideDown": false
   },
-  "webOrientation": "auto",
+  "webOrientation": "portrait",
   "inlineSpriteFrames": true,
   "inlineSpriteFrames_native": true,
-  "mainCompressionType": "none",
+  "mainCompressionType": "merge_all_json",
   "mainIsRemote": false,
-  "optimizeHotUpdate": false,
+  "optimizeHotUpdate": true,
   "md5Cache": true,
   "nativeMd5Cache": true,
   "encryptJs": true,
   "xxteaKey": "19cfa350-7fec-44",
   "zipCompressJs": true,
+  "compressSettings": true,
+  "sourceMaps": false,
+  "debug": false,
+  "separateEngine": false,
   "fb-instant-games": {},
   "android": {
     "packageName": "org.cocos2d.demo",
@@ -33,13 +37,13 @@
   "mac": {
     "packageName": "org.cocos2d.demo",
     "REMOTE_SERVER_ROOT": "",
-    "width": 1280,
-    "height": 720
+    "width": 800,
+    "height": 390
   },
   "win32": {
     "REMOTE_SERVER_ROOT": "",
-    "width": 1280,
-    "height": 720
+    "width": 800,
+    "height": 390
   },
   "android-instant": {
     "packageName": "org.cocos2d.demo",
@@ -56,5 +60,30 @@
     "jsEngine": "JSVM"
   },
   "appBundle": false,
-  "agreements": {}
+  "agreements": {},
+  "web-mobile": {
+    "orientation": "portrait",
+    "inlineSpriteFrames": true,
+    "md5Cache": true,
+    "optimizeHotUpdate": true,
+    "polyfills": {
+      "asyncFunctions": false
+    }
+  },
+  "web-desktop": {
+    "orientation": "landscape",
+    "inlineSpriteFrames": true,
+    "md5Cache": true,
+    "optimizeHotUpdate": true
+  },
+  "wechatgame": {
+    "REMOTE_SERVER_ROOT": "",
+    "appid": "",
+    "orientation": "portrait",
+    "inlineSpriteFrames": true,
+    "md5Cache": true,
+    "optimizeHotUpdate": true,
+    "separateEngine": false,
+    "subpackages": []
+  }
 }

@@ -29,7 +29,7 @@ export default class CardNumberManager extends Singleton {
                     playState: data.playState,
                 });
             }
-            console.log("DIY Card =>", cards);
+
         } else {
             // 隨機卡片處理
             const count = data.readyBuy || 0;
@@ -95,7 +95,7 @@ export default class CardNumberManager extends Singleton {
         } while (isDuplicate(newCard) && attempts < MAX_ATTEMPTS);
     
         if (attempts >= MAX_ATTEMPTS) {
-            console.warn('無法在限制次數內生成不重複的賓果卡。');
+
         }
     
         // 記錄到 confirmedPurchaseCards
@@ -103,7 +103,6 @@ export default class CardNumberManager extends Singleton {
     
         return newCard;
     }
-    
 
     /** 工具：範圍陣列 */
     public range(start: number, end: number): number[] {
@@ -118,11 +117,6 @@ export default class CardNumberManager extends Singleton {
             [result[i], result[j]] = [result[j], result[i]];
         }
         return result;
-    }
-
-    /** 清除所有卡片 */
-    public clearConfirmedPurchaseCards() {
-        this.ownedCards = [];
     }
 
     /** 清除所有卡片 */

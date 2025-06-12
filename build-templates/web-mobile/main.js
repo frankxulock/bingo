@@ -1,6 +1,20 @@
 window.boot = function () {
     var settings = window._CCSettings;
     window._CCSettings = undefined;
+    
+    // 在非开发模式下禁用所有日志输出
+    if (!CC_DEV) { // 仅在非开发模式下执行
+        // cc.log = () => {};
+        // cc.warn = () => {};
+        // // cc.error = () => {};
+        // console.log = () => {};
+        // console.warn = () => {};
+        // // console.error = () => {};
+        // console.info = () => {};
+        // console.debug = () => {};
+        // console.trace = () => {};
+    }
+    
     var onProgress = null;
     
     var RESOURCES = cc.AssetManager.BuiltinBundleName.RESOURCES;

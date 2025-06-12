@@ -70,7 +70,6 @@ export default class GameRecordPage extends cc.Component implements IWindow {
 
     public setPageState(data) {
         if(data?.data?.list) {
-            console.log("list => ", data.data.list);
             this.data = data.data.list;
             this.Node_gameHistory.active = true;
             this.Node_matchDetails.node.active = false;
@@ -78,8 +77,7 @@ export default class GameRecordPage extends cc.Component implements IWindow {
             this.ScrollView_historyRecords.refreshData(data.data.list);
         }else {
             this.ScrollView_historyRecords.node.active = false;
-            if(data?.data?.total != 0)
-                console.warn("找不到個人歷史紀錄資訊 data : ", data);
+            // if(data?.data?.total != 0)
         }
     }
 
@@ -137,7 +135,7 @@ export default class GameRecordPage extends cc.Component implements IWindow {
 
     /** 開啟歷史詳情 */
     private onItemChanged(index : number) {
-        console.log("要開啟的資料 index => ", index);
+
         this.Node_matchDetails.setPageState(this.data[index]);
         this.Node_matchDetails.node.active = true;
     }
@@ -146,7 +144,7 @@ export default class GameRecordPage extends cc.Component implements IWindow {
     public POSTHistory() {
         HttpServer.InfoHistory(this.selectedStartDate.getTime(), this.selectedEndDate.getTime(), this.state)
         .then(results => {
-            console.log("歷史紀錄數據 results ", results);
+
             this.setPageState(results);
         });
     }

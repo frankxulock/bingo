@@ -1,6 +1,7 @@
 import { CURRENCY_SYMBOL } from "../../Tools/Base/BaseDataManager";
 import { CommonTool } from "../../Tools/CommonTool";
-import { CardMega } from "../card/CardMega";
+import { MathUtils } from "../../Tools/MathUtils";
+import { CardMega as CardMega } from "../card/CardMega";
 import { CARD_CONTENT, CARD_GAMEPLAY, CARD_STATUS, GAME_STATUS } from "../CommonData";
 import CardNumberManager from "./CardNumberManager";
 /**
@@ -38,6 +39,7 @@ export class MegaDataStore {
     public readonly maxDIYCardCount: number = 60;
 
     // 卡片集合
+    public editableDIYID: number = 0;
     public editableDIYCard: CardMega | null = null;
     public savedDIYCards: CardMega[] = [];
     public selectedDIYCards: CardMega[] = [];
@@ -71,6 +73,7 @@ export class MegaDataStore {
     // 其他
     public hostAvatarData: any = null;
     public videoUrls : string[] = [];
+    public DIYCardPageinPersonalCenter : boolean = false;
     /**
      * 從服務器數據初始化存儲
      */
@@ -150,9 +153,9 @@ export class MegaDataStore {
                 (item) => item.play_name === "BGM Extra Patterns"
             );
     
+            this.selectedCardType = (this.GameRoundID == cardList.list[0]?.issue_number) 
+                ? CARD_STATUS.NORMAL : CARD_STATUS.PREORDER;
             if(extraPatternsItem) {
-                this.selectedCardType = (this.GameRoundID == extraPatternsItem.issue_number) 
-                    ? CARD_STATUS.NORMAL : CARD_STATUS.PREORDER;
                 this.multiples = extraPatternsItem.multiples;
                 this.selectedChipIndex = this.extraChips.findIndex(chip => chip === this.multiples);
                 if (this.selectedChipIndex === -1) this.selectedChipIndex = 0;
@@ -172,7 +175,6 @@ export class MegaDataStore {
     public createCardServer(data: any): void {
         // 解析伺服器回傳的訂單資料
         const orders = this.classifyOrders(data.data);
-        // console.warn("成功 orders => ", orders);
         // 處理訂單內容
         this.processOrders(orders);
 
@@ -180,9 +182,9 @@ export class MegaDataStore {
             (item) => item.play_name === "BGM Extra Patterns"
         );
     
+        this.selectedCardType = (this.GameRoundID == data.data[0].issue_number) 
+            ? CARD_STATUS.NORMAL : CARD_STATUS.PREORDER;
         if(extraPatternsItem) {
-            this.selectedCardType = (this.GameRoundID == extraPatternsItem.issue_number) 
-                ? CARD_STATUS.NORMAL : CARD_STATUS.PREORDER;
             this.multiples = extraPatternsItem.multiples;
             this.selectedChipIndex = this.extraChips.findIndex(chip => chip === this.multiples);
             if (this.selectedChipIndex === -1) this.selectedChipIndex = 0;
@@ -282,7 +284,7 @@ export class MegaDataStore {
                     numbers: sortedNumbers
                 };
                 const megaCard = new CardMega(data);
-                this.ownedCards.push(megaCard);
+                this.ownedCards.unshift(megaCard);  // 使用 unshift 將新卡片插入到數組前方
             });
         });
     }
@@ -323,9 +325,11 @@ export class MegaDataStore {
         let chipList = this.getChipList();      // 籌碼列表
         let buyCoin = 0;
         if(chipList != null)
-            buyCoin = (chipList[this.selectedChipIndex] * this.getCardsToBuy());
+            // 使用 MathUtils 精確乘法避免浮點數精度問題
+            buyCoin = MathUtils.times(chipList[this.selectedChipIndex], this.getCardsToBuy());
         else 
-            buyCoin = this.jackpotChipCost * this.getCardsToBuy();
+            // 使用 MathUtils 精確乘法避免浮點數精度問題
+            buyCoin = MathUtils.times(this.jackpotChipCost, this.getCardsToBuy());
         return buyCoin;
     }
 

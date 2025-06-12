@@ -1,7 +1,79 @@
 const url = {
-    // 協議與伺服器主機設定（可改成 https 或其他主機）
-    HTTP: "",
-    SERVERHOST: "",
+    /**
+     * 主機映射配置表 - 統一管理 HTTP API 和 WebSocket 連接
+     * 支援本地開發、測試環境和生產環境的自動切換
+     */
+    HOST_MAPPING: {
+        // 本地開發環境
+        'localhost': { 
+            api: 'localhost:3000/proxy/', 
+            ws: 'wss://bg-nats.vipsroom.net/' 
+        },
+        '127.0.0.1': { 
+            api: 'localhost:3000/proxy/', 
+            ws: 'wss://bg-nats.vipsroom.net/' 
+        },
+        // 開發測試環境 - devcocos 特殊處理
+        'devcocos.okbingos.com': { 
+            api: 'devcocos.okbingos.com/', 
+            ws: 'wss://devnats.okbingos.com/' 
+        },
+        // 測試環境 - testpc 特殊處理
+        'testcocos.okbingos.com': { 
+            api: 'testcocos.okbingos.com/', 
+            ws: 'wss://bg-nats.vipsroom.net/' 
+        },
+        // 擴展示例：可以輕鬆添加更多環境
+        // 'prod.example.com': { 
+        //     api: 'api.example.com/', 
+        //     ws: 'wss://ws.example.com/' 
+        // },
+    },
+
+    /**
+     * 統一主機解析方法 - 自動檢測當前環境並返回對應的服務器配置
+     * @param {string} type - 'api' 或 'ws'，指定要獲取的服務類型
+     * @returns {string} 對應的服務器地址
+     */
+    _resolveHost(type = 'api') {
+        const currentHost = window.location.hostname;
+        const currentUrl = window.location.href;
+        
+        // 直接匹配主機名
+        if (this.HOST_MAPPING[currentHost]) {
+            return this.HOST_MAPPING[currentHost][type];
+        }
+        
+        // 模糊匹配 URL 中包含的主機名
+        for (const [hostKey, config] of Object.entries(this.HOST_MAPPING)) {
+            if (currentUrl.includes(hostKey) || currentHost.includes(hostKey)) {
+                return config[type];
+            }
+        }
+        
+        // 預設值：未匹配時的自動生成規則
+        if (type === 'ws') {
+            const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+            return `${protocol}//${currentHost}/`;
+        }
+        return `${currentHost}/`;
+    },
+
+    /** HTTP 協議前綴 - 自動檢測當前網頁協議 */
+    get HTTP() {
+        return window.location.protocol + "//";
+    },
+    
+    /** API 服務器主機 - 自動解析 HTTP API 地址 */
+    get SERVERHOST() {
+        return this._resolveHost('api');
+    },
+
+    /** WebSocket 服務器主機 - 自動解析 WebSocket 地址 */
+    get WSHOST() {
+        return this._resolveHost('ws');
+    },
+
     // 目前遊戲代碼（可切換成不同遊戲）
     MEGA: "BGM",
     RUSH: "BGR",

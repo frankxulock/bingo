@@ -177,7 +177,6 @@ interface HowlOptions extends HowlListeners {
     };
 }
 
-
 declare class Howl{
   constructor(options: HowlOptions);
 
@@ -273,5 +272,4 @@ interface Howler {
     pos(x: number, y: number, z: number): this | void;
     orientation(x: number, y: number, z: number, xUp: number, yUp: number, zUp: number): this | void;
 }
-
 

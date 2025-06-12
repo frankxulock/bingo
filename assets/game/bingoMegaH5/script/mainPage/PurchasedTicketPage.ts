@@ -4,6 +4,7 @@ import EventManager, { GameStateEvent, GameStateUpdate } from "../../../Common/T
 import PopupManager from "../../../Common/Tools/PopupSystem/PopupManager";
 import { PopupName } from "../../../Common/Tools/PopupSystem/PopupConfig";
 import ScrollLazyLoader from "../../../Common/Tools/Scroll/ScrollLazyLoader";
+import VirtualScrollView from "../../../Common/Tools/Scroll/VirtualScrollView";
 
 const {ccclass, property} = cc._decorator;
 
@@ -11,8 +12,8 @@ const {ccclass, property} = cc._decorator;
 export default class PurchasedTicketPage extends MegaComponent {
     @property({ type: ScrollLazyLoader, visible: true })
     private ScrollView_PrizeOverview: ScrollLazyLoader = null;
-    @property({ type: ScrollLazyLoader, visible: true })
-    private ScrollView_CardGroup: ScrollLazyLoader = null;
+    @property({ type: VirtualScrollView, visible: true })
+    private ScrollView_CardGroup: VirtualScrollView = null;
     @property({ type: cc.Node, visible: true })
     private Btn_AddCard: cc.Node = null;
     @property({ type: cc.Node, visible: true })
@@ -26,12 +27,14 @@ export default class PurchasedTicketPage extends MegaComponent {
 
     protected addEventListener(): void {
         super.addEventListener();
+        EventManager.getInstance().on(GameStateEvent.GAME_DRAWTHENUMBERS, this.onSnapshot, this);
         EventManager.getInstance().on(GameStateUpdate.StateUpdate_SendBall, this.setPageState, this);
         EventManager.getInstance().on(GameStateUpdate.StateUpdate_OpenPurchasedTicketPage, this.showAction, this);
     }
 
     protected removeEventListener(): void {
         super.removeEventListener();
+        EventManager.getInstance().off(GameStateEvent.GAME_DRAWTHENUMBERS, this.onSnapshot, this);
         EventManager.getInstance().off(GameStateUpdate.StateUpdate_SendBall, this.setPageState, this);
         EventManager.getInstance().off(GameStateUpdate.StateUpdate_OpenPurchasedTicketPage, this.showAction, this);
     }
@@ -60,7 +63,7 @@ export default class PurchasedTicketPage extends MegaComponent {
 
     /** 快照恢復 */
     protected onSnapshot(): void {
-        this.node.active = !this.data.showCardPurchasePage();
+        this.node.active = !this.data.ActualNumberofCardsPurchased();
         this.setPageState();
     }
 

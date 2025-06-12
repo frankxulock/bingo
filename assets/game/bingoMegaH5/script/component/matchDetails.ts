@@ -2,9 +2,9 @@ import BallComponent from "../../../Common/Base/component/BallCompoent";
 import { CARD_CONTENT, CARD_GAMEPLAY, CARD_STATUS } from "../../../Common/Base/CommonData";
 import MegaManager from "../../../Common/Base/gameMega/MegaManager";
 import { CommonTool } from "../../../Common/Tools/CommonTool";
-import ScrollLazyLoader from "../../../Common/Tools/Scroll/ScrollLazyLoader";
 import BingoMegaUI from "../BingoMegaUI";
 import { CardMega } from "../../../Common/Base/card/CardMega";
+import VirtualScrollView from "../../../Common/Tools/Scroll/VirtualScrollView";
 
 const {ccclass, property} = cc._decorator;
 
@@ -37,15 +37,15 @@ export default class matchDetails extends cc.Component {
     @property({ type: cc.Node, visible: true })
     private Group_Balls2 : cc.Node = null; 
     private balls : BallComponent[] = [];
-    @property({ type: ScrollLazyLoader, visible: true })
-    private ScrollView_card : ScrollLazyLoader = null; 
+    @property({ type: VirtualScrollView, visible: true })
+    private ScrollView_card : VirtualScrollView = null; 
 
     private data;
 
     /** 設置詳情頁面 */
     public setPageState(data) {
         if(!data) {
-            console.warn("matchDetails: 没有数据");
+
             return;
         }
         
@@ -119,8 +119,7 @@ export default class matchDetails extends cc.Component {
                 hasSpriteFrame: !!spriteFrame
             });
         }
-        
-        console.log(`设置图标: 输赢状态="${winLose}", 使用图标=${iconType}`);
+
     }
 
     /**
@@ -321,9 +320,7 @@ export default class matchDetails extends cc.Component {
         
         // 添加原始号码信息用于调试
         cardMega['originalNumbers'] = originalNumbers;
-        
-        console.log(`卡片 ${cardIndex}: 原始=${originalNumbers}, 解析后=${JSON.stringify(cardNumbers)}, DIY=${hasDIY}, Free=${hasFree}, 内容类型=${cardContent}`);
-        
+
         return cardMega;
     }
 
@@ -337,7 +334,7 @@ export default class matchDetails extends cc.Component {
             case 'BGM Bingo&Jackpot':
                 return CARD_GAMEPLAY.JACKPOT;
             default:
-                console.warn('未知的游戏类型:', playName);
+
                 return CARD_GAMEPLAY.EXTRA;
         }
     }
@@ -393,9 +390,7 @@ export default class matchDetails extends cc.Component {
         
         // 确保高度不为负数
         height = Math.max(height, 50);
-        
-        console.log(`计算高度: 总高度=${this.node.height}, 已用高度=${usedHeight}, ScrollView高度=${height}`);
-        
+
         // 设置 ScrollView_card 的高度
         this.ScrollView_card.node.height = height;
         this.ScrollView_card.content.parent.height = height;

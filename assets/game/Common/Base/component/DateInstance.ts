@@ -3,17 +3,13 @@ import GameRecordPage from "../../../bingoMegaH5/script/mainPage/GameRecordPage"
 const {ccclass, property} = cc._decorator;
 
 /**
- * 日期选择器组件
- * 功能：显示日历，支持日期范围选择，限制在过去30天内
- * 优化：减少重复计算，提高性能和可读性
+ * 日期選擇器組件
+ * 功能：顯示42天日曆，當天在最後一週，只能選擇最近30天
+ * 優化：減少重複計算，提高性能和可讀性
  */
 @ccclass
 export default class DateInstance extends cc.Component {
-    // ==================== UI 组件 ====================
-    @property({ type: cc.Node }) private Btn_PreviousYear: cc.Node = null;
-    @property({ type: cc.Node }) private Btn_PreviousMonth: cc.Node = null;
-    @property({ type: cc.Node }) private Btn_NextYear: cc.Node = null;
-    @property({ type: cc.Node }) private Btn_NextMonth: cc.Node = null;
+    // ==================== UI 組件 ====================
     @property({ type: cc.Label }) private Label_YearMonth: cc.Label = null;
     @property({ type: [cc.Node] }) private selectBGs: cc.Node[] = [];
     @property({ type: cc.Node }) private Node_select_start: cc.Node = null;
@@ -22,47 +18,36 @@ export default class DateInstance extends cc.Component {
     @property({ type: cc.ToggleContainer }) private ToggleContainer_SelectTimeRange: cc.ToggleContainer = null;
     @property({ type: GameRecordPage }) private GameRecordPage: GameRecordPage = null;
 
-    // ==================== 私有属性 ====================
+    // ==================== 私有屬性 ====================
     private dates: cc.Label[] = [];
-    private currentYear: number = 0;
-    private currentMonth: number = 0;
     private selectedStartDate: Date = null;
     private selectedEndDate: Date = null;
     private currentState: number = 0;
+    private today: Date = new Date();
 
     // ==================== 常量配置 ====================
-    /** 日期颜色配置：[当月, 其他月, 选中, 区间, 不可选] */
+    /** 日期顏色配置：[可選, 不可選, 選中, 區間] */
     private readonly dateColors = [
-        new cc.Color(90, 90, 90),      // 当月可选
-        new cc.Color(153, 153, 153),   // 其他月
-        new cc.Color(255, 255, 255),   // 选中日期
-        new cc.Color(254, 88, 42),     // 区间中间
-        new cc.Color(153, 153, 153),   // 不可选
+        new cc.Color(90, 90, 90),      // 可選
+        new cc.Color(153, 153, 153),   // 不可選
+        new cc.Color(255, 255, 255),   // 選中日期
+        new cc.Color(254, 88, 42),     // 區間中間
     ];
 
-    /** 系统日期配置 */
-    private readonly today = new Date();
-    private readonly minDate = (() => {
-        const date = new Date();
-        date.setDate(date.getDate() - 30);
-        return date;
-    })();
-
-    /** 快速选择天数配置 */
+    /** 快速選擇天數配置 */
     private readonly quickRanges = [7, 30];
 
     // ==================== 公共方法 ====================
     /**
-     * 打开日期选择器
-     * @param start 开始日期时间戳
-     * @param end 结束日期时间戳  
-     * @param state 当前状态 (0:选择开始日期, 1:选择结束日期)
+     * 打開日期選擇器
      */
     open(start: number, end: number, state: number) {
-        this.Btn_PreviousYear.active = false;
-        this.Btn_NextYear.active = false;
         this.node.active = true;
         this.currentState = state;
+        
+        // 更新今天的日期
+        this.today = new Date();
+        
         this.initializeComponents();
         this.setSelectedDates(start, end, state);
         this.updateCalendar();
@@ -74,11 +59,11 @@ export default class DateInstance extends cc.Component {
 
     Apply() {
         if(this.GameRecordPage){
-            // 创建开始日期的副本，设置为当天开始时间（00:00:00）
+            // 創建開始日期的副本，設置為當天開始時間（00:00:00）
             const startDate = new Date(this.selectedStartDate);
             startDate.setHours(0, 0, 0, 0);
             
-            // 创建结束日期的副本，设置为当天结束时间（23:59:59）
+            // 創建結束日期的副本，設置為當天結束時間（23:59:59）
             const endDate = new Date(this.selectedEndDate);
             endDate.setHours(23, 59, 59, 999);
             
@@ -87,38 +72,9 @@ export default class DateInstance extends cc.Component {
         }
     }
 
-    // ==================== 导航按钮事件 ====================
-    OnPreviousYear() {
-        if (this.canNavigateToYear(this.currentYear - 1)) {
-            this.currentYear--;
-            this.updateCalendar();
-        }
-    }
-
-    OnNextYear() {
-        if (this.canNavigateToYear(this.currentYear + 1)) {
-            this.currentYear++;
-            this.updateCalendar();
-        }
-    }
-
-    OnPreviousMonth() {
-        if (this.canNavigateToMonth(this.currentYear, this.currentMonth - 1)) {
-            this.navigateMonth(-1);
-            this.updateCalendar();
-        }
-    }
-
-    OnNextMonth() {
-        if (this.canNavigateToMonth(this.currentYear, this.currentMonth + 1)) {
-            this.navigateMonth(1);
-            this.updateCalendar();
-        }
-    }
-
     // ==================== 私有方法 ====================
     /**
-     * 初始化组件（只执行一次）
+     * 初始化組件（只執行一次）
      */
     private initializeComponents() {
         if (this.dates.length > 0) return;
@@ -129,23 +85,24 @@ export default class DateInstance extends cc.Component {
             this.setupDateButton(label, index);
         });
 
-        // 初始化快速选择
+        // 初始化快速選擇
         this.setupQuickRangeToggles();
     }
 
     /**
-     * 设置日期按钮
+     * 設置日期按鈕
      */
     private setupDateButton(label: cc.Label, index: number) {
         if (!label.node.getComponent(cc.Button)) {
             const btn = label.node.addComponent(cc.Button);
             btn.transition = cc.Button.Transition.NONE;
         }
+        // 添加新的事件監聽器
         label.node.on(cc.Node.EventType.TOUCH_END, () => this.onClickDate(index), this);
     }
 
     /**
-     * 设置快速选择开关
+     * 設置快速選擇開關
      */
     private setupQuickRangeToggles() {
         const container = this.ToggleContainer_SelectTimeRange;
@@ -158,64 +115,95 @@ export default class DateInstance extends cc.Component {
     }
 
     /**
-     * 设置选中的日期
+     * 設置選中的日期
      */
     private setSelectedDates(start: number, end: number, state: number) {
         this.selectedStartDate = new Date(start);
         this.selectedEndDate = new Date(end);
-        const baseDate = state === 0 ? this.selectedStartDate : this.selectedEndDate;
-        this.currentYear = baseDate.getFullYear();
-        this.currentMonth = baseDate.getMonth();
+        this.currentState = state;
     }
 
     /**
-     * 更新日历显示（主要方法）
+     * 更新日曆顯示
      */
     private updateCalendar() {
-        const monthInfo = this.getMonthInfo();
-        this.updateYearMonthLabel();
         this.hideSelectionMarkers();
-        this.updateDateCells(monthInfo);
-        this.updateNavButtons();
-        this.updateSelectBGs();
-    }
-
-    /**
-     * 获取月份信息（减少重复计算）
-     */
-    private getMonthInfo() {
-        const firstDay = new Date(this.currentYear, this.currentMonth, 1);
-        const firstWeekDay = firstDay.getDay();
-        const daysInMonth = new Date(this.currentYear, this.currentMonth + 1, 0).getDate();
         
-        // 上个月信息
-        const prevMonth = this.currentMonth === 0 ? 11 : this.currentMonth - 1;
-        const prevYear = this.currentMonth === 0 ? this.currentYear - 1 : this.currentYear;
-        const daysInPrevMonth = new Date(prevYear, prevMonth + 1, 0).getDate();
-        
-        // 下个月信息
-        const nextMonth = this.currentMonth === 11 ? 0 : this.currentMonth + 1;
-        const nextYear = this.currentMonth === 11 ? this.currentYear + 1 : this.currentYear;
-
-        return {
-            firstWeekDay, daysInMonth, daysInPrevMonth,
-            prevMonth, prevYear, nextMonth, nextYear
-        };
-    }
-
-    /**
-     * 更新年月标签
-     */
-    private updateYearMonthLabel() {
+        // 更新月份顯示
         const monthNames = [
             "January", "February", "March", "April", "May", "June",
             "July", "August", "September", "October", "November", "December"
         ];
-        this.Label_YearMonth.string = monthNames[this.currentMonth];
+        if (this.Label_YearMonth) {
+            this.Label_YearMonth.string = monthNames[this.today.getMonth()];
+        }
+        
+        // 計算結束日期（當天）和它的星期
+        const endDate = new Date(this.today);
+        const endDayOfWeek = endDate.getDay(); // 0 = Sunday, 6 = Saturday
+        
+        // 計算需要顯示的最後一個位置（確保當天在正確的星期幾位置）
+        const daysToAdd = 6 - endDayOfWeek; // 補足到週六
+        endDate.setDate(endDate.getDate() + daysToAdd);
+        
+        // 計算起始日期（往前41天，總共顯示42天）
+        const startDate = new Date(endDate);
+        startDate.setDate(endDate.getDate() - 41);
+
+        // 生成42天的日期陣列
+        const datesToShow: Date[] = [];
+        for (let i = 0; i < 42; i++) {
+            const d = new Date(startDate);
+            d.setDate(startDate.getDate() + i);
+            datesToShow.push(d);
+        }
+
+        // 更新日期格子
+        this.dates.forEach((label, index) => {
+            if (!label || !label.node) return;
+
+            const date = datesToShow[index];
+            const isSelectable = this.isDateSelectable(date);
+            
+            // 更新日期顯示
+            this.updateSingleDateCell(index, {
+                actualDate: date,
+                dayNumber: date.getDate(),
+                isSelectable: isSelectable
+            });
+
+            // 設置節點狀態
+            label.node.active = true;
+            
+            // 更新按鈕狀態
+            const button = label.node.getComponent(cc.Button);
+            if (button) {
+                button.interactable = isSelectable;
+                button.enableAutoGrayEffect = true;
+            }
+        });
+
+        this.updateSelectBGs();
     }
 
     /**
-     * 隐藏选择标记
+     * 檢查日期是否可選擇（最近30天內）
+     */
+    private isDateSelectable(date: Date): boolean {
+        if (!date) return false;
+        
+        const minSelectableDate = new Date(this.today);
+        minSelectableDate.setDate(this.today.getDate() - 29); // 可選範圍：今天往前29天（共30天）
+        minSelectableDate.setHours(0, 0, 0, 0);
+        
+        const maxSelectableDate = new Date(this.today);
+        maxSelectableDate.setHours(23, 59, 59, 999);
+        
+        return date >= minSelectableDate && date <= maxSelectableDate;
+    }
+
+    /**
+     * 隱藏選擇標記
      */
     private hideSelectionMarkers() {
         this.Node_select_start.active = false;
@@ -223,83 +211,29 @@ export default class DateInstance extends cc.Component {
     }
 
     /**
-     * 更新日期格子
-     */
-    private updateDateCells(monthInfo: any) {
-        for (let i = 0; i < this.dates.length; i++) {
-            const cellInfo = this.calculateCellInfo(i, monthInfo);
-            this.updateSingleDateCell(i, cellInfo);
-        }
-    }
-
-    /**
-     * 计算单个格子信息
-     */
-    private calculateCellInfo(index: number, monthInfo: any) {
-        const { firstWeekDay, daysInMonth, daysInPrevMonth, prevMonth, prevYear, nextMonth, nextYear } = monthInfo;
-        
-        let actualDate: Date;
-        let dayNumber: number;
-        let isCurrentMonth: boolean;
-
-        if (index < firstWeekDay) {
-            // 上个月
-            dayNumber = daysInPrevMonth - (firstWeekDay - index - 1);
-            actualDate = new Date(prevYear, prevMonth, dayNumber);
-            isCurrentMonth = false;
-        } else if (index < firstWeekDay + daysInMonth) {
-            // 当月
-            dayNumber = index - firstWeekDay + 1;
-            actualDate = new Date(this.currentYear, this.currentMonth, dayNumber);
-            isCurrentMonth = true;
-        } else {
-            // 下个月
-            dayNumber = index - firstWeekDay - daysInMonth + 1;
-            actualDate = new Date(nextYear, nextMonth, dayNumber);
-            isCurrentMonth = false;
-        }
-
-        return { actualDate, dayNumber, isCurrentMonth };
-    }
-
-    /**
-     * 更新单个日期格子
+     * 更新單個日期格子
      */
     private updateSingleDateCell(index: number, cellInfo: any) {
-        const { actualDate, dayNumber, isCurrentMonth } = cellInfo;
+        const { actualDate, dayNumber, isSelectable } = cellInfo;
         const label = this.dates[index];
-        const isSelectable = this.isDateSelectable(actualDate);
+        if (!label || !label.node) return;
 
-        if (!isSelectable) {
-            this.setUnselectableCell(label, dayNumber);
-            return;
-        }
-
-        this.setSelectableCell(label, dayNumber, actualDate, isCurrentMonth, index);
-    }
-
-    /**
-     * 设置不可选择的格子
-     */
-    private setUnselectableCell(label: cc.Label, dayNumber: number) {
+        // 設置日期文字
         label.string = dayNumber.toString();
-        label.node.color = this.dateColors[4];
-        label.node.getComponent(cc.Button).interactable = false;
-    }
-
-    /**
-     * 设置可选择的格子
-     */
-    private setSelectableCell(label: cc.Label, dayNumber: number, actualDate: Date, isCurrentMonth: boolean, index: number) {
-        label.string = dayNumber.toString();
-        label.node.getComponent(cc.Button).interactable = true;
         
+        // 設置按鈕狀態
+        const button = label.node.getComponent(cc.Button);
+        if (button) {
+            button.interactable = isSelectable;
+        }
+        
+        // 應用選擇樣式
         const selectionType = this.getSelectionType(actualDate);
-        this.applySelectionStyle(label, selectionType, isCurrentMonth, index);
+        this.applySelectionStyle(label, selectionType, isSelectable);
     }
 
     /**
-     * 获取选择类型
+     * 獲取選擇類型
      */
     private getSelectionType(actualDate: Date): 'start' | 'end' | 'both' | 'between' | 'normal' {
         const isStart = this.isSameDate(actualDate, this.selectedStartDate);
@@ -315,9 +249,9 @@ export default class DateInstance extends cc.Component {
     }
 
     /**
-     * 应用选择样式
+     * 應用選擇樣式
      */
-    private applySelectionStyle(label: cc.Label, type: string, isCurrentMonth: boolean, index: number) {
+    private applySelectionStyle(label: cc.Label, type: string, isSelectable: boolean) {
         const node = label.node;
         
         switch (type) {
@@ -336,62 +270,12 @@ export default class DateInstance extends cc.Component {
                 node.color = this.dateColors[3];
                 break;
             default:
-                node.color = this.dateColors[isCurrentMonth ? 0 : 1];
+                node.color = this.dateColors[isSelectable ? 0 : 1];
         }
     }
 
     /**
-     * 更新导航按钮状态
-     */
-    private updateNavButtons() {
-        // this.Btn_PreviousYear.active = this.canNavigateToYear(this.currentYear - 1);
-        // this.Btn_NextYear.active = this.canNavigateToYear(this.currentYear + 1);
-        this.Btn_PreviousMonth.active = this.canNavigateToMonth(this.currentYear, this.currentMonth - 1);
-        this.Btn_NextMonth.active = this.canNavigateToMonth(this.currentYear, this.currentMonth + 1);
-    }
-
-    /**
-     * 检查是否可以导航到指定年份
-     */
-    private canNavigateToYear(year: number): boolean {
-        if (year < this.minDate.getFullYear() || year > this.today.getFullYear()) return false;
-        if (year === this.today.getFullYear() && this.currentMonth > this.today.getMonth()) return false;
-        return true;
-    }
-
-    /**
-     * 检查是否可以导航到指定月份
-     */
-    private canNavigateToMonth(year: number, month: number): boolean {
-        const targetDate = new Date(year, month, 1);
-        if (targetDate < this.minDate) return false;
-        if (year === this.today.getFullYear() && month > this.today.getMonth()) return false;
-        return true;
-    }
-
-    /**
-     * 导航月份
-     */
-    private navigateMonth(direction: number) {
-        this.currentMonth += direction;
-        if (this.currentMonth < 0) {
-            this.currentMonth = 11;
-            this.currentYear--;
-        } else if (this.currentMonth > 11) {
-            this.currentMonth = 0;
-            this.currentYear++;
-        }
-    }
-
-    /**
-     * 检查日期是否可选择
-     */
-    private isDateSelectable(date: Date): boolean {
-        return date >= this.minDate && date <= this.today;
-    }
-
-    /**
-     * 比较两个日期是否相同
+     * 比較兩個日期是否相同
      */
     private isSameDate(a: Date, b: Date): boolean {
         return a && b && 
@@ -401,141 +285,135 @@ export default class DateInstance extends cc.Component {
     }
 
     /**
-     * 处理日期点击
+     * 處理日期點擊
      */
     private onClickDate(index: number) {
         const label = this.dates[index];
-        const day = parseInt(label.string);
+        if (!label || !label.node || !label.node.getComponent(cc.Button).interactable) {
+            return;
+        }
+
+        // 計算點擊的日期
+        const endDate = new Date(this.today);
+        const endDayOfWeek = endDate.getDay();
+        const daysToAdd = 6 - endDayOfWeek;
+        endDate.setDate(endDate.getDate() + daysToAdd);
         
-        if (isNaN(day) || !label.node.getComponent(cc.Button).interactable) return;
+        const clickedDate = new Date(endDate);
+        clickedDate.setDate(endDate.getDate() - (41 - index));
 
-        const clickedDate = this.calculateClickedDate(index, day);
-        if (!this.isDateSelectable(clickedDate)) return;
+        // 檢查日期是否在可選範圍內
+        if (!this.isDateSelectable(clickedDate)) {
+            return;
+        }
 
-        this.updateSelectedDates(clickedDate);
+        // 更新選擇的日期
+        if (this.currentState === 0) {
+            // 選擇開始日期
+            this.selectedStartDate = new Date(clickedDate);
+            if (!this.selectedEndDate || clickedDate > this.selectedEndDate) {
+                this.selectedEndDate = new Date(clickedDate);
+            }
+        } else {
+            // 選擇結束日期
+            this.selectedEndDate = new Date(clickedDate);
+            if (!this.selectedStartDate || clickedDate < this.selectedStartDate) {
+                this.selectedStartDate = new Date(clickedDate);
+            }
+        }
+
+        // 更新日曆顯示
         this.updateCalendar();
     }
 
     /**
-     * 计算点击的日期
-     */
-    private calculateClickedDate(index: number, day: number): Date {
-        const monthInfo = this.getMonthInfo();
-        const { firstWeekDay, daysInMonth, prevMonth, prevYear, nextMonth, nextYear } = monthInfo;
-
-        if (index < firstWeekDay) {
-            return new Date(prevYear, prevMonth, day);
-        } else if (index < firstWeekDay + daysInMonth) {
-            return new Date(this.currentYear, this.currentMonth, day);
-        } else {
-            return new Date(nextYear, nextMonth, day);
-        }
-    }
-
-    /**
-     * 更新选中的日期
-     */
-    private updateSelectedDates(clickedDate: Date) {
-        if (this.currentState === 0) {
-            this.selectedStartDate = clickedDate;
-            if (!this.selectedEndDate || this.selectedEndDate < clickedDate) {
-                this.selectedEndDate = clickedDate;
-            }
-        } else {
-            this.selectedEndDate = clickedDate;
-            if (!this.selectedStartDate || this.selectedStartDate > clickedDate) {
-                this.selectedStartDate = clickedDate;
-            }
-        }
-    }
-
-    /**
-     * 设置快速选择范围
+     * 設置快速選擇範圍
      */
     private setQuickRange(days: number) {
-        const end = new Date();
-        const start = new Date();
-        start.setDate(end.getDate() - days + 1);
+        const end = new Date(this.today);
+        end.setHours(23, 59, 59, 999);
+        
+        const start = new Date(this.today);
+        start.setDate(end.getDate() - (days - 1));
+        start.setHours(0, 0, 0, 0);
         
         this.selectedStartDate = start;
         this.selectedEndDate = end;
-        this.currentYear = end.getFullYear();
-        this.currentMonth = end.getMonth();
         this.updateCalendar();
     }
 
     /**
-     * 更新选择背景（优化版本）
+     * 更新選擇背景
      */
     private updateSelectBGs() {
-        // 隐藏所有背景
+        // 隱藏所有背景
         this.selectBGs.forEach(bg => bg && (bg.active = false));
 
         if (!this.hasValidSelection()) return;
 
-        const monthInfo = this.getMonthInfo();
-        
-        // 按行处理背景
+        // 按行處理背景
         for (let row = 0; row < 6; row++) {
-            this.updateRowBackground(row, monthInfo);
+            this.updateRowBackground(row);
         }
     }
 
     /**
-     * 检查是否有有效选择
+     * 檢查是否有有效選擇
      */
     private hasValidSelection(): boolean {
         return this.selectedStartDate && this.selectedEndDate && 
-               this.selectedStartDate < this.selectedEndDate;
+               this.selectedStartDate <= this.selectedEndDate;
     }
 
     /**
-     * 更新单行背景
+     * 更新單行背景
      */
-    private updateRowBackground(row: number, monthInfo: any) {
-        const rowRange = this.getRowSelectionRange(row, monthInfo);
-        if (!rowRange) return;
-
-        const { start, end } = rowRange;
-        const startNode = this.dates[start].node;
-        const endNode = this.dates[end].node;
-        
-        // 计算背景属性
-        const leftBoundary = startNode.x - 15;
-        const rightBoundary = endNode.x + 15;
-        const centerX = (leftBoundary + rightBoundary) / 2;
-        const bgWidth = rightBoundary - leftBoundary;
-        
-        // 设置背景
-        const bg = this.selectBGs[row];
-        bg.active = true;
-        bg.setPosition(centerX, startNode.y);
-        bg.width = bgWidth;
-    }
-
-    /**
-     * 获取行选择范围
-     */
-    private getRowSelectionRange(row: number, monthInfo: any) {
+    private updateRowBackground(row: number) {
         const rowStart = row * 7;
         const rowEnd = rowStart + 6;
+        
         let selectionStart = -1;
         let selectionEnd = -1;
 
-        for (let i = rowStart; i <= rowEnd; i++) {
-            const label = this.dates[i];
-            const day = parseInt(label.string);
-            
-            if (isNaN(day) || !label.node.getComponent(cc.Button).interactable) continue;
+        // 計算結束日期
+        const endDate = new Date(this.today);
+        const endDayOfWeek = endDate.getDay();
+        const daysToAdd = 6 - endDayOfWeek;
+        endDate.setDate(endDate.getDate() + daysToAdd);
 
-            const actualDate = this.calculateClickedDate(i, day);
-            if (actualDate >= this.selectedStartDate && actualDate <= this.selectedEndDate) {
+        // 確保開始和結束日期包含完整的時間
+        const startTime = new Date(this.selectedStartDate);
+        startTime.setHours(0, 0, 0, 0);
+        const endTime = new Date(this.selectedEndDate);
+        endTime.setHours(23, 59, 59, 999);
+
+        for (let i = rowStart; i <= rowEnd; i++) {
+            const date = new Date(endDate);
+            date.setDate(endDate.getDate() - (41 - i));
+            // 設置為當天的開始時間，確保日期比較準確
+            date.setHours(0, 0, 0, 0);
+
+            if (date >= startTime && date <= endTime) {
                 if (selectionStart === -1) selectionStart = i;
                 selectionEnd = i;
             }
         }
 
-        return selectionStart !== -1 && selectionEnd !== -1 ? 
-               { start: selectionStart, end: selectionEnd } : null;
+        if (selectionStart !== -1 && selectionEnd !== -1) {
+            const startNode = this.dates[selectionStart].node;
+            const endNode = this.dates[selectionEnd].node;
+            
+            const leftBoundary = startNode.x - 15;
+            const rightBoundary = endNode.x + 15;
+            const centerX = (leftBoundary + rightBoundary) / 2;
+            const bgWidth = rightBoundary - leftBoundary;
+            
+            const bg = this.selectBGs[row];
+            if (bg) {
+                bg.active = true;
+                bg.setPosition(centerX, startNode.y);
+                bg.width = bgWidth;
+            }
+        }
     }
 }

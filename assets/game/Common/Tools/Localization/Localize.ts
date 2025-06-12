@@ -343,8 +343,7 @@ export default class Localize extends cc.Component {
                 editBox.textLabel.fontFamily = fontFamily;
             }
         } else {
-            console.error("key = " + this.localizeTextKey + "node = " + this.node.name);
-            console.error("require a label or rich text to show localize text.");
+
         }
 
         if (this.aroundPics) {
@@ -444,7 +443,7 @@ export default class Localize extends cc.Component {
 
         let spine: sp.Skeleton = this.node.getComponent(sp.Skeleton);
         if (!spine) {
-            console.error("請確認此物件為 spine");
+
             return;
         }
 
@@ -479,19 +478,18 @@ export default class Localize extends cc.Component {
     /** 依照 animation 控制 spine 多語系的時候使用此方法替代直接使用 spine 的 setAnimation */
     public playI18NSpine(trackIndex: number, animation: string, loop: boolean): spine.TrackEntry {
         if (this.localizeType !== LOCALIZE_TYPE.SPINE_I18N_BASE_ON_ANIMATION) {
-            console.error("此物件非基於 Animation 操控多語系的 Spine");
+
             return;
         }
 
         let spine: sp.Skeleton = this.node.getComponent(sp.Skeleton);
         if (!spine) {
-            console.error("請確認此物件為 Spine");
+
             return;
         }
 
         if (!this.spineAnimationList.includes(animation)) {
-            console.warn("請輸入正確 Animation Name，多語系情況在播放時請忽略 '_語系' 再傳入此方法");
-            console.warn("name_zh-sc 請輸入 name 即可");
+
             return;
         }
         let language = LocalizationManager.language;

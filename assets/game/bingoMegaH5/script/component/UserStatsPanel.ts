@@ -55,8 +55,10 @@ export default class UserStatsPanel extends MegaComponent {
      * 點擊事件處理，開啟 Bingo Jackpot 排行榜視窗並傳入資料
      */
     public OpenBingoJackpotWindow(): void {
-        const leaderboardData = this.data.getLeaderboardPageData();
-        PopupManager.showPopup(PopupName.LeaderboardPage, leaderboardData);
+        CommonTool.executeWithLock(this, () => {  
+            const leaderboardData = this.data.getLeaderboardPageData();
+            PopupManager.showPopup(PopupName.LeaderboardPage, leaderboardData);
+        }, 0.5, "OpenBingoJackpotWindow");
     }
 
     /**

@@ -1,19 +1,11 @@
-import { HttpServer } from "../../../bingoMegaH5/script/HttpServer";
 import { CommonTool } from "../../Tools/CommonTool";
-import { PopupName } from "../../Tools/PopupSystem/PopupConfig";
-import PopupManager from "../../Tools/PopupSystem/PopupManager";
-import { CardMega } from "../card/CardMega";
 import { CARD_GAMEPLAY, CARD_STATUS, GAME_STATUS, CARD_CONTENT } from "../CommonData";
 import { MegaDataStore } from "./MegaDataStore";
+import { MathUtils } from "../../Tools/MathUtils";
 
 export default class PageManager {
     
     constructor(private dataStore: MegaDataStore) {
-    }
-
-    /** 取得下注頁面相關資訊 */
-    public showCardPurchasePage() {
-        return (this.dataStore.ownedCards.length == 0)
     }
 
     /** 取得下注頁面相關資訊 */
@@ -105,33 +97,50 @@ export default class PageManager {
                     BottomBtnState = 2;
             }
         }
+        
+        // 取得已購卡頁面的卡片資訊 (根據中獎金額>預中獎金額>原生排序)
+        const ownedCards = this.dataStore.ownedCards;
+        const firstCard = ownedCards[0];
+        
+        // 決定最終的卡片數據：如果沒有卡片或第一張卡不是NORMAL狀態，使用原始數組；否則使用排序後的數組
+        const cardData = (!firstCard || firstCard.getCardState() !== CARD_STATUS.NORMAL) 
+            ? ownedCards 
+            : this.sortCardsByWinAmount(ownedCards);
 
-        // 取得已購卡頁面的卡片資訊 (根據中獎金額>預中獎金額排序>原生排序)
-        const cardData = this.dataStore.ownedCards.map((card, index) => ({
+        return {
+            pendingWinnerItem: PreItems,                    // 即將中獎內容列表
+            BottomBtnState: BottomBtnState,                 // 下方顯示列表
+            totalWin : totalWin,                            // 總贏分
+            cardData: cardData,
+        };
+    }
+    
+    /**
+     * 按照中獎金額排序卡片
+     * 排序規則：中獎金額高 > 預中獎金額高 > 保持原順序
+     */
+    private sortCardsByWinAmount(cards: any[]): any[] {
+        const cardDataWithStats = cards.map((card, index) => ({
             card,
             index,
             totalWin: card.getTotalWin(),
             preWin: card.getPreTotalWin(),
         }));
-        cardData.sort((a, b) => {
+        
+        cardDataWithStats.sort((a, b) => {
+            // 優先按中獎金額排序
             if (b.totalWin !== a.totalWin) {
-                return b.totalWin - a.totalWin; // 中獎金額高的排前面
+                return b.totalWin - a.totalWin;
             }
+            // 其次按預中獎金額排序
             if (b.preWin !== a.preWin) {
-                return b.preWin - a.preWin;     // 預中獎金額高的排前面
+                return b.preWin - a.preWin;
             }
-            return a.index - b.index;           // 保留原本順序
+            // 最後保持原始順序
+            return a.index - b.index;
         });
-
-
-        let d = {
-            pendingWinnerItem: PreItems,                    // 即將中獎內容列表
-            BottomBtnState: BottomBtnState,                 // 下方顯示列表
-            totalWin : totalWin,                            // 總贏分
-            cardData: (cardData.map(entry => entry.card)),
-        }
-
-        return d;
+        
+        return cardDataWithStats.map(entry => entry.card);
     }
 
     /** 44球結算 extra patterns獎勵事件 */
@@ -167,6 +176,7 @@ export default class PageManager {
     public getDIYEditPageData() {
         let ballDisplayInfo = this.getBallDisplayInfo();
         let data = {
+            id : this.dataStore.editableDIYID,
             ballDisplayInfo : ballDisplayInfo,    // 球號中獎資訊
             editCard: this.dataStore.editableDIYCard,                     // 要編輯的卡片資訊
             hotBalls: this.dataStore.hotBallList,                        // 熱卡
@@ -217,8 +227,12 @@ export default class PageManager {
             if (max === min) {
                 ball.ratio = 1; // 全部相同則為滿條
             } else {
-                // 線性比例映射到 0.1 ~ 1 之間
-                ball.ratio = 0.1 + 0.9 * ((ball.winCount - min) / (max - min));
+                // 線性比例映射到 0.1 ~ 1 之間，使用 MathUtils 避免浮點數精度問題
+                const dividend = MathUtils.minus(ball.winCount, min);
+                const divisor = MathUtils.minus(max, min);
+                const baseRatio = MathUtils.divide(dividend, divisor);
+                const scaledRatio = MathUtils.times(baseRatio, 0.9);
+                ball.ratio = MathUtils.plus(0.1, scaledRatio);
             }
         }
     }
@@ -258,7 +272,8 @@ export default class PageManager {
 
         let data = {
             DIYmaxCard: this.dataStore.maxDIYCardCount,      // 同時收藏最多DIY卡片數量
-            listData: listData,               // UI使用卡片
+            listData: listData,                              // UI使用卡片
+            DIYCardPageinPersonalCenter: this.dataStore.DIYCardPageinPersonalCenter,
         };
         return data;
     }

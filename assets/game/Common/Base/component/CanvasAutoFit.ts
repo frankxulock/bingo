@@ -94,6 +94,9 @@ export default class CanvasAutoFit extends cc.Component {
 
     /** UI 重新排版 */
     private relayoutUI() {
-        EventManager.getInstance().emit(GameStateUpdate.StateUpdate_Canvas);
+        // 等待解析度變更換幣後再執行刷新排版的功能
+        this.scheduleOnce(() => {
+            EventManager.getInstance().emit(GameStateUpdate.StateUpdate_Canvas);
+        }, 0);
     }
 }

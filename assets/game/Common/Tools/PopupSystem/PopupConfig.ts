@@ -1,5 +1,12 @@
 import { PopupAnimationType } from "./PopupAnimationComponent";
 
+/** 彈窗類型 */
+export enum PopupType {
+    None,
+    LocalPopup,     // 局部彈窗
+    GlobalPopup,    // 全視窗彈窗
+}
+
 export enum PopupName {
     ConfirmPurchasePage =   "ConfirmPurchasePage",
     ResultPage =            "ResultPage",
@@ -16,6 +23,7 @@ export enum PopupName {
     BalanceTooLowPage=      "BalanceTooLowPage",
     PurchaseUpdatePage=     "PurchaseUpdatePage",
     HelpCenterPage=         "HelpCenterPage",
+    DIYCardDeletePage=      "DIYCardDeletePage",
 }
 
 export const PopupPrefabPath: Record<PopupName, string> = {
@@ -34,6 +42,7 @@ export const PopupPrefabPath: Record<PopupName, string> = {
     [PopupName.BalanceTooLowPage]:          "prefab/BalanceTooLowPage",
     [PopupName.PurchaseUpdatePage]:         "prefab/PurchaseUpdatePage",
     [PopupName.HelpCenterPage]:             "prefab/HelpCenterPage",
+    [PopupName.DIYCardDeletePage]:          "prefab/DIYCardDeletePage",
 };
 
 // 動畫配置
@@ -53,6 +62,7 @@ export const ShowPopupAnimationConfig: Record<PopupName, PopupAnimationType> = {
     [PopupName.BalanceTooLowPage]:      PopupAnimationType.ScaleIn,
     [PopupName.PurchaseUpdatePage]:     PopupAnimationType.ScaleIn,
     [PopupName.HelpCenterPage]:         PopupAnimationType.SlideFromLeft,
+    [PopupName.DIYCardDeletePage]:      PopupAnimationType.SlideFromBottom,
 };
 
 export const ClosePopupAnimationConfig: Record<PopupName, PopupAnimationType> = {
@@ -71,4 +81,24 @@ export const ClosePopupAnimationConfig: Record<PopupName, PopupAnimationType> = 
     [PopupName.BalanceTooLowPage]:      PopupAnimationType.ScaleIn,
     [PopupName.PurchaseUpdatePage]:     PopupAnimationType.ScaleIn,
     [PopupName.HelpCenterPage]:         PopupAnimationType.SlideFromLeft,
+    [PopupName.DIYCardDeletePage]:      PopupAnimationType.SlideFromBottom,
+}
+
+export const PopupTypeConfig: Record<PopupName, PopupType> = {
+    [PopupName.ConfirmPurchasePage]:    PopupType.LocalPopup,
+    [PopupName.ResultPage]:             PopupType.LocalPopup,
+    [PopupName.RewardPopupPage]:        PopupType.LocalPopup,
+    [PopupName.DIYCardSelectionPage]:   PopupType.LocalPopup,
+    [PopupName.DIYEditPage]:            PopupType.GlobalPopup,
+    [PopupName.CardPurchasePopupPage]:  PopupType.LocalPopup,
+    [PopupName.StreamerInfoPage]:       PopupType.LocalPopup,
+    [PopupName.AllBallNumbersPage]:     PopupType.LocalPopup,
+    [PopupName.LeaderboardPage]:        PopupType.LocalPopup,
+    [PopupName.ChatPage]:               PopupType.LocalPopup,
+    [PopupName.PersonalCenterPage]:     PopupType.LocalPopup,
+    [PopupName.GameRecordPage]:         PopupType.LocalPopup,
+    [PopupName.BalanceTooLowPage]:      PopupType.LocalPopup,
+    [PopupName.PurchaseUpdatePage]:     PopupType.LocalPopup,
+    [PopupName.HelpCenterPage]:         PopupType.LocalPopup,
+    [PopupName.DIYCardDeletePage]:      PopupType.LocalPopup,
 }

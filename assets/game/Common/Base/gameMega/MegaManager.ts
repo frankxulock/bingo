@@ -5,11 +5,12 @@ import { CommonTool } from "../../Tools/CommonTool";
 import { PopupName } from "../../Tools/PopupSystem/PopupConfig";
 import PopupManager from "../../Tools/PopupSystem/PopupManager";
 import ToastManager from "../../Tools/Toast/ToastManager";
-import { CardMega } from "../card/CardMega";
+import { MathUtils } from "../../Tools/MathUtils";
 import { CARD_CONTENT, CARD_GAMEPLAY, CARD_STATUS, GAME_STATUS } from "../CommonData";
 import CardNumberManager from "./CardNumberManager";
 import { MegaDataStore } from "./MegaDataStore";
 import PageManager from "./PageManager";
+import { CardMega } from "../card/CardMega";
 const { ccclass } = cc._decorator;
 
 @ccclass
@@ -130,7 +131,8 @@ export default class MegaManager extends BaseDataManager {
         let showprizeList = [];
         this.dataStore.prizeList.forEach(item => {
             let multiples = (this.dataStore.multiples == 0) ? 5 : this.dataStore.multiples;
-            showprizeList.push(item * multiples);
+            // 使用 MathUtils 精確乘法避免浮點數精度問題
+            showprizeList.push(MathUtils.times(item, multiples));
         })
         return showprizeList;
     }
@@ -152,6 +154,11 @@ export default class MegaManager extends BaseDataManager {
     /** 取得視頻地址 */
     public getVideoUrls() {
         return this.dataStore.videoUrls;
+    }
+
+    /** 目前購買實際卡片數量是否為 0 */
+    public ActualNumberofCardsPurchased() {
+        return (this.dataStore.ownedCards.length == 0)
     }
 
     public getCardsToBuy = () => this.dataStore.getCardsToBuy();
@@ -205,7 +212,8 @@ export default class MegaManager extends BaseDataManager {
 
     /** 設定需要編輯的DIY卡片資訊 */
     public OpenDIYEditCard(data) {
-        this.dataStore.editableDIYCard = data;
+        this.dataStore.editableDIYCard = data.data;
+        this.dataStore.editableDIYID = data.id;
         HttpServer.DIYCount()
         .then(results => {
             for (const key in results.data) {
@@ -215,7 +223,6 @@ export default class MegaManager extends BaseDataManager {
                     this.dataStore.ballHitCountMap.set(numKey, value);
                 }
             }
-            console.warn(this.dataStore.ballHitCountMap);
             PopupManager.showPopup(PopupName.DIYEditPage, this.pageManager.getDIYEditPageData());
         });
     }
@@ -228,8 +235,6 @@ export default class MegaManager extends BaseDataManager {
     //#endregion
 
     //#region 不同頁面的業務邏輯   
-    /** 顯示購卡頁面 */
-    public showCardPurchasePage = () => this.pageManager.showCardPurchasePage();
     /** 取得下注頁面相關資訊 */
     public getCardPurchasePageData = () => this.pageManager.getCardPurchasePageData();
     /** 取得確認頁面相關資訊 */
@@ -248,8 +253,6 @@ export default class MegaManager extends BaseDataManager {
     public getAvatarPageData = ()=> this.pageManager.getAvatarPageData();
     /** DIY旋擇頁面資訊 */
     public getDIYCardSelectionPageData = ()=> this.pageManager.getDIYCardSelectionPageData();
-    /** DIY編輯頁面資訊 */
-    public getDIYEditPageData = () => this.pageManager.getDIYEditPageData();
     /** 排行榜資訊頁面 */
     public getLeaderboardPageData = () => this.pageManager.getLeaderboardPageData();
     /** 聊天與送禮頁面資訊 */
@@ -261,17 +264,18 @@ export default class MegaManager extends BaseDataManager {
     public BetCheck(isChecked) { 
         if (this.CheckOpenDIYCardSelectionPage() && isChecked) {
             this.OpenDIYCardSelectionPage();
-            return;
+            return false;
         }
         if(this.getCardsToBuy() == 0){
-            ToastManager.showToast("卡片數量不能為空");
-            return;
+            ToastManager.showToast("Card quantity cannot be empty.");
+            return false;
         }
         if ((this.getCoin() - this.getBuyTotalCard()) < 0) {
             PopupManager.showPopup(PopupName.BalanceTooLowPage);
-            return;
+            return false;
         }
         this.SendConfirmPurchase();
+        return true;
     }
 
     /** 發送確認購卡請求（亂數卡片 + DIY卡片統一處理） */
@@ -363,7 +367,7 @@ export default class MegaManager extends BaseDataManager {
         .then(results => {
             this.dataStore.createCardServer(results);
             // 文字提示
-            let ToastStr = (this.dataStore.selectedCardContent === CARD_CONTENT.NORMAL) ? "随机卡片购买成功" : "DIY卡片购买成功";
+            let ToastStr = (this.dataStore.selectedCardContent === CARD_CONTENT.NORMAL) ? "Random card purchased successfully." : "DIY card purchased successfully.";
             ToastManager.showToast(ToastStr);
 
             this.dataStore.confirmedPurchaseCards = [];
@@ -409,9 +413,9 @@ export default class MegaManager extends BaseDataManager {
         const diyIndex = this.dataStore.savedDIYCards.findIndex(card => card.getID() === data.id);
         if (diyIndex !== -1) {
             this.dataStore.savedDIYCards.splice(diyIndex, 1);
-            ToastManager.showToast("刪除OK");
+            ToastManager.showToast("Deleted successfully.");
         } else {
-            console.error("找不到要刪除的DIY卡片資訊 data => ", data);
+
         }
     }
 
@@ -474,24 +478,24 @@ export default class MegaManager extends BaseDataManager {
         this.dataStore.ownedCards = nextRoundCards;
         if(this.dataStore.ownedCards.length > 0){
             this.dataStore.currentBetAmount = 0;
-            this.dataStore.multiples = 0;
-            this.dataStore.selectedCardType = CARD_STATUS.NORMAL;
         }
         else{
             // 玩家當局有買卡才做購卡頁面數據重置行為
             if(HasTheCurrentPlayerPurchasedCard){
                 this.dataStore.cardsToBuy = 0;
                 this.dataStore.selectedPlayMode = 0;
+                this.dataStore.multiples = 0;
             }
         }
-
+        this.dataStore.selectedCardType = CARD_STATUS.NORMAL;
         this.setGameState(GAME_STATUS.BUY);
     }
 
     /** 下注結束 */
     public ReawtheNumbers() {
         // 下注結束後變更CardType 變成預購卡
-        this.dataStore.selectedCardType = CARD_STATUS.PREORDER;
+        if(this.dataStore.ownedCards.length == 0)
+            this.dataStore.selectedCardType = CARD_STATUS.PREORDER;
         this.dataStore.confirmedPurchaseCards.forEach((card)=>{
             card.setCardState(CARD_STATUS.PREORDER);
         });
@@ -539,9 +543,9 @@ export default class MegaManager extends BaseDataManager {
 
     /** 總結算事件 */
     public ResultComplete(data : any) {
-        console.warn("總結算事件 data : ", data);
         let PageData = {
             extral : data.extra,
+            jackpot: data.jackpot,
             const : this.dataStore.currentBetAmount,
         }
         PopupManager.showPopup(PopupName.ResultPage, PageData);
@@ -553,7 +557,8 @@ export default class MegaManager extends BaseDataManager {
     }
 
     /** 開啟DIY卡片頁面 */
-    public SendDIYCardSelectionPage(showSelectionPage : boolean) {
+    public SendDIYCardSelectionPage(showSelectionPage : boolean, DIYCardPageinPersonalCenter : boolean = false) {
+        this.dataStore.DIYCardPageinPersonalCenter = DIYCardPageinPersonalCenter;
         // 傳送請求給伺服器DIY卡片收藏內容
         HttpServer.DIYCardList()
         .then(results => {
@@ -619,7 +624,6 @@ export default class MegaManager extends BaseDataManager {
 
         HttpServer.InfoHistory(sevenDaysAgo.getTime(), endOfToday.getTime(), 4)
         .then(results => {
-            console.log("歷史紀錄數據 results ", results);
             PopupManager.showPopup(PopupName.GameRecordPage, results);
         });
     }

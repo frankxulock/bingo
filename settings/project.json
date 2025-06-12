@@ -3,26 +3,29 @@
     "default"
   ],
   "start-scene": "eb6246e2-529b-40ff-b032-10e81951144c",
-  "last-module-event-record-time": 1746697520773,
+  "last-module-event-record-time": 1749174441005,
   "collision-matrix": [
     [
       true
     ]
   ],
   "excluded-modules": [
-    "3D Physics/Builtin"
+    "3D Primitive",
+    "3D Physics/cannon.js",
+    "3D Physics/Builtin",
+    "3D Particle"
   ],
   "preview-port": 7456,
   "design-resolution-width": 390,
   "design-resolution-height": 800,
-  "fit-width": false,
+  "fit-width": true,
   "fit-height": true,
-  "use-project-simulator-setting": false,
+  "use-project-simulator-setting": true,
   "simulator-orientation": false,
   "use-customize-simulator": true,
   "simulator-resolution": {
-    "width": 960,
-    "height": 640
+    "width": 390,
+    "height": 800
   },
   "clear-simulator-cache": true,
   "facebook": {
@@ -34,5 +37,6 @@
     "audience": {
       "enable": false
     }
-  }
+  },
+  "assets-sort-type": "name"
 }

@@ -92,10 +92,10 @@ export default class StreamerInfoPage extends cc.Component implements IWindow {
         if (navigator.clipboard?.writeText) {
             navigator.clipboard.writeText(text).then(() => {
                 cc.log("✅ 拷貝成功:", text);
-                ToastManager.showToast("拷貝主播ID 成功");
+                ToastManager.showToast("Copied host ID successfully.");
             }).catch(err => {
                 cc.error("❌ 拷貝失敗:", err);
-                ToastManager.showToast("拷貝主播ID 失敗");
+                ToastManager.showToast("Failed to copy host ID.");
             });
         } else {
             // 備援方式
@@ -106,10 +106,10 @@ export default class StreamerInfoPage extends cc.Component implements IWindow {
             try {
                 document.execCommand("copy");
                 cc.log("✅ 備援拷貝成功:", text);
-                ToastManager.showToast("拷貝主播ID 成功");
+                ToastManager.showToast("Copied host ID successfully.");
             } catch (err) {
                 cc.error("❌ 備援拷貝失敗:", err);
-                ToastManager.showToast("拷貝主播ID 失敗");
+                ToastManager.showToast("Failed to copy host ID.");
             }
             document.body.removeChild(input);
         }

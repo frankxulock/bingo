@@ -644,8 +644,8 @@
     },
     "_contentSize": {
       "__type__": "cc.Size",
-      "width": 58.04,
-      "height": 22.68
+      "width": 51.75,
+      "height": 0
     },
     "_anchorPoint": {
       "__type__": "cc.Vec2",
@@ -694,7 +694,7 @@
         "__uuid__": "eca5d2f2-8ef6-41c2-bbe6-f9c79d09c432"
       }
     ],
-    "_srcBlendFactor": 770,
+    "_srcBlendFactor": 1,
     "_dstBlendFactor": 771,
     "_string": "Detalls",
     "_N$string": "Detalls",
@@ -702,7 +702,7 @@
     "_lineHeight": 0,
     "_enableWrapText": true,
     "_N$file": {
-      "__uuid__": "4aeb69e6-e793-435d-ae21-36d0229ec11b"
+      "__uuid__": "6ae5b396-936b-4529-84ea-63b6ffe931c9"
     },
     "_isSystemFontUsed": false,
     "_spacingX": 0,
@@ -875,7 +875,7 @@
         "__uuid__": "eca5d2f2-8ef6-41c2-bbe6-f9c79d09c432"
       }
     ],
-    "_srcBlendFactor": 770,
+    "_srcBlendFactor": 1,
     "_dstBlendFactor": 771,
     "_spriteFrame": {
       "__uuid__": "706e2b0a-e500-492c-9702-e59478a5d640"
@@ -1104,8 +1104,8 @@
     },
     "_contentSize": {
       "__type__": "cc.Size",
-      "width": 218.88,
-      "height": 20.16
+      "width": 194.44,
+      "height": 0
     },
     "_anchorPoint": {
       "__type__": "cc.Vec2",
@@ -1154,7 +1154,7 @@
         "__uuid__": "eca5d2f2-8ef6-41c2-bbe6-f9c79d09c432"
       }
     ],
-    "_srcBlendFactor": 770,
+    "_srcBlendFactor": 1,
     "_dstBlendFactor": 771,
     "_string": "Extra Pattern & Jackpot Balls",
     "_N$string": "Extra Pattern & Jackpot Balls",
@@ -1162,7 +1162,7 @@
     "_lineHeight": 0,
     "_enableWrapText": true,
     "_N$file": {
-      "__uuid__": "4aeb69e6-e793-435d-ae21-36d0229ec11b"
+      "__uuid__": "6ae5b396-936b-4529-84ea-63b6ffe931c9"
     },
     "_isSystemFontUsed": false,
     "_spacingX": 0,
@@ -3545,8 +3545,8 @@
     },
     "_contentSize": {
       "__type__": "cc.Size",
-      "width": 83.32,
-      "height": 20.16
+      "width": 74.22,
+      "height": 0
     },
     "_anchorPoint": {
       "__type__": "cc.Vec2",
@@ -3595,7 +3595,7 @@
         "__uuid__": "eca5d2f2-8ef6-41c2-bbe6-f9c79d09c432"
       }
     ],
-    "_srcBlendFactor": 770,
+    "_srcBlendFactor": 1,
     "_dstBlendFactor": 771,
     "_string": "Bingo Balls",
     "_N$string": "Bingo Balls",
@@ -3603,7 +3603,7 @@
     "_lineHeight": 0,
     "_enableWrapText": true,
     "_N$file": {
-      "__uuid__": "4aeb69e6-e793-435d-ae21-36d0229ec11b"
+      "__uuid__": "6ae5b396-936b-4529-84ea-63b6ffe931c9"
     },
     "_isSystemFontUsed": false,
     "_spacingX": 0,
@@ -4075,8 +4075,8 @@
     },
     "_contentSize": {
       "__type__": "cc.Size",
-      "width": 173.27,
-      "height": 15.12
+      "width": 160.83,
+      "height": 0
     },
     "_anchorPoint": {
       "__type__": "cc.Vec2",
@@ -4125,7 +4125,7 @@
         "__uuid__": "eca5d2f2-8ef6-41c2-bbe6-f9c79d09c432"
       }
     ],
-    "_srcBlendFactor": 770,
+    "_srcBlendFactor": 1,
     "_dstBlendFactor": 771,
     "_string": "Table Id : Mega 164314697310",
     "_N$string": "Table Id : Mega 164314697310",
@@ -4133,7 +4133,7 @@
     "_lineHeight": 0,
     "_enableWrapText": true,
     "_N$file": {
-      "__uuid__": "4aeb69e6-e793-435d-ae21-36d0229ec11b"
+      "__uuid__": "6ae5b396-936b-4529-84ea-63b6ffe931c9"
     },
     "_isSystemFontUsed": false,
     "_spacingX": 0,
@@ -4171,7 +4171,7 @@
         "__uuid__": "eca5d2f2-8ef6-41c2-bbe6-f9c79d09c432"
       }
     ],
-    "_srcBlendFactor": 770,
+    "_srcBlendFactor": 1,
     "_dstBlendFactor": 771,
     "_spriteFrame": {
       "__uuid__": "6e134f8d-1914-4a76-a7d7-9e8acd2553c6"

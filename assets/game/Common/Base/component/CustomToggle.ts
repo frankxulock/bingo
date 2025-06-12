@@ -1,25 +1,42 @@
-/**
- * CustomToggle 組合組件
- * 使用組合模式包含一個 cc.Toggle，添加擴展功能
- * 優點：保持 Toggle 原生功能完整性，同時添加自定義行為
- */
-@cc._decorator.ccclass
+const { ccclass, property } = cc._decorator;
+
+@ccclass
 export default class CustomToggle extends cc.Component {
+    @property(cc.Node)
+    selected: cc.Node = null;
 
-    /** 內部 Toggle 組件 */
-    @cc._decorator.property(cc.Toggle)
-    toggle: cc.Toggle = null;
-
-    /** 未選中時顯示的節點（選中時會隱藏） */
-    @cc._decorator.property(cc.Node)
+    @property(cc.Node)
     unselected: cc.Node = null;
 
-    protected onLoad(): void {
-        const toggle = this.node.getComponent(cc.Toggle);
-        toggle.node.on('toggle', this.onToggleChanged, this);
+    private _isChecked: boolean = false;
+
+    @property({ tooltip: "是否選中" })
+    get isChecked(): boolean {
+        return this._isChecked;
     }
 
-    onToggleChanged(toggle: cc.Toggle) {
-        this.unselected.active = !toggle.isChecked;
+    set isChecked(value: boolean) {
+        this._isChecked = value;
+        this.updateVisualState();
+    }
+
+    onLoad() {
+        this.updateVisualState();
+        this.node.on(cc.Node.EventType.TOUCH_END, this.onToggle, this);
+    }
+
+    onDestroy() {
+        this.node.off(cc.Node.EventType.TOUCH_END, this.onToggle, this);
+    }
+
+    private onToggle() {
+        this.isChecked = !this.isChecked;
+        // 派發 toggle 事件，帶上 isChecked 狀態
+        this.node.emit("toggle", this);
+    }
+
+    private updateVisualState() {
+        if (this.selected) this.selected.active = this._isChecked;
+        if (this.unselected) this.unselected.active = !this._isChecked;
     }
 }

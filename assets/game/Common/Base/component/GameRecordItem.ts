@@ -76,7 +76,7 @@ export default class GameRecordItem extends cc.Component {
             default:
                 this.Node_E.active = false;
                 this.Node_BJ.active = false;
-                console.error('未知游戏类型:', playName);
+
         }
     }
 

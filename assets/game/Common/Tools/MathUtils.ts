@@ -19,7 +19,7 @@ export class MathUtils {
         }
 
         if (!this.checkCalculateInput(num1) || !this.checkCalculateInput(num2)) {
-            console.warn(`illegal input`);
+
             return 0;
         }
 
@@ -34,7 +34,7 @@ export class MathUtils {
         }
 
         if (!this.checkCalculateInput(num1) || !this.checkCalculateInput(num2)) {
-            console.warn(`illegal input`);
+
             return 0;
         }
 
@@ -49,7 +49,7 @@ export class MathUtils {
         }
 
         if (!this.checkCalculateInput(num1) || !this.checkCalculateInput(num2)) {
-            console.warn(`illegal input`);
+
             return 0;
         }
 
@@ -72,7 +72,7 @@ export class MathUtils {
         }
 
         if (!this.checkCalculateInput(num1) || !this.checkCalculateInput(num2)) {
-            console.warn(`illegal input`);
+
             return 0;
         }
 
@@ -124,7 +124,7 @@ export class MathUtils {
 
         MathUtils.msgStack.push(msg);
         MathUtils.timer = setTimeout(() => {
-            console.warn(MathUtils.msgStack.join("\n----\n"));
+
             MathUtils.msgStack.length = 0;
         });
     }

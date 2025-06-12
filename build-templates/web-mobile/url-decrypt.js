@@ -6,9 +6,7 @@
 
 (function() {
   'use strict';
-  
-  console.log('🔐 开始初始化URL解密模块...');
-  
+
   /**
    * URL解密配置
    */
@@ -96,27 +94,21 @@
       
       function attemptDecryption() {
         attempts++;
-        console.log(`🔄 尝试解密URL参数 (第 ${attempts} 次)`);
         
         try {
           // 获取URL查询字符串
           const queryString = window.location.search.substring(1);
-          console.log('📥 获取到查询字符串:', queryString ? '有数据' : '无数据');
-          
+
           // 如果没有查询字符串，返回空对象
           if (!queryString || queryString.trim() === '') {
-            console.log('ℹ️ 没有URL参数需要解密');
             resolve({});
             return;
           }
           
           // 执行解密
-          const decryptedText = performDecryption(queryString, DECRYPT_CONFIG.secretKey);
-          console.log('🔓 解密成功，长度:', decryptedText.length);
-          
+          const decryptedText = performDecryption(queryString, DECRYPT_CONFIG.secretKey);   
           // 解析解密后的数据
           const decryptedData = parseQueryString(decryptedText);
-          console.log('✅ URL解密完成:', Object.keys(decryptedData));
           
           resolve(decryptedData);
           
@@ -124,7 +116,6 @@
           console.error(`❌ 第 ${attempts} 次解密失败:`, error.message);
           
           if (attempts < DECRYPT_CONFIG.retryAttempts) {
-            console.log(`⏳ ${DECRYPT_CONFIG.retryDelay}ms 后重试...`);
             setTimeout(attemptDecryption, DECRYPT_CONFIG.retryDelay);
           } else {
             console.error('💥 解密失败，已达到最大重试次数');
@@ -150,8 +141,6 @@
    */
   async function initializeDecryption() {
     try {
-      console.log('🚀 开始URL解密处理...');
-      
       // 执行解密
       const decryptedData = await processUrlDecryption();
       
@@ -167,9 +156,6 @@
         }
       });
       window.dispatchEvent(event);
-      
-      console.log('🎉 URL解密模块初始化完成');
-      
       // 标记解密完成
       window.urlDecryptionReady = true;
       

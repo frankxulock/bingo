@@ -6,6 +6,10 @@
 
   <title>MegaBingo</title>
 
+  <!-- 🎯 Favicon -->
+  <link rel="icon" type="image/x-icon" href="data:image/x-icon;base64,AAABAAEAEBAQAAEABAAoAQAAFgAAACgAAAAQAAAAIAAAAAEABAAAAAAAgAAAAAAAAAAAAAAAEAAAABAAAAAAAAAAAADs7ADs7ADs7ADs7ADs7ADs7ADs7ADs7ADs7ADs7ADs7ADs7ADs7ADs7ADs7AD///8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD//wAA//8AAP//AAD//wAA//8AAP//AAD//wAA//8AAP//AAD//wAA//8AAP//AAD//wAA//8AAP//AAD//wAA">
+  <link rel="shortcut icon" href="data:image/x-icon;base64,AAABAAEAEBAQAAEABAAoAQAAFgAAACgAAAAQAAAAIAAAAAEABAAAAAAAgAAAAAAAAAAAAAAAEAAAABAAAAAAAAAAAADs7ADs7ADs7ADs7ADs7ADs7ADs7ADs7ADs7ADs7ADs7ADs7ADs7ADs7ADs7AD///8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD//wAA//8AAP//AAD//wAA//8AAP//AAD//wAA//8AAP//AAD//wAA//8AAP//AAD//wAA//8AAP//AAD//wAA">
+
   <!-- ✅ 手機與跨瀏覽器相容性設定 -->
   <meta name="viewport" content="width=device-width,user-scalable=no,initial-scale=1, minimum-scale=1,maximum-scale=1,viewport-fit=cover" />
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -17,11 +21,11 @@
   <meta name="force-rendering" content="webkit" />
   <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
   <meta name="msapplication-tap-highlight" content="no">
-  <meta name="full-screen" content="yes" />
+  <!-- <meta name="full-screen" content="yes" />
   <meta name="x5-fullscreen" content="true" />
-  <meta name="360-fullscreen" content="true" />
-  <meta name="screen-orientation" content="landscape" />
-  <meta name="x5-orientation" content="landscape">
+  <meta name="360-fullscreen" content="true" /> -->
+  <meta name="screen-orientation" content="portrait" />
+  <meta name="x5-orientation" content="portrait">
   <meta name="x5-page-mode" content="app">
   
   <!-- 🌐 PWA 支持 -->
@@ -43,6 +47,20 @@
   
   <!-- 🎮 遊戲主畫布 -->
   <canvas id="GameCanvas" oncontextmenu="event.preventDefault()" tabindex="0"></canvas>
+
+  <!-- 📱 竖屏提示信息 -->
+  <div class="portrait-hint">
+    <div>為了更好的遊戲體驗</div>
+    <div>請將設備旋轉至豎屏模式</div>
+    <div style="font-size: 24px; margin-top: 10px;">📱</div>
+  </div>
+
+  <!-- 🖥️ PC端横屏提示信息 -->
+  <div class="landscape-hint">
+    <div>為了更好的遊戲體驗</div>
+    <div>請將窗口調整為橫屏模式</div>
+    <div style="font-size: 24px; margin-top: 10px;">🖥️</div>
+  </div>
 
   <!-- 🔄 Splash 開場動畫與進度條 -->
   <div id="splash">
@@ -68,6 +86,64 @@
     const frames = [];
     let loadedCount = 0;
     let animationTimer = null;
+
+    /**
+     * 統一設備判斷函數
+     * 使用與 CommonTool.shouldUseMobileMode() 相同的判斷邏輯
+     */
+    function getDeviceType() {
+      const ua = navigator.userAgent || navigator.vendor || window.opera || '';
+      const width = window.innerWidth;
+      const height = window.innerHeight;
+      const ratio = height / width;
+
+      // 基本條件判斷
+      const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+      const isPortrait = ratio > 1;
+      const isSmallScreen = Math.min(width, height) <= 768;
+      const isMobileUA = /android|iphone|ipad|ipod|windows phone/i.test(ua);
+
+      // 擴展條件：包含模擬器的判斷
+      const hasPhoneLikeRatio = ratio > 1.2 && ratio < 2.5;
+      const hasReasonableSize = width >= 320 && width <= 450 && height >= 550 && height <= 950;
+
+      // 組合判斷：原始判斷 OR 類似手機的模擬器
+      const isMobile = (isMobileUA || isTouchDevice) && isSmallScreen && isPortrait ||
+                       (isTouchDevice && hasPhoneLikeRatio && hasReasonableSize);
+      
+      window.isMobile = isMobile;
+      return {
+        isMobile,
+        isPC: !isMobile,
+        screenWidth: width,
+        screenHeight: height,
+        ratio,
+        userAgent: ua,
+      };
+    }
+
+    // 🌐 將設備判斷函數暴露到全局，供其他腳本使用
+    window.getDeviceType = getDeviceType;
+
+    // 🎯 使用統一的設備判斷邏輯控制背景圖片顯示
+    function setupGameBackground() {
+      const device = getDeviceType();
+      // 設置 data-device 屬性，讓 CSS 根據設備類型應用樣式
+      document.documentElement.setAttribute('data-device', device.isMobile ? 'mobile' : 'pc');
+    }
+
+    // 初始化背景設置
+    setupGameBackground();
+
+    // 監聽窗口大小變化，重新判斷設備類型
+    window.addEventListener('resize', () => {
+      setupGameBackground();
+    });
+
+    // 監聽方向變化
+    window.addEventListener('orientationchange', () => {
+      setTimeout(setupGameBackground, 500);
+    });
 
     for (let i = 0; i < totalFrames; i++) {
       const frame = new Image();
@@ -112,8 +188,6 @@
 
         function tryLoad() {
           attempts++;
-          console.log(`🔄 嘗試載入：${src} (第 ${attempts} 次)`);
-
           if (currentScript) currentScript.remove();
 
           const script = document.createElement('script');
@@ -121,12 +195,10 @@
           script.src = `${src}?_v=${Date.now()}`; // 防快取
 
           script.onload = () => {
-            console.log(`✅ 成功載入：${src}`);
             resolve();
           };
 
           script.onerror = () => {
-            console.warn(`❌ 載入失敗：${src}`);
             if (attempts < retries) {
               setTimeout(tryLoad, 1000); // 延遲重試
             } else {
@@ -178,111 +250,9 @@
     }
 
     /**
-     * 全屏处理函数
-     */
-    function attemptFullscreen() {
-      return new Promise((resolve) => {
-        // 🖥️ 桌面端全屏处理
-        function requestFullscreen() {
-          const element = document.documentElement;
-          if (element.requestFullscreen) {
-            return element.requestFullscreen();
-          } else if (element.webkitRequestFullscreen) {
-            return element.webkitRequestFullscreen();
-          } else if (element.mozRequestFullScreen) {
-            return element.mozRequestFullScreen();
-          } else if (element.msRequestFullscreen) {
-            return element.msRequestFullscreen();
-          }
-          return Promise.resolve();
-        }
-
-        // 📱 移动端全屏处理
-        function handleMobileFullscreen() {
-          // iOS Safari 全屏适配
-          if (/iPad|iPhone|iPod/.test(navigator.userAgent)) {
-            // 隐藏地址栏
-            setTimeout(() => {
-              window.scrollTo(0, 1);
-            }, 100);
-            
-            // 监听方向变化
-            window.addEventListener('orientationchange', () => {
-              setTimeout(() => {
-                window.scrollTo(0, 1);
-                adjustCanvasSize();
-              }, 500);
-            });
-          }
-          
-          // Android 全屏处理
-          if (/Android/.test(navigator.userAgent)) {
-            // 隐藏状态栏和导航栏
-            if (window.screen && window.screen.orientation) {
-              try {
-                window.screen.orientation.lock('landscape').catch(() => {});
-              } catch (e) {}
-            }
-          }
-          
-          // 微信浏览器特殊处理
-          if (/MicroMessenger/.test(navigator.userAgent)) {
-            document.addEventListener('WeixinJSBridgeReady', () => {
-              window.scrollTo(0, 1);
-            });
-          }
-        }
-
-        // 🖼️ 调整画布大小
-        function adjustCanvasSize() {
-          const canvas = document.getElementById('GameCanvas');
-          if (canvas) {
-            // 使用 CSS 确保画布填满屏幕
-            canvas.style.width = '100vw';
-            canvas.style.height = '100vh';
-            
-            // 对于 iOS Safari
-            if (/iPad|iPhone|iPod/.test(navigator.userAgent)) {
-              canvas.style.height = '-webkit-fill-available';
-            }
-          }
-        }
-
-        // 🎯 执行全屏逻辑
-        const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-        
-        if (isMobile) {
-          handleMobileFullscreen();
-          adjustCanvasSize();
-          resolve();
-        } else {
-          // 桌面端尝试全屏
-          const userInteracted = localStorage.getItem('userInteracted');
-          if (userInteracted) {
-            requestFullscreen().then(resolve).catch(resolve);
-          } else {
-            // 等待用户交互后再全屏
-            const handleFirstClick = () => {
-              localStorage.setItem('userInteracted', 'true');
-              requestFullscreen().catch(() => {});
-              document.removeEventListener('click', handleFirstClick);
-              document.removeEventListener('touchstart', handleFirstClick);
-            };
-            
-            document.addEventListener('click', handleFirstClick);
-            document.addEventListener('touchstart', handleFirstClick);
-            resolve();
-          }
-        }
-      });
-    }
-
-    /**
      * 啟動遊戲流程 - 動態載入所有必要腳本
      */
     async function startGame() {
-      // 🖥️ 尝试自动全屏
-      await attemptFullscreen();
       
       let currentScript = ''; // 用於錯誤提示
       try {
@@ -320,55 +290,84 @@
 
         // 啟動遊戲
         window.boot();
-        console.log('🎉 游戏启动成功！');
       } catch (err) {
         showReloadDialog(`遊戲載入失敗，請檢查網路連線後重新整理頁面。`);
         console.error('[Game Start Error]', err);
       }
     }
 
-    // DOM 結構完成後啟動遊戲
-    window.addEventListener('DOMContentLoaded', startGame);
+    // 🔄 强制屏幕方向显示函数 - 移动端竖屏，PC端横屏
+    function enforcePortraitMode() {
+      const device = getDeviceType();
+      const screenWidth = device.screenWidth;
+      const screenHeight = device.screenHeight;
+      
+      const body = document.body;
+      const canvas = document.getElementById('GameCanvas');
+      const splash = document.getElementById('splash');
+      
+      // 清除所有旋轉類，避免衝突
+      body.classList.remove('force-portrait', 'force-landscape');
+      if (canvas) canvas.classList.remove('force-portrait', 'force-landscape');
+      if (splash) splash.classList.remove('force-portrait', 'force-landscape');
+      
+      if (device.isMobile) {
+        // 📱 移动端强制竖屏
+        const isLandscape = screenWidth > screenHeight;
+        
+        if (isLandscape) {
+          // 横屏时强制旋转为竖屏显示
+          body.classList.add('force-portrait');
+          if (canvas) canvas.classList.add('force-portrait');
+          if (splash) splash.classList.add('force-portrait');
+        } else {
+          // console.log('📱 移動端：豎屏模式，正常顯示');
+        }
+      } else {
+        // 🖥️ PC端
+      }
+    }
 
-    // 🖥️ 全屏和方向变化处理
-    window.addEventListener('resize', () => {
+    // 🖼️ 调整画布大小
+    function adjustCanvasSize() {
       const canvas = document.getElementById('GameCanvas');
       if (canvas) {
+        // 使用 CSS 确保画布填满屏幕
         canvas.style.width = '100vw';
         canvas.style.height = '100vh';
+        
+        // 对于 iOS Safari
         if (/iPad|iPhone|iPod/.test(navigator.userAgent)) {
           canvas.style.height = '-webkit-fill-available';
         }
       }
+    }
+
+    // DOM 結構完成後啟動遊戲
+    window.addEventListener('DOMContentLoaded', () => {
+      // 🎮 启动游戏
+      startGame();
+    });
+
+    // 🖥️ 方向变化处理
+    window.addEventListener('resize', () => {
+      adjustCanvasSize();
+      enforcePortraitMode();
     });
 
     window.addEventListener('orientationchange', () => {
       setTimeout(() => {
-        window.scrollTo(0, 1);
-        const canvas = document.getElementById('GameCanvas');
-        if (canvas) {
-          canvas.style.width = '100vw';
-          canvas.style.height = '100vh';
-          if (/iPad|iPhone|iPod/.test(navigator.userAgent)) {
-            canvas.style.height = '-webkit-fill-available';
-          }
+        const device = getDeviceType();
+        
+        if (device.isMobile) {
+          // 移动设备处理
+          window.scrollTo(0, 1);
+          adjustCanvasSize();
         }
+        
+        // 强制屏幕方向处理 - 移动端竖屏，PC端横屏
+        enforcePortraitMode();
       }, 500);
-    });
-
-    // 防止页面被意外退出全屏
-    document.addEventListener('fullscreenchange', () => {
-      if (!document.fullscreenElement) {
-        // 如果不在全屏状态，尝试重新全屏（桌面端）
-        const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-        if (!isMobile && localStorage.getItem('userInteracted')) {
-          setTimeout(() => {
-            if (document.documentElement.requestFullscreen) {
-              document.documentElement.requestFullscreen().catch(() => {});
-            }
-          }, 1000);
-        }
-      }
     });
 
     // 清理動畫資源與影片，避免 unload 時殘留
@@ -380,6 +379,7 @@
     window.addEventListener('load', () => {
       document.querySelectorAll('video').forEach(el => el.remove());
     });
+    
     // 掛載到全域 window 物件，讓其他腳本能使用
     window.showReloadDialog = showReloadDialog; 
 

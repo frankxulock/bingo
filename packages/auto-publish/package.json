@@ -1,0 +1,38 @@
+{
+  "name": "auto-publish",
+  "version": "3.0.0",
+  "main": "main.js",
+  "description": "Automated Publishing Suite for Cocos Creator with code protection and Git integration",
+  "author": "Caler",
+  "engines": {
+    "cocos": "^2.4.0"
+  },
+  "scripts": {
+    "test-git": "node test-git.js",
+    "test-git-full": "node test-git.js --full"
+  },
+  "dependencies": {
+    "javascript-obfuscator": "2.19.1"
+  },
+  "overrides": {
+    "libphonenumber-js": "1.9.0"
+  },
+  "panels": {
+    "settings": {
+      "title": "Auto Publish Settings",
+      "type": "dockable",
+      "main": "panel/index.js",
+      "size": {
+        "min-width": 400,
+        "min-height": 350,
+        "width": 450,
+        "height": 500
+      }
+    }
+  },
+  "main-menu": {
+    "工具/自动发布": {
+      "message": "auto-publish:open-settings"
+    }
+  }
+} 

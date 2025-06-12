@@ -28,34 +28,49 @@ export default class PopupAnimationComponent extends cc.Component {
                 obj.scale = 0.5;
                 obj.runAction(cc.sequence(
                     cc.scaleTo(0.3, 1.2).easing(cc.easeBounceOut()),
-                    cc.scaleTo(0.1, 1)
+                    cc.scaleTo(0.1, 1),
+                    cc.callFunc(() => { })
                 ));
                 break;
 
             case PopupAnimationType.SlideFromLeft:
                 obj.x = -cc.winSize.width;
-                obj.runAction(cc.moveTo(0.3, cc.v2(0, obj.y)).easing(cc.easeCubicActionOut()));
+                obj.runAction(cc.sequence(
+                    cc.moveTo(0.3, cc.v2(0, obj.y)).easing(cc.easeCubicActionOut()),
+                    cc.callFunc(() => { })
+                ));
                 break;
 
             case PopupAnimationType.SlideFromRight:
                 obj.x = cc.winSize.width;
-                obj.runAction(cc.moveTo(0.3, cc.v2(0, obj.y)).easing(cc.easeCubicActionOut()));
-                console.log(cc.v2(0, obj.y));
+                obj.runAction(cc.sequence(
+                    cc.moveTo(0.3, cc.v2(0, obj.y)).easing(cc.easeCubicActionOut()),
+                    cc.callFunc(() => { })
+                ));
                 break;
 
             case PopupAnimationType.SlideFromBottom:
                 obj.y = -cc.winSize.height;
-                obj.runAction(cc.moveTo(0.3, cc.v2(obj.x, 0)).easing(cc.easeCubicActionOut()));
+                obj.runAction(cc.sequence(
+                    cc.moveTo(0.3, cc.v2(obj.x, 0)).easing(cc.easeCubicActionOut()),
+                    cc.callFunc(() => { })
+                ));
                 break;
 
             case PopupAnimationType.ScaleIn:
                 obj.scale = 0;
-                obj.runAction(cc.scaleTo(0.3, 1).easing(cc.easeBackOut()));
+                obj.runAction(cc.sequence(
+                    cc.scaleTo(0.3, 1).easing(cc.easeBackOut()),
+                    cc.callFunc(() => { })
+                ));
                 break;
 
             case PopupAnimationType.FlipVertical:
                 obj.scaleY = 0;
-                obj.runAction(cc.scaleTo(0.3, 1, 1).easing(cc.easeBackOut()));
+                obj.runAction(cc.sequence(
+                    cc.scaleTo(0.3, 1, 1).easing(cc.easeBackOut()),
+                    cc.callFunc(() => { })
+                ));
                 break;
 
             case PopupAnimationType.None:

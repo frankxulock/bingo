@@ -44,9 +44,16 @@ export default class BingoMegaUI extends BaseSingletonComponent {
         'card-pre_card_BG',
     ];
 
+    private cardTitle: string[] = [
+        'Lang-EN-label-buy-combo',
+        'Lang-EN-label-buy-e',
+        'Lang-EN-label-buy-b&j-1',
+    ];
+
     protected cardIconBGs: cc.SpriteFrame[] = [];
     private userIcon: cc.SpriteFrame[] = [];
     private dengji: cc.SpriteFrame[] = [];
+    private cardTitles: cc.SpriteFrame[] = [];
 
     public static getInstance(): BingoMegaUI {
         return this._getInstance(BingoMegaUI);
@@ -62,6 +69,7 @@ export default class BingoMegaUI extends BaseSingletonComponent {
 
         // 如果有卡牌背景也可以這樣初始化：
         this.cardIconBGs = this.cardBGStr.map(name => this.allAsset?.getSpriteFrame(name) || null);
+        this.cardTitles = this.cardTitle.map(name => this.allAsset?.getSpriteFrame(name) || null);
     }
 
     /** 取得所有卡牌背景 */
@@ -72,6 +80,11 @@ export default class BingoMegaUI extends BaseSingletonComponent {
     /** 取得單張卡牌背景 */
     public getCardIconBG(index: number): cc.SpriteFrame {
         return this.cardIconBGs[index] || null;
+    }
+
+    /** 賓果卡片標題 */
+    public getCardTitle(index: number): cc.SpriteFrame {
+        return this.cardTitles[index] || null;
     }
 
     /** 取得球背景 */

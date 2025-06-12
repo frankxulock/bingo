@@ -425,7 +425,7 @@
       var testPlay = new Audio().play();
       if (testPlay && typeof Promise !== 'undefined' && (testPlay instanceof Promise || typeof testPlay.then === 'function')) {
         testPlay.catch(function() {
-          console.warn('HTML5 Audio pool exhausted, returning potentially locked audio object.');
+
         });
       }
 
@@ -552,7 +552,7 @@
 
     // Throw an error if no source is provided.
     if (!o.src || o.src.length === 0) {
-      console.error('An array of source files must be passed with any new Howl.');
+
       return;
     }
 
@@ -690,7 +690,7 @@
 
         // Log a warning if no extension was found.
         if (!ext) {
-          console.warn('No file extension was found. Consider using the "format" property or specify an extension.');
+
         }
 
         // Check if this extension is available.
@@ -2564,7 +2564,6 @@
     window.Sound = Sound;
   }
 })();
-
 
 /*!
  *  Spatial Plugin - Adds support for stereo and 3D audio where Web Audio is supported.

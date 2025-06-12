@@ -550,7 +550,7 @@
     },
     "_contentSize": {
       "__type__": "cc.Size",
-      "width": 134.56,
+      "width": 138.67,
       "height": 0
     },
     "_anchorPoint": {
@@ -600,7 +600,7 @@
         "__uuid__": "eca5d2f2-8ef6-41c2-bbe6-f9c79d09c432"
       }
     ],
-    "_srcBlendFactor": 770,
+    "_srcBlendFactor": 1,
     "_dstBlendFactor": 771,
     "_string": "YOUR WINS",
     "_N$string": "YOUR WINS",
@@ -608,7 +608,7 @@
     "_lineHeight": 0,
     "_enableWrapText": true,
     "_N$file": {
-      "__uuid__": "96e184f8-e2d1-488a-817e-0ae694579318"
+      "__uuid__": "e6bdc21d-c5b9-46b7-94e8-53dba5fa13a6"
     },
     "_isSystemFontUsed": false,
     "_spacingX": 0,
@@ -731,8 +731,8 @@
     },
     "_contentSize": {
       "__type__": "cc.Size",
-      "width": 107.05,
-      "height": 20.16
+      "width": 94.67,
+      "height": 0
     },
     "_anchorPoint": {
       "__type__": "cc.Vec2",
@@ -781,7 +781,7 @@
         "__uuid__": "eca5d2f2-8ef6-41c2-bbe6-f9c79d09c432"
       }
     ],
-    "_srcBlendFactor": 770,
+    "_srcBlendFactor": 1,
     "_dstBlendFactor": 771,
     "_string": "Extra Parrerns",
     "_N$string": "Extra Parrerns",
@@ -789,7 +789,7 @@
     "_lineHeight": 0,
     "_enableWrapText": true,
     "_N$file": {
-      "__uuid__": "4aeb69e6-e793-435d-ae21-36d0229ec11b"
+      "__uuid__": "6ae5b396-936b-4529-84ea-63b6ffe931c9"
     },
     "_isSystemFontUsed": false,
     "_spacingX": 0,
@@ -841,7 +841,7 @@
     },
     "_contentSize": {
       "__type__": "cc.Size",
-      "width": 75.12,
+      "width": 74.44,
       "height": 0
     },
     "_anchorPoint": {
@@ -891,7 +891,7 @@
         "__uuid__": "eca5d2f2-8ef6-41c2-bbe6-f9c79d09c432"
       }
     ],
-    "_srcBlendFactor": 770,
+    "_srcBlendFactor": 1,
     "_dstBlendFactor": 771,
     "_string": "+ ₱5",
     "_N$string": "+ ₱5",
@@ -899,7 +899,7 @@
     "_lineHeight": 0,
     "_enableWrapText": true,
     "_N$file": {
-      "__uuid__": "c6c6c779-078d-475d-907b-18ca91840336"
+      "__uuid__": "8aadb837-9b9f-45e4-93d4-23fb65955b69"
     },
     "_isSystemFontUsed": false,
     "_spacingX": 0,
@@ -1182,7 +1182,7 @@
         "__uuid__": "eca5d2f2-8ef6-41c2-bbe6-f9c79d09c432"
       }
     ],
-    "_srcBlendFactor": 770,
+    "_srcBlendFactor": 1,
     "_dstBlendFactor": 771,
     "_string": "Close",
     "_N$string": "Close",
@@ -1190,7 +1190,7 @@
     "_lineHeight": 40,
     "_enableWrapText": false,
     "_N$file": {
-      "__uuid__": "4aeb69e6-e793-435d-ae21-36d0229ec11b"
+      "__uuid__": "6ae5b396-936b-4529-84ea-63b6ffe931c9"
     },
     "_isSystemFontUsed": false,
     "_spacingX": 0,
@@ -1368,7 +1368,7 @@
         "__uuid__": "eca5d2f2-8ef6-41c2-bbe6-f9c79d09c432"
       }
     ],
-    "_srcBlendFactor": 770,
+    "_srcBlendFactor": 1,
     "_dstBlendFactor": 771,
     "_spriteFrame": {
       "__uuid__": "88dced3b-2464-4722-a7ae-c6bc3346b880"

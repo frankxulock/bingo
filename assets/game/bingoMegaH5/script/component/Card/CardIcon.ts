@@ -1,4 +1,3 @@
-import { CardBG } from "../../../../Common/Base/card/CardMega";
 import { CommonTool } from "../../../../Common/Tools/CommonTool";
 import BingoMegaUI from "../../BingoMegaUI";
 

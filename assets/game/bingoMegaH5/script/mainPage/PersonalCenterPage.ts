@@ -25,7 +25,7 @@ export default class PersonalCenterPage extends cc.Component implements IWindow 
 
     private data : any = null;
     private dataManager : MegaManager = null;
-
+    
     open(): void {
         EventManager.getInstance().on(GameStateUpdate.StaticUpdate_Coin, this.setPageState, this);
         this.dataManager = MegaManager.getInstance();
@@ -36,9 +36,12 @@ export default class PersonalCenterPage extends cc.Component implements IWindow 
             item.node.on("toggle", this.OnChangeLanguage, this);
         })
     }
+    
     close(): void {
-        EventManager.getInstance().off(GameStateUpdate.StaticUpdate_Coin, this.setPageState, this);
-        PopupManager.closePopup(PopupName.PersonalCenterPage);
+        CommonTool.executeWithLock(this, () => {
+            EventManager.getInstance().off(GameStateUpdate.StaticUpdate_Coin, this.setPageState, this);
+            PopupManager.closePopup(PopupName.PersonalCenterPage);
+        }, 0.5, "close");
     }
 
     public setPageState(){
@@ -50,32 +53,41 @@ export default class PersonalCenterPage extends cc.Component implements IWindow 
 
     /** 玩家充值 */
     OnAdd() {
-        console.log("玩家充值");
+
     }
 
     /** 開啟DIY選擇頁面 */
     OnDIY() {
-        this.dataManager.SendDIYCardSelectionPage(true);
+        CommonTool.executeWithLock(this, () => {
+            this.dataManager.SendDIYCardSelectionPage(true, true);
+        }, 0.5, "OnDIY");
     }
 
     /** 開啟歷史紀錄 */
     OnGameRecird() {
-        this.dataManager.OpenGameRecord();
+        CommonTool.executeWithLock(this, () => {
+            this.dataManager.OpenGameRecord();
+        }, 0.5, "OnGameRecird");
     }
 
     /** 開啟遊戲規則 */
     OnHelpCenter() {
-        PopupManager.showPopup(PopupName.HelpCenterPage);
+        CommonTool.executeWithLock(this, () => {
+            PopupManager.showPopup(PopupName.HelpCenterPage);
+        }, 0.5, "OnHelpCenter");
     }
 
     /** 開啟遊戲音效 */
     OnGameSound() {
-        // this.toggle_Audio.isChecked = true;
-        audioManager.setHtmlFocus(true);
+        CommonTool.executeWithLock(this, () => {
+            audioManager.setHtmlFocus(true);
+        }, 0.3, "OnGameSound");
     }
 
     /** 變更語言 */
     OnChangeLanguage(toggle: cc.Toggle) {
-        console.log("變更語言");
+        CommonTool.executeWithLock(this, () => {
+            // 語言變更邏輯...
+        }, 0.3, "OnChangeLanguage");
     }
 }

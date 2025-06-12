@@ -78,17 +78,82 @@ canvas {
     /* 移除固定的 width, height - 改由 updateMatrix 動態設置 */
 }
 
-/* 📱 全屏模式适配 */
-@media screen and (orientation: landscape) {
-    html, body, #GameCanvas {
-        width: 100vw;
-        height: 100vh;
-    }
+/* 📱 移動端樣式 */
+html[data-device="mobile"], 
+html[data-device="mobile"] body, 
+html[data-device="mobile"] #GameCanvas {
+    width: 100vw;
+    height: 100vh;
 }
 
-/* 🍎 iOS Safari 适配 */
+/* 🖥️ PC端樣式 */
+html[data-device="pc"], 
+html[data-device="pc"] body, 
+html[data-device="pc"] #GameCanvas {
+    width: 100vw;
+    height: 100vh;
+}
+
+/* 🖥️ PC版本强制横屏显示类 */
+html[data-device="pc"] .force-landscape {
+    width: 100vh !important;
+    height: 100vw !important;
+    transform-origin: left top !important;
+    transform: rotate(90deg) translate(0, -100%) !important;
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+}
+
+/* 🎮 Canvas PC端强制横屏显示 */
+html[data-device="pc"] #GameCanvas.force-landscape {
+    width: 100vh !important;
+    height: 100vw !important;
+    transform-origin: left top !important;
+    transform: rotate(90deg) translate(0, -100%) !important;
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    z-index: 10 !important;
+}
+
+/* 🎬 Splash PC端强制横屏显示 */  
+html[data-device="pc"] #splash.force-landscape {
+    width: 100vh !important;
+    height: 100vw !important;
+    transform-origin: left top !important;
+    transform: rotate(90deg) translate(0, -100%) !important;
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+}
+
+/* 🖥️ PC端横屏提示信息 */
+html[data-device="pc"] .landscape-hint {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(0, 0, 0, 0.8);
+    color: white;
+    padding: 20px;
+    border-radius: 10px;
+    text-align: center;
+    z-index: 9999;
+    display: none;
+    font-family: Arial, sans-serif;
+}
+
+/* PC端竖屏时显示横屏提示 */
+html[data-device="pc"] body.force-landscape .landscape-hint {
+    display: block !important;
+}
+
+/* 🍎 iOS Safari 适配 - 只在移动设备上生效 */
 @supports (-webkit-appearance: none) and (stroke-color: transparent) {
-    html, body, #GameCanvas {
+    html[data-device="mobile"], 
+    html[data-device="mobile"] body, 
+    html[data-device="mobile"] #GameCanvas {
         width: 100vw;
         height: 100vh;
         height: -webkit-fill-available;
@@ -145,13 +210,25 @@ canvas {
     visibility: hidden;
 }
 
-.id-test-video {
-	position: absolute;
-	padding: 0;
-	border: 0;
-	margin: 0;
-	width: 1334;
-	height: 750;
+#gameBG {
+    width: 100%;
+    height: 100%;
+}
+
+/* 📱 移動端隱藏背景圖片 */
+html[data-device="mobile"] #gameBG {
+    display: none;
+}
+
+/* 🖥️ PC端顯示背景圖片 */
+html[data-device="pc"] #gameBG {
+    display: block;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    object-fit: cover;
 }
 
 .background-container {
@@ -163,11 +240,26 @@ canvas {
     width: auto;
     height: 100%;
   
-    aspect-ratio: 390 / 844; /* 維持設計比例 */
+    aspect-ratio: 390 / 800; /* 維持設計比例 */
     background-color: #202020; /* 或 background-image */
   
     background-size: cover;
     background-position: top center;
+    background-repeat: no-repeat;
+}
+
+/* 📱 移動端background-container鋪滿螢幕 */
+html[data-device="mobile"] .background-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    transform: none;
+    width: 100vw;
+    height: 100vh;
+    
+    /* 保持內部元素的相對位置和大小 */
+    background-size: cover;
+    background-position: center;
     background-repeat: no-repeat;
 }
 
@@ -191,9 +283,16 @@ canvas {
     image-rendering: auto;
 }
 
-#gameBG {
+/* 📱 移動端logo動畫適配 */
+html[data-device="mobile"] #logo-animation,
+html[data-device="mobile"] #logo-canvas {
+    position: absolute;
     width: 100%;
-    height: 100%;
+    height: 17.17%;
+    top: 24.88%;
+    left: 50%;
+    transform: translateX(-50%);
+    image-rendering: auto;
 }
 
 /* 固定設計尺寸進度條 */
@@ -207,6 +306,20 @@ canvas {
     border-radius: 22.05vw; /* 86px / 390px * 100vw */
     
     /* 改成使用單一顏色的邊框 */
+    border: 0.15vw solid #7556F5;
+    background-color: transparent;
+    padding: 0;
+    box-shadow: none;
+}
+
+/* 📱 移動端進度條適配 */
+html[data-device="mobile"] .progress-bar {
+    position: absolute;
+    width: 54.36%;
+    height: 0.95%;
+    top: 49.05%;
+    left: 22.82%;
+    border-radius: 22.05vw;
     border: 0.15vw solid #7556F5;
     background-color: transparent;
     padding: 0;
@@ -229,4 +342,79 @@ canvas {
                         transparent 75%, transparent);             */
     
     animation: animate-stripes 1s linear infinite;             
+}
+
+/* 🔧 移動端强制竖屏显示类 */
+html[data-device="mobile"] .force-portrait {
+    width: 100vh !important;
+    height: 100vw !important;
+    transform-origin: left top !important;
+    transform: rotate(90deg) translate(0, -100%) !important;
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+}
+
+/* 🎮 移動端Canvas 强制竖屏显示 */
+html[data-device="mobile"] #GameCanvas.force-portrait {
+    width: 100vh !important;
+    height: 100vw !important;
+    transform-origin: left top !important;
+    transform: rotate(90deg) translate(0, -100%) !important;
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    z-index: 10 !important;
+}
+
+/* 🎬 移動端Splash 强制竖屏显示 */  
+html[data-device="mobile"] #splash.force-portrait {
+    width: 100vh !important;
+    height: 100vw !important;
+    transform-origin: left top !important;
+    transform: rotate(90deg) translate(0, -100%) !important;
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+}
+
+/* 📱 移动端隐藏PC横屏提示 */
+html[data-device="mobile"] .landscape-hint {
+    display: none !important;
+}
+
+/* 📱 移動端竖屏提示信息 */
+html[data-device="mobile"] .portrait-hint {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(0, 0, 0, 0.8);
+    color: white;
+    padding: 20px;
+    border-radius: 10px;
+    text-align: center;
+    z-index: 9999;
+    display: none;
+    font-family: Arial, sans-serif;
+}
+
+/* 移动端横屏时显示竖屏提示 */
+html[data-device="mobile"] body.force-portrait .portrait-hint {
+    display: block !important;
+}
+
+/* 🖥️ PC版本隐藏竖屏提示 */
+html[data-device="pc"] .portrait-hint {
+    display: none !important;
+}
+
+/* 🚫 特殊情況：小螢幕時的額外優化 */
+@media screen and (max-height: 500px) {
+    /* 横屏或小屏幕时隐藏不必要的元素 */
+    body {
+        -webkit-text-size-adjust: none;
+        -ms-text-size-adjust: none;
+        text-size-adjust: none;
+    }
 }

@@ -37,18 +37,22 @@ export default class BottomBar extends MegaComponent {
 
     /** 開啟充值頁面 */
     public OpenAddGameCoin(): void {
-        console.log("開啟充值頁面");
+
     }
 
     /** 開啟聊天彈窗 */
     public OpenChatPage(): void {
-        const chatData = this.data.getChatPageData();
-        PopupManager.showPopup(PopupName.ChatPage, chatData);
+        CommonTool.executeWithLock(this, () => {  
+            const chatData = this.data.getChatPageData();
+            PopupManager.showPopup(PopupName.ChatPage, chatData);
+        }, 0.5, "OpenChatPage");
     }
 
     /** 開啟個人中心彈窗 */
     public OpnePersonalCenterPage(): void {
-        PopupManager.showPopup(PopupName.PersonalCenterPage);
+        CommonTool.executeWithLock(this, () => {  
+            PopupManager.showPopup(PopupName.PersonalCenterPage);
+        }, 0.5, "OpnePersonalCenterPage");
     }
 
     /** 快照回調，用於畫面更新時觸發 */

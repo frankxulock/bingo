@@ -71,7 +71,7 @@ export class SocketManager extends Singleton {
         this.socket.binaryType = "arraybuffer";
 
         this.socket.onopen = () => {
-            console.log("✅ WebSocket opened");
+
         };
 
         this.socket.onmessage = (event) => {
@@ -80,12 +80,12 @@ export class SocketManager extends Singleton {
         };
 
         this.socket.onclose = () => {
-            console.warn("❎ WebSocket closed");
+
             this.stopPing();
         };
 
         this.socket.onerror = (err) => {
-            console.error("💥 WebSocket error:", err);
+
         };
     }
 
@@ -95,10 +95,10 @@ export class SocketManager extends Singleton {
             const encoded = new TextEncoder().encode(message);
             this.socket.send(encoded);
             if (!isPingPong) {
-                console.log("📤 Sent message:", message.trim());
+
             }
         } else {
-            console.warn("⚠️ WebSocket 尚未開啟，無法發送");
+
         }
     }
 
@@ -195,13 +195,13 @@ export class SocketManager extends Singleton {
                 const json = JSON.parse(payload); // 將 payload 解析為 JSON
                 this.processServerEvent(subject, json); // 進一步處理事件資料
             } catch (err) {
-                console.warn("❗ 無法解析伺服器資料:", err);
+
             }
 
         } else {
             // 其他非標準類型訊息（例如非 PONG 的錯誤訊息或未知訊息）
             if (!msg.startsWith("PONG")) {
-                console.log("📩 Server:", msg.trim());
+
             }
         }
     }
@@ -222,7 +222,7 @@ export class SocketManager extends Singleton {
             //     !subject.includes(WsTopicType.MegaCountdown) &&
             //     !(subject.includes(WsTopicType.OrderCurrent) && type === 25)
             // ) {
-                console.log(`📨 收到消息 - 主題: ${subject}, 類型: ${type}, 資料: `, data);
+
             // }
 
             // 根據主題類型分發到對應的處理方法
@@ -255,9 +255,9 @@ export class SocketManager extends Singleton {
             }
         } catch (error) {
             if (error instanceof WsError) {
-                console.error(`🚨 WebSocket錯誤: ${error.message}`, error);
+
             } else {
-                console.error(`🚨 處理消息時發生未知錯誤:`, error);
+
             }
             // 可以在這裡添加錯誤報告或重試邏輯
         }
@@ -289,7 +289,7 @@ export class SocketManager extends Singleton {
                     );
             }
         } catch (error) {
-            console.error(`🚨 處理用戶信息時發生錯誤:`, error);
+
             throw error;
         }
     }
@@ -299,10 +299,10 @@ export class SocketManager extends Singleton {
      */
     private handleBanStatus(type: number, data: any) {
         try {
-            console.log(`🚫 處理封禁狀態 - 類型: ${type}`, data);
+
             // 實現封禁狀態處理邏輯
         } catch (error) {
-            console.error(`🚨 處理封禁狀態時發生錯誤:`, error);
+
             throw error;
         }
     }
@@ -316,7 +316,7 @@ export class SocketManager extends Singleton {
             // 實現在線狀態處理邏輯
             this.data.setOnline(data);
         } catch (error) {
-            console.error(`🚨 處理在線狀態時發生錯誤:`, error);
+
             throw error;
         }
     }
@@ -326,10 +326,10 @@ export class SocketManager extends Singleton {
      */
     private handlePrizePotRecord(type: number, data: any) {
         try {
-            console.log(`🏆 處理獎池記錄 - 類型: ${type}`, data);
+
             // 實現獎池記錄處理邏輯
         } catch (error) {
-            console.error(`🚨 處理獎池記錄時發生錯誤:`, error);
+
             throw error;
         }
     }
@@ -342,7 +342,7 @@ export class SocketManager extends Singleton {
             // console.log(`📋 處理當前訂單 - 類型: ${type}`, data);
             // 實現當前訂單處理邏輯
         } catch (error) {
-            console.error(`🚨 處理當前訂單時發生錯誤:`, error);
+
             throw error;
         }
     }
@@ -360,11 +360,11 @@ export class SocketManager extends Singleton {
                     this.data.updateCurrentJPRanking(data);
                     break;
                 default:
-                    console.log(`🏅 未處理排名信息 - 類型: ${type}`, data);
+
                     break;
             }
         } catch (error) {
-            console.error(`🚨 處理排名信息時發生錯誤:`, error);
+
             throw error;
         }
     }
@@ -379,11 +379,11 @@ export class SocketManager extends Singleton {
                     this.data.ResultComplete(data);
                     break;
                 default:
-                    console.log(`🎉 未處理中獎通知 - 類型: ${type}`, data);
+
                     break;
             }
         } catch (error) {
-            console.error(`🚨 處理中獎通知時發生錯誤:`, error);
+
             throw error;
         }
     }
@@ -407,7 +407,7 @@ export class SocketManager extends Singleton {
             this.data.updatePrizePot(data);
             // console.log(`💰 BGM獎池更新 - 類型: ${type}`, data);
         } catch (error) {
-            console.error(`🚨 處理BGM獎池數據時發生錯誤:`, error);
+
             throw error;
         }
     }
@@ -422,12 +422,12 @@ export class SocketManager extends Singleton {
                     this.data.updateCurrentEPRanking(data);
                     break;
                 default:
-                    console.warn(`🚨 未處理 Extra Mega type:`, type + `   data : `, data);
+
                     break;
             }
             // this.data.updateExtraMega(data);
         } catch (error) {
-            console.error(`🚨 處理 Extra Mega 數據時發生錯誤:`, error);
+
             throw error;
         }
     }
@@ -448,7 +448,7 @@ export class SocketManager extends Singleton {
                 this.handleMegaCountdown(data);
                 break;
             default:
-                console.warn("❗ 未支援的 Mega 主題:", subject);
+
                 break;
         }
     }
@@ -475,7 +475,7 @@ export class SocketManager extends Singleton {
                 break;
 
             default:
-                console.warn("🔶 未知的遊戲事件:", data.game_event, data);
+
                 break;
         }
     }
@@ -492,7 +492,6 @@ export class SocketManager extends Singleton {
             this.data.ReawtheNumbers();
         }
     }
-
 
     private startPing() {
         this.pingTimer = setInterval(() => {
@@ -515,7 +514,7 @@ export class SocketManager extends Singleton {
     subscribe(subject: string, sid?: number) {
         const realSid = sid ?? this.sidCounter++;
         this.sendMessage(`SUB ${subject} ${realSid}\r\n`);
-        console.log(`📥 SUB ${subject} ${realSid}`);
+
     }
 
     /**
@@ -526,7 +525,7 @@ export class SocketManager extends Singleton {
         const payloadLen = new TextEncoder().encode(payloadStr).length;
         const msg = `PUB ${subject} ${payloadLen}\r\n${payloadStr}\r\n`;
         this.sendMessage(msg);
-        console.log(`📤 PUB ${subject}`, payload);
+
     }
 
     close() {

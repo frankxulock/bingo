@@ -24,6 +24,11 @@ export default class AllBallNumbersPage extends cc.Component implements IWindow 
         EventManager.getInstance().on(GameStateUpdate.StateUpdate_SendBall, this.setPageState, this);
     }
 
+    protected onDestroy(): void {
+        EventManager.getInstance().off(GameStateEvent.GAME_BUY, this.newGame, this);
+        EventManager.getInstance().off(GameStateUpdate.StateUpdate_SendBall, this.setPageState, this);
+    }
+
     open(data : any): void {
         if(this.balls == null) {
             let ball1 = this.Node_Ball.getComponentsInChildren(BallComponent);
@@ -34,8 +39,6 @@ export default class AllBallNumbersPage extends cc.Component implements IWindow 
         this.setPageState();
     }
     close(): void {
-        EventManager.getInstance().off(GameStateEvent.GAME_BUY, this.newGame, this);
-        EventManager.getInstance().off(GameStateUpdate.StateUpdate_SendBall, this.setPageState, this);
         PopupManager.closePopup(PopupName.AllBallNumbersPage);
     }
 

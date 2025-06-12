@@ -32,7 +32,6 @@ export default class LocalizationManager extends Singleton {
         }
 
         this.status = STATUS.INITIALIZING;
-        console.log("Language: " + LocalizationManager.language);
 
         // const commonKeys = Object.keys(Common_Language[LocalizationManager.language]);
         // for (let i = 0; i < commonKeys.length; i++) {
@@ -45,7 +44,7 @@ export default class LocalizationManager extends Singleton {
             const map = languageMap[i];
             const languageData = map[LocalizationManager.language];
             if (languageData == null) {
-                console.error(`當前遊戲並不支援 ${LocalizationManager.language} 語系`);
+
                 break;
             }
             const keys = Object.keys(languageData);
@@ -69,17 +68,17 @@ export default class LocalizationManager extends Singleton {
      */
     public get(key: string, ...optionalParams: (string | number)[]): string {
         if (this.status == STATUS.UNINITIALIZED) {
-            console.error("多語系未初始化");
+
             return "";
         }
 
         if (this.status == STATUS.INITIALIZING) {
-            console.error("多語系未建立完成");
+
             return "";
         }
 
         if (!this.texts[key]) {
-            console.error("text key not found - key = " + key);
+
             return "";
         }
         return CommonTool.strFormat(this.texts[key], ...optionalParams);
@@ -88,7 +87,7 @@ export default class LocalizationManager extends Singleton {
     public editorGetSpriteFrame(uuid): Promise<cc.SpriteFrame> {
         return new Promise((resolve) => {
             cc.assetManager.loadAny({ type: "uuid", uuid: uuid }, (err, texture) => {
-                if (err) console.log("load i18n image failed", uuid);
+                if (err) 
                 resolve(texture);
             });
         });

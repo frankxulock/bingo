@@ -15,7 +15,7 @@ export default class ResultPage extends cc.Component implements IWindow {
     @property({ type: cc.Label, visible: true })
     private Label_jackpotWin: cc.Label = null;
     @property({ type: cc.Label, visible: true })
-    private Label_cost: cc.Label = null;
+    private Label_const: cc.Label = null;
     @property({ type: cc.Node, visible: true })
     private Node_extraItem: cc.Node = null;
     @property({ type: cc.Node, visible: true })
@@ -24,15 +24,16 @@ export default class ResultPage extends cc.Component implements IWindow {
 
     open(data: any): void {
         let d = data;
-        let extralWin = d.extral;
-        let jackpotWin = d.jackpot;
+        let extralWin = d.extral || 0;
+        let jackpotWin = d.jackpot || 0;
+        let total = extralWin + jackpotWin;
         this.Node_extraItem.active = (extralWin !== 0);
         this.Node_jackpotItem.active = (jackpotWin !== 0);
 
-        CommonTool.setLabel(this.Label_total, d.total);
-        CommonTool.setLabel(this.Label_extralWin, extralWin);
-        CommonTool.setLabel(this.Label_jackpotWin, jackpotWin);
-        CommonTool.setLabel(this.Label_cost, d.cost);
+        CommonTool.setLabel(this.Label_total, CommonTool.formatNumber(total));
+        CommonTool.setLabel(this.Label_extralWin, CommonTool.formatNumber(extralWin));
+        CommonTool.setLabel(this.Label_jackpotWin, CommonTool.formatNumber(jackpotWin));
+        CommonTool.setLabel(this.Label_const, d.const);
 
         // 清除之前的定時器（如果存在）
         if (this.autoCloseTimer !== null) {

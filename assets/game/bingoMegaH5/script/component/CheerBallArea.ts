@@ -75,7 +75,9 @@ export default class CheerBallArea extends MegaComponent {
      * 開啟所有球號資訊詳細視窗
      */
     public OpenBallDetailsWindow() {
-        PopupManager.showPopup(PopupName.AllBallNumbersPage, this.data.getAllBallNumbersPageData());
+        CommonTool.executeWithLock(this, () => {  
+            PopupManager.showPopup(PopupName.AllBallNumbersPage, this.data.getAllBallNumbersPageData());
+        }, 0.5, "OpenBallDetailsWindow");
     }
 
     /**
